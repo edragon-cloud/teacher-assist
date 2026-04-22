@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>HOD — Khoa Ngoại Ngữ ĐNU</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Crimson+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#D32F2F;--red-dk:#B71C1C;--red-lt:#FFEBEE;
+  --black:#0F0F0F;--charcoal:#1A1A1A;--dark:#2C2C2C;
+  --mid:#555;--silver:#888;--pale:#B0B0B0;
+  --light:#F4F4F4;--white:#FFF;--border:#DCDCDC;
+  --sh:0 2px 12px rgba(0,0,0,.08);--sh-lg:0 8px 40px rgba(0,0,0,.16);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Crimson Pro',Georgia,serif;background:var(--light);color:var(--black);font-size:18px;line-height:1.65;min-height:100vh}
+
+/* LOGIN */
+.login-screen{position:fixed;inset:0;background:var(--black);z-index:900;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.login-screen::after{content:'HOD';position:absolute;font-family:'Barlow Condensed',sans-serif;font-size:200px;font-weight:800;color:rgba(211,47,47,.04);pointer-events:none;letter-spacing:-8px}
+.lbox{background:var(--charcoal);border-top:3px solid var(--red);padding:50px 44px;width:380px;max-width:95vw;position:relative;z-index:1}
+.lbox input{width:100%;padding:16px;background:#111;border:1px solid #333;color:var(--white);font-size:22px;font-family:'Barlow Condensed',sans-serif;letter-spacing:4px;text-align:center;outline:none;transition:border-color .2s}
+.lbox input:focus{border-color:var(--red)}
+.lbox button{width:100%;margin-top:12px;padding:14px;background:var(--red);color:var(--white);border:none;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:3px;cursor:pointer}
+.lbox button:hover{background:var(--red-dk)}
+.lbox-err{color:#ff6b6b;font-size:14px;text-align:center;margin-top:10px;display:none;font-family:'Barlow Condensed',sans-serif}
+.back-btn{margin-top:20px;color:#444;font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:2px;cursor:pointer;text-transform:uppercase;background:none;border:none;position:relative;z-index:1}
+.back-btn:hover{color:#888}
+
+/* HEADER */
+.header{background:var(--black);height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;border-bottom:3px solid var(--red);position:sticky;top:0;z-index:200}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-mark{width:42px;height:42px;background:var(--red);clip-path:polygon(10% 0%,100% 0%,90% 100%,0% 100%);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--white);letter-spacing:1px}
+.brand-text .top{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:var(--white);letter-spacing:2px}
+.brand-text .bot{font-size:12px;color:var(--pale);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px}
+.hdr-right{display:flex;align-items:center;gap:12px}
+.clock{font-family:'Barlow Condensed',sans-serif;font-size:15px;color:#666;letter-spacing:1px}
+.btn-hdr{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;padding:7px 16px;cursor:pointer;border:none;transition:all .2s;text-transform:uppercase}
+.btn-red{background:var(--red);color:var(--white)}.btn-red:hover{background:var(--red-dk)}
+.btn-ghost{background:transparent;border:1px solid #444;color:var(--pale)}.btn-ghost:hover{border-color:var(--red);color:var(--white)}
+
+/* RIBBON */
+.ribbon{background:var(--red);color:var(--white);font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;letter-spacing:2px;padding:8px 40px;text-transform:uppercase}
+
+/* NAV TABS */
+.tab-nav{background:var(--charcoal);border-bottom:1px solid #333;display:flex;padding:0 40px;overflow-x:auto;gap:0}
+.tab-btn{background:transparent;border:none;color:var(--silver);padding:14px 20px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:all .2s}
+.tab-btn:hover{color:var(--white)}
+.tab-btn.active{color:var(--white);border-bottom-color:var(--red)}
+
+/* MAIN */
+.main{padding:28px 40px;max-width:1440px;margin:0 auto}
+.pane{display:none;animation:fadeUp .25s ease}
+.pane.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:26px}
+.stat-card{background:var(--white);border:1px solid var(--border);border-top:3px solid var(--black);padding:20px 16px;text-align:center;transition:all .2s}
+.stat-card:hover{border-top-color:var(--red);transform:translateY(-2px)}
+.si{font-size:24px;margin-bottom:7px}
+.sn{font-family:'Barlow Condensed',sans-serif;font-size:46px;font-weight:800;line-height:1;color:var(--black)}
+.sl{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--silver);margin-top:4px}
+.stat-card.is-alert .sn{color:var(--red)}
+
+/* SEC HEADER */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.sec-hdr h2{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--black);border-left:4px solid var(--red);padding-left:12px}
+.btn-group{display:flex;gap:8px;flex-wrap:wrap}
+
+/* BUTTONS */
+.btn{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;padding:8px 16px;border:none;cursor:pointer;transition:all .2s;text-transform:uppercase}
+.btn-primary{background:var(--red);color:var(--white)}.btn-primary:hover{background:var(--red-dk)}
+.btn-dark{background:var(--black);color:var(--white)}.btn-dark:hover{background:var(--dark)}
+.btn-green{background:#1B5E20;color:var(--white)}.btn-green:hover{background:#145214}
+.btn-blue{background:#0D47A1;color:var(--white)}.btn-blue:hover{background:#0a3880}
+.btn-outline{background:transparent;border:1.5px solid var(--black);color:var(--black)}.btn-outline:hover{background:var(--black);color:var(--white)}
+.btn-sm{padding:6px 13px;font-size:12px}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+.data-table{width:100%;border-collapse:collapse;background:var(--white);box-shadow:var(--sh)}
+.data-table th{background:var(--black);color:var(--white);padding:12px 13px;text-align:left;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap}
+.data-table th:first-child{border-left:3px solid var(--red)}
+.data-table td{padding:11px 13px;border-bottom:1px solid var(--border);font-size:16px;vertical-align:middle}
+.data-table tr:hover td{background:#fafafa}
+.data-table tr:last-child td{border-bottom:none}
+
+/* BADGES */
+.badge{display:inline-block;padding:3px 9px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.5px}
+.b-red{background:#FFEBEE;color:var(--red);border:1px solid #FFCDD2}
+.b-green{background:#E8F5E9;color:#1B5E20;border:1px solid #C8E6C9}
+.b-amber{background:#FFF8E1;color:#E65100;border:1px solid #FFE082}
+.b-gray{background:#FAFAFA;color:var(--mid);border:1px solid var(--border)}
+.b-blue{background:#E3F2FD;color:#0D47A1;border:1px solid #BBDEFB}
+
+/* PROGRESS */
+.prog-wrap{background:#eee;height:7px;margin-top:5px}
+.prog-bar{height:7px;background:var(--red);transition:width .4s}
+.prog-bar.ok{background:#2E7D32}
+
+/* LOADING / EMPTY */
+.loading{padding:40px;text-align:center;color:var(--silver);font-size:17px}
+.spinner{display:inline-block;width:22px;height:22px;border:2px solid #ddd;border-top-color:var(--red);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{padding:60px 20px;text-align:center;color:var(--silver)}
+.empty .ico{font-size:44px;margin-bottom:10px}
+
+/* ======================================================
+   SETTINGS PANEL
+====================================================== */
+.settings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:20px}
+.set-card{background:var(--white);border-top:3px solid var(--red);border:1px solid var(--border);padding:34px}
+.set-card h3{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--black);margin-bottom:6px}
+.set-card .set-desc{font-size:15px;color:var(--silver);margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:16px}
+.set-field{margin-bottom:16px}
+.set-field label{display:block;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:var(--mid);text-transform:uppercase;margin-bottom:7px}
+.set-field input{width:100%;padding:12px 14px;border:1.5px solid var(--border);font-size:17px;font-family:'Crimson Pro',serif;outline:none;transition:border-color .2s;color:var(--black);background:var(--white)}
+.set-field input:focus{border-color:var(--red)}
+.set-field input[type="password"]{letter-spacing:2px}
+.set-field .hint{font-size:13px;color:var(--silver);margin-top:5px;font-style:italic}
+.set-field .masked{font-family:'Barlow Condensed',sans-serif;font-size:14px;color:#2E7D32;margin-top:5px;letter-spacing:1px}
+.btn-save{padding:12px 26px;background:var(--red);color:var(--white);border:none;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background .2s;margin-top:4px}
+.btn-save:hover{background:var(--red-dk)}
+
+/* EXPORT */
+.export-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.export-card{background:var(--white);border:1px solid var(--border);border-top:3px solid var(--black);padding:22px;transition:all .2s}
+.export-card:hover{border-top-color:var(--red)}
+.export-card h3{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;letter-spacing:1px;margin-bottom:6px}
+.export-card p{font-size:14px;color:var(--silver);margin-bottom:14px}
+.export-btns{display:flex;gap:8px}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--charcoal);color:var(--white);padding:13px 20px;font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:.5px;box-shadow:var(--sh-lg);border-left:4px solid var(--red);transform:translateY(100px);opacity:0;transition:all .3s;z-index:9999;max-width:360px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{border-left-color:#2E7D32}
+
+@media(max-width:768px){.header{padding:0 16px}.tab-nav{padding:0 8px}.main{padding:16px}.settings-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN (same secret style as index.html) -->
+<div class="login-screen" id="loginScreen">
+  <div class="lbox">
+    <input type="password" id="hodPw" placeholder="••••••••"
+           onkeydown="if(event.key==='Enter')loginHOD()">
+    <button onclick="loginHOD()">→</button>
+    <div class="lbox-err" id="lboxErr">✕</div>
+  </div>
+  <button class="back-btn" onclick="window.location.href='index.html'">← Quay lại</button>
+</div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="brand">
+    <div class="brand-mark">ĐNU</div>
+    <div class="brand-text">
+      <div class="top">KHOA NGOẠI NGỮ</div>
+      <div class="bot">DASHBOARD TỔ TRƯỞNG</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <span class="clock" id="clock"></span>
+    <button class="btn-hdr btn-ghost" onclick="refresh()">↺ LÀM MỚI</button>
+    <button class="btn-hdr btn-ghost" onclick="window.location.href='index.html'">← PORTAL GV</button>
+  </div>
+</header>
+
+<!-- RIBBON -->
+<div class="ribbon" id="ribbon">⏳ Đang tải...</div>
+
+<!-- TABS -->
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="sw('tongquan',this)">📊 Tổng quan</button>
+  <button class="tab-btn" onclick="sw('congvan',this)">📄 Công văn</button>
+  <button class="tab-btn" onclick="sw('lichthi',this)">📅 Lịch thi</button>
+  <button class="tab-btn" onclick="sw('lichday',this)">📚 Lịch dạy</button>
+  <button class="tab-btn" onclick="sw('giangday',this)">📋 P.C Giảng dạy</button>
+  <button class="tab-btn" onclick="sw('chamthi',this)">✅ Chấm thi</button>
+  <button class="tab-btn" onclick="sw('giangvien',this)">👥 Giảng viên</button>
+  <button class="tab-btn" onclick="sw('export',this)">💾 Xuất</button>
+  <button class="tab-btn" onclick="sw('settings',this)">⚙ Cài đặt</button>
+</nav>
+
+<main class="main">
+
+  <!-- TỔNG QUAN -->
+  <div class="pane active" id="pane-tongquan">
+    <div class="stats-grid" id="statsGrid"><div class="loading"><span class="spinner"></span>Đang tải...</div></div>
+    <div class="sec-hdr"><h2>📄 Công văn chờ gửi</h2></div>
+    <div id="cvChoDuyet"><div class="loading"><span class="spinner"></span></div></div>
+  </div>
+
+  <!-- CÔNG VĂN -->
+  <div class="pane" id="pane-congvan">
+    <div class="sec-hdr">
+      <h2>📄 Công văn / Thông báo</h2>
+      <div class="btn-group">
+        <button class="btn btn-green btn-sm" onclick="exSheets('CongVan_ThongBao')">📤 Xuất Sheets</button>
+        <button class="btn btn-blue btn-sm" onclick="exCSV('CongVan_ThongBao')">⬇ CSV</button>
+      </div>
+    </div>
+    <div class="tbl-wrap" id="cvTable"><div class="loading"><span class="spinner"></span></div></div>
+  </div>
+
+  <!-- LỊCH THI -->
+  <div class="pane" id="pane-lichthi">
+    <div class="sec-hdr">
+      <h2>📅 Lịch thi Tổng hợp</h2>
+      <div class="btn-group">
+        <button class="btn btn-green btn-sm" onclick="exSheets('LichThi_TongHop')">📤 Xuất Sheets</button>
+        <button class="btn btn-blue btn-sm" onclick="exCSV('LichThi_TongHop')">⬇ CSV</button>
+      </div>
+    </div>
+    <div class="tbl-wrap" id="ltTable"><div class="loading"><span class="spinner"></span></div></div>
+  </div>
+
+  <!-- LỊCH DẠY -->
+  <div class="pane" id="pane-lichday">
+    <div class="sec-hdr">
+      <h2>📚 Lịch dạy</h2>
+      <div class="btn-group">
+        <button class="btn btn-green btn-sm" onclick="exSheets('LichDay_Goc')">📤 Xuất Sheets</button>
+        <button class="btn btn-blue btn-sm" onclick="exCSV('LichDay_Goc')">⬇ CSV</button>
+      </div>
+    </div>
+    <div class="tbl-wrap" id="ldTable"><div class="loading"><span class="spinner"></span></div></div>
+  </div>
+
+  <!-- PHÂN CÔNG GIẢNG DẠY -->
+  <div class="pane" id="pane-giangday">
+    <div class="sec-hdr">
+      <h2>📋 Phân công Giảng dạy</h2>
+      <div class="btn-group">
+        <button class="btn btn-green btn-sm" onclick="exSheets('PhanCong_GiangDay')">📤 Xuất Sheets</button>
+        <button class="btn btn-blue btn-sm" onclick="exCSV('PhanCong_GiangDay')">⬇ CSV</button>
+      </div>
+    </div>
+    <div class="tbl-wrap" id="gdTable"><div class="loading"><span class="spinner"></span></div></div>
+  </div>
+
+  <!-- CHẤM THI -->
+  <div class="pane" id="pane-chamthi">
+    <div class="sec-hdr">
+      <h2>✅ Phân công Chấm thi</h2>
+      <div class="btn-group">
+        <button class="btn btn-green btn-sm" onclick="exSheets('PhanCong_ChamThi')">📤 Xuất Sheets</button>
+        <button class="btn btn-blue btn-sm" onclick="exCSV('PhanCong_ChamThi')">⬇ CSV</button>
+      </div>
+    </div>
+    <div class="tbl-wrap" id="ctTable"><div class="loading"><span class="spinner"></span></div></div>
+  </div>
+
+  <!-- GIẢNG VIÊN -->
+  <div class="pane" id="pane-giangvien">
+    <div class="sec-hdr">
+      <h2>👥 Giảng viên — <span id="namHocLabel"></span></h2>
+      <div class="btn-group">
+        <button class="btn btn-green btn-sm" onclick="exSheets('DanhSach_GV')">📤 Xuất Sheets</button>
+        <button class="btn btn-blue btn-sm" onclick="exCSV('DanhSach_GV')">⬇ CSV</button>
+      </div>
+    </div>
+    <div class="tbl-wrap" id="gvTable"><div class="loading"><span class="spinner"></span></div></div>
+  </div>
+
+  <!-- XUẤT DỮ LIỆU -->
+  <div class="pane" id="pane-export">
+    <div class="sec-hdr"><h2>💾 Xuất dữ liệu</h2></div>
+    <div class="export-grid">
+      <div class="export-card" style="border-top-color:var(--red)">
+        <h3>📁 Toàn bộ hồ sơ bộ môn</h3>
+        <p>Tạo 1 file Sheets chứa tất cả các tab, lưu vào Drive Bộ môn.</p>
+        <div class="export-btns"><button class="btn btn-primary" style="width:100%" onclick="exToanBo()">📤 Xuất toàn bộ → Drive</button></div>
+      </div>
+      ${['LichDay_Goc','LichThi_TongHop','DangKy_GacThi','PhanCong_ChamThi','PhanCong_GiangDay','CongVan_ThongBao','DanhSach_GV'].map(s=>`
+      <div class="export-card">
+        <h3>${s.replace(/_/g,' ')}</h3>
+        <p>Xuất tab này ra file riêng.</p>
+        <div class="export-btns">
+          <button class="btn btn-green btn-sm" onclick="exSheets('${s}')">📤 Sheets</button>
+          <button class="btn btn-blue btn-sm" onclick="exCSV('${s}')">⬇ CSV</button>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>
+
+  <!-- ⚙ CÀI ĐẶT HỆ THỐNG -->
+  <div class="pane" id="pane-settings">
+    <div class="sec-hdr"><h2>⚙ Cài đặt hệ thống</h2></div>
+    <div class="settings-grid">
+
+      <!-- CLAUDE API KEY -->
+      <div class="set-card">
+        <h3>🤖 Claude API Key</h3>
+        <div class="set-desc">Key để phân tích công văn / lịch thi từ Telegram. Lấy tại console.anthropic.com</div>
+        <div class="set-field">
+          <label>API Key</label>
+          <input type="password" id="sClaudeKey" placeholder="sk-ant-api03-..." autocomplete="off">
+          <div class="hint">Dán key vào đây. Key sẽ được lưu bảo mật vào Google Sheets.</div>
+          <div class="masked" id="claudeKeyStatus"></div>
+        </div>
+        <button class="btn-save" onclick="saveSetting('CLAUDE_API_KEY','sClaudeKey','claudeKeyStatus')">LƯU KEY →</button>
+      </div>
+
+      <!-- TELEGRAM TOKEN -->
+      <div class="set-card">
+        <h3>📱 Telegram Bot Token</h3>
+        <div class="set-desc">Token để nhận tin nhắn từ Telegram. Lấy từ @BotFather trên Telegram.</div>
+        <div class="set-field">
+          <label>Bot Token</label>
+          <input type="password" id="sTelegramToken" placeholder="123456789:ABC..." autocomplete="off">
+          <div class="hint">Tạo bot qua @BotFather → lấy token → dán vào đây.</div>
+          <div class="masked" id="telegramStatus"></div>
+        </div>
+        <button class="btn-save" onclick="saveSetting('TELEGRAM_BOT_TOKEN','sTelegramToken','telegramStatus')">LƯU TOKEN →</button>
+      </div>
+
+      <!-- ADMIN EMAIL -->
+      <div class="set-card">
+        <h3>📧 Email nhận thông báo</h3>
+        <div class="set-desc">Email Tổ trưởng nhận nhắc deadline công văn và cập nhật hệ thống.</div>
+        <div class="set-field">
+          <label>Email</label>
+          <input type="email" id="sAdminEmail" placeholder="toTruong@dnu.edu.vn" autocomplete="off">
+          <div class="masked" id="adminEmailStatus"></div>
+        </div>
+        <button class="btn-save" onclick="saveSetting('ADMIN_EMAIL','sAdminEmail','adminEmailStatus')">LƯU EMAIL →</button>
+      </div>
+
+      <!-- NĂM HỌC / HỌC KỲ -->
+      <div class="set-card">
+        <h3>📚 Năm học / Học kỳ hiện tại</h3>
+        <div class="set-desc">Dùng để lọc dữ liệu mặc định trong toàn hệ thống.</div>
+        <div class="set-field">
+          <label>Năm học</label>
+          <input type="text" id="sNamHoc" placeholder="2025-2026">
+          <div class="masked" id="namHocStatus"></div>
+        </div>
+        <div class="set-field">
+          <label>Học kỳ</label>
+          <input type="text" id="sHocKy" placeholder="HK2">
+          <div class="masked" id="hocKyStatus"></div>
+        </div>
+        <button class="btn-save" onclick="saveNamHocHocKy()">LƯU →</button>
+      </div>
+
+      <!-- ĐỔI MẬT KHẨU HOD -->
+      <div class="set-card">
+        <h3>🔑 Đổi mật khẩu HOD</h3>
+        <div class="set-desc">Mật khẩu này được nhập khi click logo 5 lần ở trang Portal.</div>
+        <div class="set-field">
+          <label>Mật khẩu hiện tại</label>
+          <input type="password" id="hodOldPw" placeholder="Nhập mật khẩu hiện tại">
+        </div>
+        <div class="set-field">
+          <label>Mật khẩu mới</label>
+          <input type="password" id="hodNewPw" placeholder="Ít nhất 6 ký tự">
+        </div>
+        <div class="set-field">
+          <label>Nhập lại mật khẩu mới</label>
+          <input type="password" id="hodNewPw2" placeholder="Xác nhận lại">
+        </div>
+        <button class="btn-save" onclick="doiMkHOD()">ĐỔI MẬT KHẨU →</button>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="config.js"></script>
+<script>
+/* ======================================================
+   LOGIN
+====================================================== */
+async function loginHOD() {
+  const pw  = document.getElementById('hodPw').value;
+  const btn = document.querySelector('.lbox button');
+  btn.textContent = '...'; btn.disabled = true;
+  try {
+    const r = await api('dangNhapHOD', { matKhau: pw });
+    btn.textContent = '→'; btn.disabled = false;
+    if (r.success) {
+      document.getElementById('loginScreen').style.display = 'none';
+      refresh();
+    } else {
+      document.getElementById('lboxErr').style.display = 'block';
+      document.getElementById('hodPw').value = '';
+      document.getElementById('hodPw').focus();
+    }
+  } catch(e) {
+    btn.textContent = '→'; btn.disabled = false;
+    document.getElementById('lboxErr').style.display = 'block';
+  }
+}
+document.getElementById('hodPw').addEventListener('keydown', e => { if(e.key==='Enter') loginHOD(); });
+
+/* ======================================================
+   CLOCK
+====================================================== */
+function tick() {
+  const n = new Date();
+  const d = ['CN','T2','T3','T4','T5','T6','T7'][n.getDay()];
+  document.getElementById('clock').textContent =
+    `${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}  ${d} ${n.getDate()}/${n.getMonth()+1}/${n.getFullYear()}`;
+}
+function p(x){return String(x).padStart(2,'0')}
+setInterval(tick,1000); tick();
+
+/* ======================================================
+   TABS
+====================================================== */
+let loaded = {};
+function sw(name, btn) {
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('pane-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (!loaded[name]) { loadPane(name); loaded[name] = true; }
+}
+function loadPane(n) {
+  if(n==='tongquan')  loadTQ();
+  if(n==='congvan')   loadCV();
+  if(n==='lichthi')   loadLT();
+  if(n==='lichday')   loadLD();
+  if(n==='giangday')  loadGD();
+  if(n==='chamthi')   loadCT();
+  if(n==='giangvien') loadGV();
+  if(n==='settings')  loadSettings();
+}
+function refresh() { loaded = {}; loadPane('tongquan'); }
+
+/* ======================================================
+   TỔNG QUAN
+====================================================== */
+async function loadTQ() {
+  try {
+    const d = await api('getThongKe');
+    document.getElementById('ribbon').textContent = `📚  NĂM HỌC ${d.namHoc}  ·  ${d.hocKy}  ·  Hệ thống Quản lý Bộ môn`;
+    document.getElementById('namHocLabel').textContent = d.namHoc;
+    document.getElementById('statsGrid').innerHTML = [
+      ['👥','Giảng viên',d.tongGV,false],
+      ['📅','Ca thi HK này',d.tongCaThi,false],
+      ['🔍','Ca chờ phân công',d.caChoPC,d.caChoPC>0],
+      ['✅','Lượt đăng ký gác',d.tongDangKy,false],
+      ['📄','Tổng công văn',d.tongCongVan,false],
+      ['⏳','Công văn chờ gửi',d.cvChoGui,d.cvChoGui>0],
+      ['⚠️','Deadline <7 ngày',d.deadlineSap,d.deadlineSap>0],
+    ].map(([ico,lbl,val,alert])=>`
+      <div class="stat-card ${alert?'is-alert':''}">
+        <div class="si">${ico}</div>
+        <div class="sn">${val}</div>
+        <div class="sl">${lbl}</div>
+      </div>`).join('');
+  } catch(e) { document.getElementById('statsGrid').innerHTML='<p style="color:red">Lỗi: '+e.message+'</p>'; }
+
+  try {
+    const list = await api('getAllCongVan');
+    const cho  = list.filter(r => r.trangThai === 'Chờ gửi');
+    document.getElementById('cvChoDuyet').innerHTML = cho.length ? buildCV(cho) :
+      '<div class="empty"><div class="ico">🎉</div><p>Không có công văn chờ gửi.</p></div>';
+  } catch(e) {}
+}
+
+function buildCV(list) {
+  return `<div class="tbl-wrap"><table class="data-table"><thead><tr>
+    <th>ID</th><th>Tiêu đề</th><th>Đối tượng</th><th>Deadline</th><th>Trạng thái</th><th>Thao tác</th>
+  </tr></thead><tbody>${list.map(r=>{
+    const sc=r.trangThai==='Đã gửi'?'b-green':r.trangThai==='Chờ gửi'?'b-amber':'b-gray';
+    return `<tr>
+      <td><code style="font-size:13px">${esc(r.id)}</code></td>
+      <td style="max-width:280px"><b>${esc(r.tieuDe)}</b></td>
+      <td>${esc(r.doiTuong)}</td>
+      <td style="color:${r.deadline?'#E65100':'var(--silver)'}"><b>${esc(r.deadline||'—')}</b></td>
+      <td><span class="badge ${sc}">${esc(r.trangThai)}</span></td>
+      <td>${r.trangThai!=='Đã gửi'?`<button class="btn btn-dark btn-sm" onclick="markCV(${r.idx},this)">✓ Đã gửi</button>`:''}</td>
+    </tr>`;}).join('')}</tbody></table></div>`;
+}
+
+async function loadCV() {
+  document.getElementById('cvTable').innerHTML = ld();
+  try { document.getElementById('cvTable').innerHTML = buildCV(await api('getAllCongVan')); }
+  catch(e) { document.getElementById('cvTable').innerHTML='<p style="color:red;padding:20px">'+e.message+'</p>'; }
+}
+async function markCV(idx, btn) {
+  btn.disabled=true; btn.textContent='...';
+  await api('updateCongVanTrangThai',{idx,trangThai:'Đã gửi'});
+  toast('✅ Đã cập nhật!',true); loadCV();
+}
+
+async function loadLT() {
+  document.getElementById('ltTable').innerHTML = ld();
+  try {
+    const list = await api('getAllLichThi');
+    if(!list.length){document.getElementById('ltTable').innerHTML=empty('📭','Chưa có lịch thi.');return;}
+    document.getElementById('ltTable').innerHTML=`<div class="tbl-wrap"><table class="data-table"><thead><tr>
+      <th>Mã ca</th><th>Ngày thi</th><th>Ca / Giờ</th><th>Môn thi</th><th>Hình thức</th>
+      <th>Cần GV</th><th>Đã ĐK</th><th>Trạng thái</th>
+    </tr></thead><tbody>${list.map(r=>`<tr>
+      <td><code style="font-size:12px">${esc(r.maCaThi)}</code></td>
+      <td><b>${esc(r.ngayThi)}</b></td>
+      <td>${esc(r.caThi)} <small style="color:var(--silver)">${esc(r.gioThi)}</small></td>
+      <td>${esc(r.monThi)}</td><td>${esc(r.hinhThuc)}</td>
+      <td style="text-align:center"><b>${r.soCanCo}</b></td>
+      <td style="text-align:center"><span class="badge ${r.soDaDK>=r.soCanCo?'b-green':'b-red'}">${r.soDaDK}/${r.soCanCo}</span></td>
+      <td><span class="badge b-gray">${esc(r.trangThai)}</span></td>
+    </tr>`).join('')}</tbody></table></div>`;
+  } catch(e){document.getElementById('ltTable').innerHTML='<p style="color:red;padding:20px">'+e.message+'</p>';}
+}
+
+async function loadLD() {
+  document.getElementById('ldTable').innerHTML=ld();
+  try {
+    const list=await api('getAllLichDay');
+    if(!list.length){document.getElementById('ldTable').innerHTML=empty('📭','Chưa có dữ liệu.');return;}
+    document.getElementById('ldTable').innerHTML=`<div class="tbl-wrap"><table class="data-table"><thead><tr>
+      <th>NH</th><th>HK</th><th>Mã GV</th><th>Ngày dạy</th><th>Buổi</th><th>Tiết BD</th><th>Môn học</th><th>Lớp</th><th>Phòng</th>
+    </tr></thead><tbody>${list.map(r=>`<tr>
+      <td>${esc(r.namHoc)}</td><td>${esc(r.hocKy)}</td><td><code>${esc(r.maGV)}</code></td>
+      <td><b>${esc(r.ngayDay)}</b></td><td>${esc(r.buoi)}</td><td>${esc(String(r.tietBD))}</td>
+      <td><b>${esc(r.monHoc)}</b></td><td>${esc(r.lop)}</td><td>${esc(r.phong)}</td>
+    </tr>`).join('')}</tbody></table></div>`;
+  } catch(e){document.getElementById('ldTable').innerHTML='<p style="color:red;padding:20px">'+e.message+'</p>';}
+}
+
+async function loadGD() {
+  document.getElementById('gdTable').innerHTML=ld();
+  try {
+    const list=await api('getAllPhanCongGiangDay');
+    if(!list.length){document.getElementById('gdTable').innerHTML=empty('📭','Chưa có dữ liệu.');return;}
+    document.getElementById('gdTable').innerHTML=`<div class="tbl-wrap"><table class="data-table"><thead><tr>
+      <th>NH</th><th>HK</th><th>Mã GV</th><th>Môn học</th><th>Số tiết</th><th>Ngành/Khoa</th><th>Ghi chú</th>
+    </tr></thead><tbody>${list.map(r=>`<tr>
+      <td>${esc(r.namHoc)}</td><td>${esc(r.hocKy)}</td><td><code>${esc(r.maGV)}</code></td>
+      <td><b>${esc(r.monHoc)}</b></td><td>${esc(String(r.soTiet))}</td>
+      <td>${esc(r.nganhKhoa)}</td><td style="color:var(--silver)">${esc(r.ghiChu)}</td>
+    </tr>`).join('')}</tbody></table></div>`;
+  } catch(e){document.getElementById('gdTable').innerHTML='<p style="color:red;padding:20px">'+e.message+'</p>';}
+}
+
+async function loadCT() {
+  document.getElementById('ctTable').innerHTML=ld();
+  try {
+    const list=await api('getAllPhanCongChamThi');
+    if(!list.length){document.getElementById('ctTable').innerHTML=empty('📭','Chưa có dữ liệu.');return;}
+    document.getElementById('ctTable').innerHTML=`<div class="tbl-wrap"><table class="data-table"><thead><tr>
+      <th>NH</th><th>HK</th><th>Môn thi</th><th>Hình thức</th>
+      <th>SL</th><th>Giám thị 1</th><th>Giám thị 2</th><th>Hạn chấm</th><th>Trạng thái</th>
+    </tr></thead><tbody>${list.map(r=>{
+      const sc=r.trangThai==='Hoàn thành'?'b-green':r.trangThai?'b-amber':'b-gray';
+      return `<tr>
+        <td>${esc(r.namHoc)}</td><td>${esc(r.hocKy)}</td><td><b>${esc(r.monThi)}</b></td>
+        <td>${esc(r.hinhThuc)}</td><td>${esc(String(r.soLuong))}</td>
+        <td>${esc(r.gt1)}</td><td>${esc(r.gt2)}</td>
+        <td style="color:#E65100"><b>${esc(r.hanCham||'—')}</b></td>
+        <td><span class="badge ${sc}">${esc(r.trangThai||'—')}</span></td>
+      </tr>`;}).join('')}</tbody></table></div>`;
+  } catch(e){document.getElementById('ctTable').innerHTML='<p style="color:red;padding:20px">'+e.message+'</p>';}
+}
+
+async function loadGV() {
+  document.getElementById('gvTable').innerHTML=ld();
+  try {
+    const list=await api('getAllGiangVien');
+    if(!list.length){document.getElementById('gvTable').innerHTML=empty('👥','Chưa có giảng viên nào.');return;}
+    document.getElementById('gvTable').innerHTML=`<div class="tbl-wrap"><table class="data-table"><thead><tr>
+      <th>Mã GV</th><th>Họ tên</th><th>Email</th><th>Vai trò</th>
+      <th>Ca đã gác</th><th>Còn lại</th><th>Tiến độ</th>
+    </tr></thead><tbody>${list.map(r=>{
+      const pct=Math.min(100,Math.round(r.soCaNam/20*100));
+      const cb=r.conLai<=0?'<span class="badge b-red">Đủ 20 ca</span>':
+               r.conLai<=5?`<span class="badge b-amber">Còn ${r.conLai}</span>`:
+               `<span class="badge b-green">Còn ${r.conLai}</span>`;
+      return `<tr>
+        <td><code>${esc(r.maGV)}</code></td>
+        <td><b>${esc(r.hoTen)}</b></td>
+        <td style="font-size:15px">${esc(r.email||'')}</td>
+        <td>${esc(r.vaiTro||'')}</td>
+        <td style="text-align:center;font-weight:700;font-size:19px">${r.soCaNam}/20</td>
+        <td>${cb}</td>
+        <td style="min-width:110px">
+          <div class="prog-wrap"><div class="prog-bar ${pct<80?'ok':''}" style="width:${pct}%"></div></div>
+          <small style="color:var(--silver);font-size:12px">${pct}%</small>
+        </td>
+      </tr>`;}).join('')}</tbody></table></div>`;
+  } catch(e){document.getElementById('gvTable').innerHTML='<p style="color:red;padding:20px">'+e.message+'</p>';}
+}
+
+/* ======================================================
+   SETTINGS — load hiện trạng + lưu
+====================================================== */
+async function loadSettings() {
+  try {
+    const keys = ['CLAUDE_API_KEY','TELEGRAM_BOT_TOKEN','ADMIN_EMAIL','NamHoc_HienTai','HocKy_HienTai'];
+    const r = await api('getCaiDatMulti', { keys: keys.join(',') });
+    if (r.CLAUDE_API_KEY)        showMasked('claudeKeyStatus', r.CLAUDE_API_KEY);
+    if (r.TELEGRAM_BOT_TOKEN)    showMasked('telegramStatus', r.TELEGRAM_BOT_TOKEN);
+    if (r.ADMIN_EMAIL)           document.getElementById('adminEmailStatus').textContent = '✓ ' + r.ADMIN_EMAIL;
+    if (r.NamHoc_HienTai)        { document.getElementById('sNamHoc').value = r.NamHoc_HienTai; document.getElementById('namHocStatus').textContent = '✓ Đang lưu: ' + r.NamHoc_HienTai; }
+    if (r.HocKy_HienTai)         { document.getElementById('sHocKy').value = r.HocKy_HienTai;  document.getElementById('hocKyStatus').textContent = '✓ Đang lưu: ' + r.HocKy_HienTai; }
+  } catch(e) {}
+}
+
+function showMasked(elId, val) {
+  const el = document.getElementById(elId);
+  if (!val) return;
+  const preview = val.length > 12 ? val.slice(0,6) + '••••••••' + val.slice(-4) : '••••••••';
+  el.textContent = '✓ Đã lưu: ' + preview;
+}
+
+async function saveSetting(settingKey, inputId, statusId) {
+  const val = document.getElementById(inputId).value.trim();
+  if (!val) { toast('⚠ Vui lòng nhập giá trị!'); return; }
+  try {
+    await api('saveCaiDat', { key: settingKey, value: val });
+    document.getElementById(inputId).value = '';
+    showMasked(statusId, val);
+    if (statusId === 'adminEmailStatus') document.getElementById(statusId).textContent = '✓ Đã lưu: ' + val;
+    toast('✅ Đã lưu ' + settingKey + '!', true);
+  } catch(e) { toast('❌ Lỗi: ' + e.message); }
+}
+
+async function saveNamHocHocKy() {
+  const nh = document.getElementById('sNamHoc').value.trim();
+  const hk = document.getElementById('sHocKy').value.trim();
+  if (!nh || !hk) { toast('⚠ Điền đầy đủ năm học và học kỳ!'); return; }
+  try {
+    await api('saveCaiDat', { key:'NamHoc_HienTai', value:nh });
+    await api('saveCaiDat', { key:'HocKy_HienTai',  value:hk });
+    document.getElementById('namHocStatus').textContent = '✓ Đang lưu: ' + nh;
+    document.getElementById('hocKyStatus').textContent  = '✓ Đang lưu: ' + hk;
+    toast('✅ Đã cập nhật năm học / học kỳ!', true);
+  } catch(e) { toast('❌ Lỗi: ' + e.message); }
+}
+
+async function doiMkHOD() {
+  const o=document.getElementById('hodOldPw').value;
+  const n=document.getElementById('hodNewPw').value;
+  const n2=document.getElementById('hodNewPw2').value;
+  if(n!==n2){ toast('❌ Mật khẩu mới không khớp!'); return; }
+  try {
+    const r=await api('doiMatKhauHOD',{oldPw:o,newPw:n});
+    toast(r.message,r.success);
+    if(r.success){document.getElementById('hodOldPw').value='';document.getElementById('hodNewPw').value='';document.getElementById('hodNewPw2').value='';}
+  } catch(e){toast('❌ Lỗi: '+e.message);}
+}
+
+/* ======================================================
+   EXPORT
+====================================================== */
+async function exSheets(name){
+  toast('⏳ Đang tạo Google Sheets...');
+  try{const r=await api('exportNewSheetAPI',{sheetName:name,title:name});if(r.success){toast('✅ Xong!',true);window.open(r.url,'_blank');}else toast('❌ '+r.message);}
+  catch(e){toast('❌ '+e.message);}
+}
+async function exToanBo(){
+  toast('⏳ Đang tạo hồ sơ tổng hợp...');
+  try{const r=await api('exportToanBoAPI');if(r.success){toast('✅ Xong!',true);window.open(r.url,'_blank');}else toast('❌ '+r.message);}
+  catch(e){toast('❌ '+e.message);}
+}
+async function exCSV(name){
+  try{
+    const r=await api('exportSheetAPI',{sheetName:name});
+    if(!r.success){toast('❌ '+r.message);return;}
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob(['\uFEFF'+r.csv],{type:'text/csv;charset=utf-8'}));
+    a.download=r.filename; a.click(); toast('✅ Đã tải '+r.filename,true);
+  } catch(e){toast('❌ '+e.message);}
+}
+
+/* ======================================================
+   HELPERS
+====================================================== */
+function ld(){return '<div class="loading"><span class="spinner"></span>Đang tải...</div>';}
+function empty(ico,msg){return `<div class="empty"><div class="ico">${ico}</div><p>${msg}</p></div>`;}
+function toast(msg,ok){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast'+(ok?' ok':'');
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),4000);
+}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
+</body>
+</html>
