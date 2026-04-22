@@ -4,233 +4,395 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Khoa Ngoại Ngữ — ĐH Đồng Nai</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Crimson+Pro:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --red:#D32F2F; --red-dk:#B71C1C; --red-lt:#FFEBEE;
-  --black:#0F0F0F; --charcoal:#1A1A1A; --dark:#2C2C2C;
-  --mid:#555; --silver:#888; --pale:#B0B0B0;
-  --light:#F4F4F4; --white:#FFF; --border:#DCDCDC;
-  --sh:0 2px 12px rgba(0,0,0,.08); --sh-lg:0 8px 40px rgba(0,0,0,.18);
+  --red:#C62828; --red-lt:#FFEBEE; --red-dk:#B71C1C;
+  --black:#0F0F0F; --charcoal:#1A1A1A;
+  --ink:#1C1C1E; --mid:#555; --silver:#888; --pale:#B0B0B0;
+  --bg:#F7F5F2; --white:#FFFFFF; --border:#E0DDD8;
+  --sh: 0 2px 16px rgba(0,0,0,.08);
+  --sh-lg: 0 12px 48px rgba(0,0,0,.14);
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Crimson Pro',Georgia,serif;background:var(--light);color:var(--black);font-size:18px;line-height:1.65;min-height:100vh}
-
-/* HEADER */
-.header{background:var(--black);height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;border-bottom:3px solid var(--red);position:sticky;top:0;z-index:300}
-.brand{display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none}
-.brand-mark{width:42px;height:42px;background:var(--red);clip-path:polygon(10% 0%,100% 0%,90% 100%,0% 100%);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--white);letter-spacing:1px;transition:transform .12s}
-.brand-mark.pop{transform:scale(.82)}
-.brand-text .top{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:var(--white);letter-spacing:2px;line-height:1}
-.brand-text .bot{font-size:13px;color:var(--pale);font-family:'Barlow Condensed',sans-serif}
-.hdr-right{display:flex;align-items:center;gap:12px}
-.hdr-user{display:none;text-align:right}
-.hdr-name{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--white);letter-spacing:1px}
-.hdr-role{font-size:13px;color:var(--pale)}
-.btn-sm{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;padding:7px 16px;cursor:pointer;border:none;transition:all .2s;text-transform:uppercase}
-.btn-ghost{background:transparent;border:1px solid #444;color:var(--pale)}.btn-ghost:hover{border-color:var(--red);color:var(--white)}
-.btn-red{background:var(--red);color:var(--white)}.btn-red:hover{background:var(--red-dk)}
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body {
+  font-family: 'EB Garamond', Georgia, 'Times New Roman', serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 18px;
+  line-height: 1.65;
+  min-height: 100vh;
+}
 
 /* ============================================================
-   AUTH SCREENS (login / register / forgot)
+   LOADING SCREEN
 ============================================================ */
-.auth-screen{display:none;align-items:center;justify-content:center;min-height:calc(100vh - 68px);padding:30px;background:var(--light)}
-.auth-screen.active{display:flex}
+.loading-screen {
+  position: fixed; inset: 0;
+  background: var(--black);
+  z-index: 9999;
+  display: flex; flex-direction: column;
+  align-items: flex-start; justify-content: center;
+  padding: clamp(30px, 8vw, 80px);
+  transition: opacity .5s ease;
+}
+.loading-screen.out { opacity: 0; pointer-events: none; }
 
-.auth-card{background:var(--white);border-top:4px solid var(--red);box-shadow:var(--sh-lg);padding:50px 46px;width:460px;max-width:100%}
-.auth-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:3px;color:var(--red);text-transform:uppercase;margin-bottom:8px}
-.auth-title{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:800;color:var(--black);letter-spacing:1px;margin-bottom:4px;line-height:1}
-.auth-sub{font-size:16px;color:var(--silver);margin-bottom:32px}
+.ls-eyebrow {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 4px; text-transform: uppercase;
+  color: var(--red); margin-bottom: 16px;
+}
+.ls-title {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: clamp(36px, 7vw, 72px);
+  font-weight: 500;
+  color: var(--white);
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+.ls-title span { color: var(--red); font-style: italic; }
+.ls-sub {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--silver); margin-bottom: 40px;
+}
+.ls-line {
+  width: 0; height: 2px; background: var(--red);
+  transition: width 1.2s ease;
+  max-width: 320px;
+}
+.ls-line.go { width: 320px; }
 
-.field{margin-bottom:16px}
-.field label{display:block;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:2px;color:var(--mid);text-transform:uppercase;margin-bottom:7px}
-.field input{width:100%;padding:13px 15px;border:1.5px solid var(--border);background:var(--white);font-size:18px;font-family:'Crimson Pro',serif;outline:none;color:var(--black);transition:border-color .2s}
-.field input:focus{border-color:var(--red)}
+/* ============================================================
+   HEADER
+============================================================ */
+.header {
+  background: var(--black);
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 clamp(16px, 4vw, 40px);
+  border-bottom: 2px solid var(--red);
+  position: sticky; top: 0; z-index: 300;
+}
+.brand { display: flex; align-items: center; gap: 14px; cursor: pointer; user-select: none; }
+.brand-mark {
+  width: 40px; height: 40px;
+  background: var(--red);
+  clip-path: polygon(10% 0%,100% 0%,90% 100%,0% 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 800; color: var(--white); letter-spacing: 1px;
+  transition: transform .15s; flex-shrink: 0;
+}
+.brand-mark.pop { transform: scale(.85); }
+.brand-text .top {
+  font-family: 'EB Garamond', serif;
+  font-size: 17px; font-weight: 600; color: var(--white);
+  letter-spacing: .5px; line-height: 1;
+}
+.brand-text .bot { font-size: 12px; color: var(--pale); font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px; }
+.hdr-right { display: flex; align-items: center; gap: 10px; }
+.hdr-user { display: none; text-align: right; }
+.hdr-name { font-family: 'EB Garamond', serif; font-size: 17px; font-weight: 600; color: var(--white); }
+.hdr-role { font-size: 12px; color: var(--pale); font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px; }
+.btn-sm { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; padding: 7px 14px; border: none; cursor: pointer; transition: all .2s; min-height: 36px; touch-action: manipulation; }
+.btn-ghost { background: transparent; border: 1px solid #444; color: var(--pale); }
+.btn-ghost:hover { border-color: var(--red); color: var(--white); }
 
-.btn-full{width:100%;padding:15px;background:var(--red);color:var(--white);border:none;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background .2s;margin-top:4px}
-.btn-full:hover{background:var(--red-dk)}
-.btn-full:disabled{background:#ccc;cursor:not-allowed}
+/* ============================================================
+   AUTH — TAB SWITCHER STYLE
+============================================================ */
+.auth-wrap {
+  display: flex; align-items: center; justify-content: center;
+  min-height: calc(100vh - 64px);
+  padding: 30px 16px;
+}
+.auth-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  box-shadow: var(--sh-lg);
+  width: min(520px, 100%);
+  overflow: hidden;
+}
 
-.auth-err{color:var(--red);font-size:15px;font-weight:600;margin-top:10px;display:none;padding:10px 14px;background:var(--red-lt);border-left:3px solid var(--red)}
-.auth-ok{color:#1B5E20;font-size:15px;font-weight:600;margin-top:10px;display:none;padding:10px 14px;background:#E8F5E9;border-left:3px solid #1B5E20}
+/* Tab switcher — Sign In / Register */
+.auth-tabs {
+  display: grid; grid-template-columns: 1fr 1fr;
+  background: #F0EDE8;
+}
+.auth-tab {
+  padding: 18px;
+  font-family: 'EB Garamond', serif;
+  font-size: 18px; font-weight: 500;
+  text-align: center; cursor: pointer;
+  border: none; background: transparent;
+  color: var(--silver); transition: all .2s;
+  border-bottom: 3px solid transparent;
+}
+.auth-tab.active { background: var(--white); color: var(--red); border-bottom-color: var(--red); }
 
-.auth-links{display:flex;justify-content:space-between;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap;gap:8px}
-.auth-link{font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:1px;color:var(--mid);cursor:pointer;background:none;border:none;text-transform:uppercase;padding:0;transition:color .2s}
-.auth-link:hover{color:var(--red)}
+.auth-body { padding: clamp(24px, 5vw, 40px); }
+.auth-pane { display: none; }
+.auth-pane.active { display: block; }
 
-.default-hint{font-size:14px;color:var(--silver);margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+.auth-eyebrow { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--red); margin-bottom: 6px; }
+.auth-heading { font-family: 'EB Garamond', serif; font-size: 28px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+.auth-sub { font-size: 16px; color: var(--silver); margin-bottom: 28px; font-style: italic; }
+
+.field { margin-bottom: 16px; }
+.field label { display: block; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--mid); margin-bottom: 7px; }
+.field input {
+  width: 100%; padding: 13px 15px;
+  border: 1.5px solid var(--border); background: var(--bg);
+  font-size: 17px; font-family: 'EB Garamond', serif;
+  outline: none; color: var(--ink); transition: border-color .2s;
+  border-radius: 0; -webkit-appearance: none;
+}
+.field input:focus { border-color: var(--red); background: var(--white); }
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.btn-submit {
+  width: 100%; padding: 15px;
+  background: var(--red); color: var(--white);
+  border: none; font-family: 'EB Garamond', serif;
+  font-size: 18px; font-weight: 600;
+  cursor: pointer; transition: background .2s; margin-top: 6px;
+  min-height: 52px; touch-action: manipulation;
+}
+.btn-submit:hover { background: var(--red-dk); }
+.btn-submit:disabled { background: #ccc; cursor: not-allowed; }
+
+.auth-err { color: var(--red); font-size: 15px; margin-top: 10px; display: none; padding: 10px 14px; background: var(--red-lt); border-left: 3px solid var(--red); font-family: 'EB Garamond', serif; }
+.auth-ok { color: #1B5E20; font-size: 15px; margin-top: 10px; display: none; padding: 10px 14px; background: #E8F5E9; border-left: 3px solid #2E7D32; font-family: 'EB Garamond', serif; }
+
+.auth-forgot { text-align: center; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
+.link-btn { background: none; border: none; color: var(--mid); font-size: 15px; font-family: 'EB Garamond', serif; font-style: italic; cursor: pointer; text-decoration: underline; transition: color .2s; }
+.link-btn:hover { color: var(--red); }
 
 /* ============================================================
    APP SHELL
 ============================================================ */
-.app{display:none}
-.tab-nav{background:var(--white);border-bottom:2px solid var(--border);display:flex;padding:0 40px;overflow-x:auto;gap:0}
-.tab-btn{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;background:transparent;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;padding:14px 20px;color:var(--silver);cursor:pointer;white-space:nowrap;transition:all .2s}
-.tab-btn:hover{color:var(--dark)}
-.tab-btn.active{color:var(--red);border-bottom-color:var(--red)}
+.app { display: none; }
 
-.main{padding:28px 40px;max-width:1200px;margin:0 auto}
-.pane{display:none;animation:fadeUp .25s ease}
-.pane.active{display:block}
-@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-
-/* QUOTA */
-.quota-wrap{background:var(--charcoal);color:var(--white);padding:14px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px}
-.ql{font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:1.5px;color:var(--pale);text-transform:uppercase}
-.qn{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:800;color:var(--red);line-height:1}
-.q-sub{font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--pale);margin-bottom:4px}
-.q-prog{width:160px;background:#333;height:5px}
-.q-fill{height:5px;background:var(--red);transition:width .4s}
-.q-fill.safe{background:#2E7D32}
-
-/* SEC TITLE */
-.sec-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--black);border-left:4px solid var(--red);padding-left:12px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
-
-/* CA CARDS */
-.ca-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
-.ca-card{background:var(--white);border:1px solid var(--border);border-top:3px solid var(--black);padding:20px;transition:all .2s;position:relative}
-.ca-card:hover:not(.is-full){border-top-color:var(--red);box-shadow:var(--sh)}
-.ca-card.is-full{opacity:.6}
-.ca-tag{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:var(--red);text-transform:uppercase;margin-bottom:5px}
-.ca-date{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;color:var(--black);line-height:1.1;margin-bottom:4px}
-.ca-time{font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:.5px;color:var(--silver);margin-bottom:12px}
-.ca-row{font-size:17px;margin-bottom:4px}
-.ca-row b{color:var(--black)}
-.ca-code{display:inline-block;background:var(--black);color:var(--white);font-family:'Barlow Condensed',sans-serif;font-size:12px;padding:3px 10px;letter-spacing:1px;margin-top:8px}
-.slot-row{display:flex;align-items:center;gap:10px;margin-top:10px}
-.slot-lbl{font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--silver);white-space:nowrap}
-.slot-track{flex:1;background:#eee;height:4px}
-.slot-fill{height:4px;background:var(--red);transition:width .4s}
-.slot-fill.done{background:#2E7D32}
-.btn-dk{width:100%;margin-top:14px;padding:13px;background:var(--red);color:var(--white);border:none;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background .2s}
-.btn-dk:hover:not(:disabled){background:var(--red-dk)}
-.btn-dk:disabled{background:#ccc;cursor:not-allowed}
-
-/* MY LIST */
-.my-row{background:var(--white);border:1px solid var(--border);border-left:4px solid var(--red);padding:16px 20px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:14px}
-.my-date{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:var(--black)}
-.my-det{font-size:15px;color:var(--silver);margin-top:3px}
-.chip{font-family:'Barlow Condensed',sans-serif;font-size:11px;padding:3px 9px;letter-spacing:.5px;display:inline-block;margin-top:4px}
-.chip-ok{background:#E8F5E9;color:#1B5E20;border:1px solid #C8E6C9}
-.chip-wait{background:#FFF8E1;color:#E65100;border:1px solid #FFE082}
-.btn-huy{padding:8px 16px;border:1.5px solid var(--red);color:var(--red);background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;cursor:pointer;transition:all .2s;text-transform:uppercase;white-space:nowrap}
-.btn-huy:hover{background:var(--red);color:var(--white)}
-
-/* LỊCH DẠY TABLE */
-.tbl-wrap{overflow-x:auto}
-.ld-table{width:100%;border-collapse:collapse;background:var(--white);box-shadow:var(--sh)}
-.ld-table th{background:var(--black);color:var(--white);padding:11px 13px;text-align:left;font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1.5px;text-transform:uppercase}
-.ld-table th:first-child{border-left:3px solid var(--red)}
-.ld-table td{padding:11px 13px;border-bottom:1px solid var(--border);font-size:16px}
-.ld-table tr:hover td{background:#fafafa}
-.ld-table tr:last-child td{border-bottom:none}
-
-/* SETTINGS */
-.set-card{background:var(--white);border-top:3px solid var(--red);border:1px solid var(--border);padding:34px;max-width:500px}
-.set-card h3{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--black);margin-bottom:20px}
-.set-field{margin-bottom:15px}
-.set-field label{display:block;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;color:var(--mid);text-transform:uppercase;margin-bottom:7px}
-.set-field input{width:100%;padding:12px 14px;border:1.5px solid var(--border);font-size:17px;font-family:'Crimson Pro',serif;outline:none;transition:border-color .2s;color:var(--black)}
-.set-field input:focus{border-color:var(--red)}
-.btn-save{padding:12px 24px;background:var(--red);color:var(--white);border:none;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background .2s}
-.btn-save:hover{background:var(--red-dk)}
-
-/* HOD SECRET MODAL */
-.hod-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9000;align-items:center;justify-content:center}
-.hod-ov.open{display:flex}
-.hod-box{background:var(--charcoal);border-top:3px solid var(--red);width:340px;max-width:95vw;padding:36px;position:relative}
-.hod-close{position:absolute;top:12px;right:16px;background:none;border:none;color:#444;font-size:18px;cursor:pointer}
-.hod-input{width:100%;padding:15px;background:#111;border:1px solid #333;color:var(--white);font-size:22px;font-family:'Barlow Condensed',sans-serif;letter-spacing:4px;text-align:center;outline:none;transition:border-color .2s}
-.hod-input:focus{border-color:var(--red)}
-.hod-btn{width:100%;margin-top:10px;padding:13px;background:var(--red);color:var(--white);border:none;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:3px;cursor:pointer}
-.hod-btn:hover{background:var(--red-dk)}
-.hod-err{color:#ff6b6b;font-size:14px;text-align:center;margin-top:8px;display:none;font-family:'Barlow Condensed',sans-serif}
-
-/* CONFIRM MODAL */
-.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:center;justify-content:center}
-.modal-ov.open{display:flex}
-.modal-box{background:var(--white);border-top:4px solid var(--red);width:460px;max-width:95vw;padding:38px}
-.modal-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--black);margin-bottom:8px}
-.modal-sub{font-size:15px;color:var(--silver);margin-bottom:16px}
-.preview{background:var(--light);border-left:3px solid var(--red);padding:16px;font-size:17px;line-height:2}
-.modal-btns{display:flex;gap:10px;margin-top:18px}
-.btn-confirm{flex:1;padding:14px;background:var(--red);color:var(--white);border:none;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;cursor:pointer;text-transform:uppercase}
-.btn-confirm:hover{background:var(--red-dk)}
-.btn-cancel{flex:1;padding:14px;border:1.5px solid var(--border);background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:14px;cursor:pointer;color:var(--mid)}
-
-/* LOADING / EMPTY */
-.loading{padding:40px;text-align:center;color:var(--silver);font-size:17px}
-.spinner{display:inline-block;width:22px;height:22px;border:2px solid #ddd;border-top-color:var(--red);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle}
-@keyframes spin{to{transform:rotate(360deg)}}
-.empty{padding:60px 20px;text-align:center;color:var(--silver)}
-.empty .ico{font-size:44px;margin-bottom:10px}
-
-/* EXPORT */
-.btn-export{background:var(--black);color:var(--white);border:none;padding:8px 14px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer}
-.btn-export:hover{background:var(--dark)}
-
-/* TOAST */
-.toast{position:fixed;bottom:22px;right:22px;background:var(--charcoal);color:var(--white);padding:13px 18px;font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:.5px;box-shadow:var(--sh-lg);border-left:4px solid var(--red);transform:translateY(100px);opacity:0;transition:all .3s;z-index:9999;max-width:350px}
-.toast.show{transform:translateY(0);opacity:1}
-.toast.ok{border-left-color:#2E7D32}
-
-@media(max-width:680px){
-  .header{padding:0 16px}
-  .main{padding:16px}
-  .tab-nav{padding:0 8px}
-  .auth-card{padding:36px 22px}
-  .ca-grid{grid-template-columns:1fr}
-  .q-prog{width:100px}
-  .auth-links{flex-direction:column;gap:12px}
+.tab-nav {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  display: flex; padding: 0 clamp(10px, 3vw, 40px);
+  overflow-x: auto; gap: 0;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none;
 }
+.tab-nav::-webkit-scrollbar { display: none; }
+.tab-btn {
+  font-family: 'EB Garamond', serif; font-size: 16px; font-weight: 500;
+  background: transparent; border: none; border-bottom: 2px solid transparent;
+  margin-bottom: -1px; padding: 14px 20px;
+  color: var(--silver); cursor: pointer; white-space: nowrap; transition: all .2s;
+}
+.tab-btn:hover { color: var(--ink); }
+.tab-btn.active { color: var(--red); border-bottom-color: var(--red); }
+
+.main { padding: clamp(16px, 3vw, 28px) clamp(16px, 4vw, 40px); max-width: 1200px; margin: 0 auto; }
+.pane { display: none; animation: fadeUp .25s ease; }
+.pane.active { display: block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
 
 /* ============================================================
-   MOBILE RESPONSIVE
+   SCHEDULE CALENDAR VIEW
 ============================================================ */
-@media(max-width:768px){
-  .header{padding:0 14px;height:60px}
-  .brand-text .top{font-size:14px;letter-spacing:1px}
-  .brand-text .bot{display:none}
-  .hdr-name{font-size:15px}
-  .hdr-role{display:none}
-  .tab-nav{padding:0;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-  .tab-nav::-webkit-scrollbar{display:none}
-  .tab-btn{padding:12px 14px;font-size:13px;letter-spacing:1px}
-  .main{padding:14px}
-  .auth-card{padding:32px 20px}
-  .auth-title{font-size:26px}
-  .lc-field input, .field input{font-size:16px;padding:12px 13px}
-  .btn-full{padding:14px;font-size:15px}
-  .ca-grid{grid-template-columns:1fr}
-  .quota-wrap{padding:12px 14px}
-  .qn{font-size:24px}
-  .q-prog{width:100px}
-  .sec-title{font-size:17px}
-  .set-card{padding:22px 18px}
-  .my-row{flex-wrap:wrap;gap:10px}
-  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  .ld-table th{padding:10px;font-size:12px}
-  .ld-table td{padding:10px;font-size:15px}
-  .auth-links{flex-direction:column;align-items:center;gap:14px}
-  .btn-full, .btn-save, .btn-dk, .btn-huy{min-height:48px;touch-action:manipulation;border-radius:0}
-  .btn-export{min-height:44px;touch-action:manipulation}
+.schedule-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px; margin-bottom: 20px;
 }
-@media(max-width:480px){
-  .auth-card{padding:28px 16px}
-  .brand-text .top{font-size:13px}
-  .hdr-right .btn-sm{display:none}
-  #logoutBtn{display:block !important;font-size:12px;padding:6px 10px}
+.schedule-toolbar h2 {
+  font-family: 'EB Garamond', serif; font-size: 24px; font-weight: 600;
+  color: var(--ink); border-left: 3px solid var(--red); padding-left: 12px;
+}
+.view-tabs { display: flex; gap: 0; border: 1px solid var(--border); overflow: hidden; }
+.view-tab {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600;
+  letter-spacing: 1px; text-transform: uppercase;
+  padding: 8px 16px; border: none; background: var(--white); color: var(--silver);
+  cursor: pointer; transition: all .2s; min-height: 36px; touch-action: manipulation;
+}
+.view-tab.active { background: var(--red); color: var(--white); }
+.view-nav { display: flex; align-items: center; gap: 10px; }
+.view-nav-btn {
+  width: 36px; height: 36px;
+  background: var(--white); border: 1px solid var(--border);
+  font-size: 18px; cursor: pointer; transition: all .2s;
+  display: flex; align-items: center; justify-content: center;
+  touch-action: manipulation;
+}
+.view-nav-btn:hover { background: var(--red); color: var(--white); border-color: var(--red); }
+.view-nav-label {
+  font-family: 'EB Garamond', serif; font-size: 17px; font-weight: 500;
+  min-width: 160px; text-align: center;
+}
+
+/* Week/Month view grid */
+.week-grid { display: grid; grid-template-columns: 60px repeat(7,1fr); border: 1px solid var(--border); background: var(--white); }
+.wg-header { background: var(--black); color: var(--white); padding: 10px 6px; text-align: center; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; }
+.wg-header.today { background: var(--red); }
+.wg-header.corner { background: var(--black); }
+.wg-time { padding: 6px; text-align: right; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; color: var(--silver); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); vertical-align: top; }
+.wg-cell { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); min-height: 52px; padding: 2px; position: relative; }
+.wg-cell.today-col { background: rgba(198,40,40,.03); }
+.wg-event {
+  background: var(--red); color: var(--white);
+  font-size: 12px; padding: 4px 6px; margin-bottom: 2px;
+  line-height: 1.3; border-left: 3px solid var(--red-dk);
+  cursor: pointer; transition: opacity .15s;
+}
+.wg-event:hover { opacity: .85; }
+.wg-event.light { background: #EF9A9A; color: var(--ink); border-left-color: var(--red); }
+
+/* List view */
+.list-view { background: var(--white); border: 1px solid var(--border); }
+.list-day-header { background: var(--charcoal); color: var(--white); padding: 10px 16px; font-family: 'EB Garamond', serif; font-size: 17px; font-weight: 600; }
+.list-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.list-item:last-child { border-bottom: none; }
+.list-item:hover { background: #fafafa; }
+.list-time { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; letter-spacing: .5px; color: var(--silver); white-space: nowrap; padding-top: 2px; min-width: 80px; }
+.list-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--red); flex-shrink: 0; margin-top: 6px; }
+.list-info { flex: 1; }
+.list-subject { font-family: 'EB Garamond', serif; font-size: 18px; font-weight: 600; color: var(--ink); }
+.list-meta { font-size: 15px; color: var(--silver); margin-top: 2px; }
+
+/* ============================================================
+   CA THI CARDS
+============================================================ */
+.sec-title {
+  font-family: 'EB Garamond', serif; font-size: 22px; font-weight: 600;
+  color: var(--ink); border-left: 3px solid var(--red); padding-left: 12px;
+  margin-bottom: 20px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+}
+.quota-bar { background: var(--charcoal); color: var(--white); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+.ql { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--pale); }
+.qn { font-family: 'EB Garamond', serif; font-size: 28px; font-weight: 600; color: var(--red); line-height: 1; }
+.q-sub { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; color: var(--pale); margin-bottom: 4px; }
+.q-prog { width: 160px; background: #333; height: 4px; }
+.q-fill { height: 4px; background: var(--red); transition: width .4s; }
+.q-fill.safe { background: #2E7D32; }
+
+.ca-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
+.ca-card { background: var(--white); border: 1px solid var(--border); border-top: 3px solid var(--charcoal); padding: 20px; transition: all .2s; }
+.ca-card:hover:not(.is-full) { border-top-color: var(--red); box-shadow: var(--sh); }
+.ca-card.is-full { opacity: .6; }
+.ca-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--red); margin-bottom: 4px; }
+.ca-date { font-family: 'EB Garamond', serif; font-size: 24px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.ca-time { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; letter-spacing: .5px; color: var(--silver); margin-bottom: 12px; }
+.ca-row { font-size: 16px; margin-bottom: 4px; }
+.ca-code { display: inline-block; background: var(--ink); color: var(--white); font-family: 'Barlow Condensed', sans-serif; font-size: 12px; padding: 3px 10px; letter-spacing: 1px; margin-top: 8px; }
+.slot-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.slot-lbl { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; color: var(--silver); white-space: nowrap; }
+.slot-track { flex: 1; background: #eee; height: 3px; }
+.slot-fill { height: 3px; background: var(--red); transition: width .4s; }
+.slot-fill.done { background: #2E7D32; }
+.btn-dk { width: 100%; margin-top: 14px; padding: 12px; background: var(--red); color: var(--white); border: none; font-family: 'EB Garamond', serif; font-size: 17px; font-weight: 600; cursor: pointer; transition: background .2s; min-height: 48px; touch-action: manipulation; }
+.btn-dk:hover:not(:disabled) { background: var(--red-dk); }
+.btn-dk:disabled { background: #ccc; cursor: not-allowed; }
+
+/* MY LIST */
+.my-row { background: var(--white); border: 1px solid var(--border); border-left: 3px solid var(--red); padding: 16px 20px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.my-date { font-family: 'EB Garamond', serif; font-size: 19px; font-weight: 600; color: var(--ink); }
+.my-det { font-size: 15px; color: var(--silver); margin-top: 3px; }
+.chip { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; padding: 3px 9px; letter-spacing: .5px; display: inline-block; margin-top: 4px; }
+.chip-ok { background: #E8F5E9; color: #1B5E20; border: 1px solid #C8E6C9; }
+.chip-wait { background: #FFF8E1; color: #E65100; border: 1px solid #FFE082; }
+.btn-huy { padding: 8px 16px; border: 1px solid var(--red); color: var(--red); background: transparent; font-family: 'EB Garamond', serif; font-size: 15px; cursor: pointer; transition: all .2s; white-space: nowrap; min-height: 40px; touch-action: manipulation; }
+.btn-huy:hover { background: var(--red); color: var(--white); }
+
+/* SETTINGS */
+.set-card { background: var(--white); border-top: 3px solid var(--red); border: 1px solid var(--border); padding: clamp(20px, 4vw, 34px); max-width: 500px; }
+.set-card h3 { font-family: 'EB Garamond', serif; font-size: 22px; font-weight: 600; color: var(--ink); margin-bottom: 20px; }
+.set-field { margin-bottom: 15px; }
+.set-field label { display: block; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--mid); margin-bottom: 7px; }
+.set-field input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); font-size: 17px; font-family: 'EB Garamond', serif; outline: none; transition: border-color .2s; color: var(--ink); background: var(--bg); }
+.set-field input:focus { border-color: var(--red); }
+.btn-save { padding: 12px 24px; background: var(--red); color: var(--white); border: none; font-family: 'EB Garamond', serif; font-size: 17px; font-weight: 600; cursor: pointer; transition: background .2s; min-height: 48px; touch-action: manipulation; }
+.btn-save:hover { background: var(--red-dk); }
+
+/* CONFIRM MODAL */
+.modal-ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 500; align-items: center; justify-content: center; padding: 16px; }
+.modal-ov.open { display: flex; }
+.modal-box { background: var(--white); border-top: 4px solid var(--red); width: min(460px, 100%); padding: clamp(24px, 5vw, 38px); }
+.modal-title { font-family: 'EB Garamond', serif; font-size: 24px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+.modal-sub { font-size: 16px; color: var(--silver); margin-bottom: 14px; font-style: italic; }
+.preview { background: var(--bg); border-left: 3px solid var(--red); padding: 16px; font-size: 17px; line-height: 2; font-family: 'EB Garamond', serif; }
+.modal-btns { display: flex; gap: 10px; margin-top: 18px; }
+.btn-confirm { flex: 1; padding: 14px; background: var(--red); color: var(--white); border: none; font-family: 'EB Garamond', serif; font-size: 17px; font-weight: 600; cursor: pointer; min-height: 50px; touch-action: manipulation; }
+.btn-confirm:hover { background: var(--red-dk); }
+.btn-cancel { flex: 1; padding: 14px; border: 1px solid var(--border); background: transparent; font-family: 'EB Garamond', serif; font-size: 17px; cursor: pointer; color: var(--mid); touch-action: manipulation; }
+
+/* HOD MODAL */
+.hod-ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.88); z-index: 9000; align-items: center; justify-content: center; padding: 16px; }
+.hod-ov.open { display: flex; }
+.hod-box { background: var(--charcoal); border-top: 3px solid var(--red); width: min(340px, 100%); padding: clamp(24px, 5vw, 36px); position: relative; }
+.hod-close { position: absolute; top: 12px; right: 14px; background: none; border: none; color: #444; font-size: 18px; cursor: pointer; padding: 4px 8px; }
+.hod-input { width: 100%; padding: 16px; background: #111; border: 1px solid #333; color: var(--white); font-size: 22px; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 5px; text-align: center; outline: none; transition: border-color .2s; border-radius: 0; -webkit-appearance: none; }
+.hod-input:focus { border-color: var(--red); }
+.hod-btn { width: 100%; margin-top: 12px; padding: 15px; background: var(--red); color: var(--white); border: none; font-family: 'EB Garamond', serif; font-size: 18px; font-weight: 600; cursor: pointer; min-height: 52px; touch-action: manipulation; }
+.hod-btn:hover { background: var(--red-dk); }
+.hod-btn:disabled { background: #333; cursor: not-allowed; }
+.hod-err { color: #ff6b6b; font-size: 14px; text-align: center; margin-top: 10px; display: none; font-family: 'Barlow Condensed', sans-serif; }
+
+/* LOADING / EMPTY / TOAST */
+.loading { padding: 40px; text-align: center; color: var(--silver); font-family: 'EB Garamond', serif; font-style: italic; font-size: 18px; }
+.spinner { display: inline-block; width: 22px; height: 22px; border: 2px solid #ddd; border-top-color: var(--red); border-radius: 50%; animation: spin .7s linear infinite; margin-right: 8px; vertical-align: middle; }
+@keyframes spin { to{transform:rotate(360deg)} }
+.empty { padding: 60px 20px; text-align: center; color: var(--silver); }
+.empty .ico { font-size: 44px; margin-bottom: 12px; }
+.empty p { font-family: 'EB Garamond', serif; font-style: italic; font-size: 18px; }
+.btn-export { background: var(--ink); color: var(--white); border: none; padding: 8px 16px; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; min-height: 36px; touch-action: manipulation; }
+.btn-export:hover { background: var(--charcoal); }
+.toast { position: fixed; bottom: 20px; right: 20px; background: var(--charcoal); color: var(--white); padding: 12px 18px; font-family: 'EB Garamond', serif; font-size: 16px; box-shadow: var(--sh-lg); border-left: 4px solid var(--red); transform: translateY(100px); opacity: 0; transition: all .3s; z-index: 9999; max-width: 340px; }
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.ok { border-left-color: #2E7D32; }
+
+/* ============================================================
+   MOBILE
+============================================================ */
+@media(max-width:680px){
+  .header { padding: 0 14px; height: 58px; }
+  .brand-text .top { font-size: 15px; }
+  .brand-text .bot { display: none; }
+  .hdr-name { font-size: 15px; }
+  .hdr-role { display: none; }
+  .tab-btn { padding: 12px 14px; font-size: 15px; }
+  .main { padding: 14px; }
+  .auth-card { box-shadow: none; border-radius: 0; }
+  .auth-body { padding: 22px 18px; }
+  .field-row { grid-template-columns: 1fr; }
+  .ca-grid { grid-template-columns: 1fr; }
+  .quota-bar { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .week-grid { overflow-x: auto; min-width: 600px; }
+  .schedule-toolbar { flex-direction: column; align-items: flex-start; }
+  .view-nav { flex-wrap: wrap; }
+  .my-row { flex-wrap: wrap; }
 }
 </style>
 </head>
 <body>
+
+<!-- LOADING SCREEN -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="ls-eyebrow">Khoa Ngoại Ngữ &middot; Đại học Đồng Nai</div>
+  <div class="ls-title">Hệ thống<br>Quản lý <span>Bộ môn</span></div>
+  <div class="ls-sub">Teacher Management System</div>
+  <div class="ls-line" id="lsLine"></div>
+</div>
 
 <!-- HEADER -->
 <header class="header">
   <div class="brand" id="brand">
     <div class="brand-mark" id="brandMark">ĐNU</div>
     <div class="brand-text">
-      <div class="top">KHOA NGOẠI NGỮ</div>
+      <div class="top">Khoa Ngoại Ngữ</div>
       <div class="bot">Đại học Đồng Nai</div>
     </div>
   </div>
@@ -243,124 +405,139 @@ body{font-family:'Crimson Pro',Georgia,serif;background:var(--light);color:var(-
   </div>
 </header>
 
-<!-- ============================================================
-     LOGIN SCREEN
-============================================================ -->
-<div class="auth-screen active" id="screenLogin">
+<!-- AUTH WRAP -->
+<div class="auth-wrap" id="authWrap">
   <div class="auth-card">
-    <div class="auth-eyebrow">Portal Giảng viên</div>
-    <div class="auth-title">ĐĂNG NHẬP</div>
-    <div class="auth-sub">Nhập thông tin để truy cập hệ thống.</div>
-    <div class="field"><label>Mã GV hoặc Email</label>
-      <input type="text" id="loginId" placeholder="GV001 hoặc ten@dnu.edu.vn" autocomplete="username"></div>
-    <div class="field"><label>Mật khẩu</label>
-      <input type="password" id="loginPw" placeholder="Nhập mật khẩu" autocomplete="current-password"
-             onkeydown="if(event.key==='Enter')doLogin()"></div>
-    <button class="btn-full" id="btnLogin" onclick="doLogin()">ĐĂNG NHẬP →</button>
-    <div class="auth-err" id="loginErr"></div>
-    <div class="auth-links">
-      <button class="auth-link" onclick="showScreen('screenRegister')">ĐĂNG KÝ TÀI KHOẢN MỚI</button>
-      <button class="auth-link" onclick="showScreen('screenForgot')">QUÊN MẬT KHẨU</button>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabSignIn" onclick="switchAuthTab('signin')">Đăng nhập</button>
+      <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">Đăng ký</button>
     </div>
-    <div class="default-hint">💡 Mật khẩu mặc định lần đầu: <strong>123abc</strong></div>
+
+    <div class="auth-body">
+
+      <!-- SIGN IN -->
+      <div class="auth-pane active" id="paneSignIn">
+        <div class="auth-eyebrow">Portal Giảng viên</div>
+        <div class="auth-heading">Chào mừng trở lại</div>
+        <div class="auth-sub">Nhập thông tin để truy cập hệ thống.</div>
+        <div class="field">
+          <label>Mã GV hoặc Email</label>
+          <input type="text" id="loginId" placeholder="GV001 hoặc ten@dnu.edu.vn" autocomplete="username">
+        </div>
+        <div class="field">
+          <label>Mật khẩu</label>
+          <input type="password" id="loginPw" placeholder="Nhập mật khẩu" autocomplete="current-password"
+                 onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+        <button class="btn-submit" id="btnLogin" onclick="doLogin()">Đăng nhập →</button>
+        <div class="auth-err" id="loginErr"></div>
+        <div class="auth-forgot">
+          <button class="link-btn" onclick="switchAuthTab('forgot')">Quên mật khẩu?</button>
+          &nbsp;·&nbsp;
+          <small style="color:var(--silver);font-style:italic">Mặc định: 123abc</small>
+        </div>
+      </div>
+
+      <!-- REGISTER -->
+      <div class="auth-pane" id="paneRegister">
+        <div class="auth-eyebrow">Tài khoản mới</div>
+        <div class="auth-heading">Đăng ký</div>
+        <div class="auth-sub">Tài khoản được kích hoạt ngay sau khi đăng ký.</div>
+        <div class="field-row">
+          <div class="field"><label>Họ và tên</label><input type="text" id="regName" placeholder="Nguyễn Văn A"></div>
+          <div class="field"><label>Số điện thoại</label><input type="tel" id="regPhone" placeholder="0901234567"></div>
+        </div>
+        <div class="field"><label>Email</label><input type="email" id="regEmail" placeholder="ten@dnu.edu.vn" autocomplete="email"></div>
+        <div class="field-row">
+          <div class="field"><label>Mật khẩu</label><input type="password" id="regPw" placeholder="Ít nhất 6 ký tự"></div>
+          <div class="field"><label>Nhập lại</label><input type="password" id="regPw2" placeholder="Xác nhận" onkeydown="if(event.key==='Enter')doRegister()"></div>
+        </div>
+        <button class="btn-submit" id="btnRegister" onclick="doRegister()">Tạo tài khoản →</button>
+        <div class="auth-err" id="regErr"></div>
+        <div class="auth-ok" id="regOk"></div>
+      </div>
+
+      <!-- FORGOT -->
+      <div class="auth-pane" id="paneForgot">
+        <div class="auth-eyebrow">Đặt lại mật khẩu</div>
+        <div class="auth-heading">Quên mật khẩu?</div>
+        <div class="auth-sub">Hệ thống sẽ gửi mật khẩu mới về email của bạn.</div>
+        <div class="field"><label>Email đã đăng ký</label><input type="email" id="forgotEmail" placeholder="ten@dnu.edu.vn" onkeydown="if(event.key==='Enter')doForgot()"></div>
+        <button class="btn-submit" id="btnForgot" onclick="doForgot()">Gửi mật khẩu mới →</button>
+        <div class="auth-err" id="forgotErr"></div>
+        <div class="auth-ok" id="forgotOk"></div>
+        <div class="auth-forgot">
+          <button class="link-btn" onclick="switchAuthTab('signin')">← Quay lại đăng nhập</button>
+        </div>
+      </div>
+
+    </div>
   </div>
 </div>
 
-<!-- ============================================================
-     REGISTER SCREEN
-============================================================ -->
-<div class="auth-screen" id="screenRegister">
-  <div class="auth-card">
-    <div class="auth-eyebrow">Tài khoản mới</div>
-    <div class="auth-title">ĐĂNG KÝ</div>
-    <div class="auth-sub">Điền thông tin bên dưới. Tài khoản sẽ được kích hoạt ngay sau khi đăng ký.</div>
-    <div class="field"><label>Họ và tên</label>
-      <input type="text" id="regName" placeholder="Nguyễn Văn A"></div>
-    <div class="field"><label>Email</label>
-      <input type="email" id="regEmail" placeholder="ten@dnu.edu.vn" autocomplete="email"></div>
-    <div class="field"><label>Số điện thoại</label>
-      <input type="tel" id="regPhone" placeholder="0901234567"></div>
-    <div class="field"><label>Mật khẩu</label>
-      <input type="password" id="regPw" placeholder="Ít nhất 6 ký tự"></div>
-    <div class="field"><label>Nhập lại mật khẩu</label>
-      <input type="password" id="regPw2" placeholder="Xác nhận mật khẩu"
-             onkeydown="if(event.key==='Enter')doRegister()"></div>
-    <button class="btn-full" id="btnRegister" onclick="doRegister()">GỬI ĐĂNG KÝ →</button>
-    <div class="auth-err" id="regErr"></div>
-    <div class="auth-ok" id="regOk"></div>
-    <div class="auth-links">
-      <button class="auth-link" onclick="showScreen('screenLogin')">← ĐÃ CÓ TÀI KHOẢN? ĐĂNG NHẬP</button>
-    </div>
-  </div>
-</div>
-
-<!-- ============================================================
-     FORGOT PASSWORD SCREEN
-============================================================ -->
-<div class="auth-screen" id="screenForgot">
-  <div class="auth-card">
-    <div class="auth-eyebrow">Quên mật khẩu</div>
-    <div class="auth-title">ĐẶT LẠI MẬT KHẨU</div>
-    <div class="auth-sub">Nhập email đã đăng ký. Hệ thống sẽ gửi mật khẩu mới về email của bạn.</div>
-    <div class="field"><label>Email</label>
-      <input type="email" id="forgotEmail" placeholder="ten@dnu.edu.vn"
-             onkeydown="if(event.key==='Enter')doForgot()"></div>
-    <button class="btn-full" id="btnForgot" onclick="doForgot()">GỬI MẬT KHẨU MỚI →</button>
-    <div class="auth-err" id="forgotErr"></div>
-    <div class="auth-ok" id="forgotOk"></div>
-    <div class="auth-links">
-      <button class="auth-link" onclick="showScreen('screenLogin')">← QUAY LẠI ĐĂNG NHẬP</button>
-    </div>
-  </div>
-</div>
-
-<!-- ============================================================
-     APP
-============================================================ -->
+<!-- APP -->
 <div class="app" id="app">
   <nav class="tab-nav">
-    <button class="tab-btn active" onclick="sw('dangky',this)">📋 Đăng ký ca thi</button>
+    <button class="tab-btn active" onclick="sw('lichday',this)">📚 Lịch dạy</button>
+    <button class="tab-btn" onclick="sw('dangky',this)">📋 Đăng ký gác thi</button>
     <button class="tab-btn" onclick="sw('cuatoi',this)">✅ Ca của tôi</button>
-    <button class="tab-btn" onclick="sw('lichday',this)">📚 Lịch dạy</button>
     <button class="tab-btn" onclick="sw('caidat',this)">⚙ Tài khoản</button>
   </nav>
+
   <main class="main">
 
-    <div class="pane active" id="pane-dangky">
+    <!-- LỊCH DẠY — tab đầu tiên -->
+    <div class="pane active" id="pane-lichday">
+      <div class="schedule-toolbar">
+        <h2>Lịch dạy của tôi</h2>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <div class="view-nav">
+            <button class="view-nav-btn" onclick="navSchedule(-1)">‹</button>
+            <span class="view-nav-label" id="scheduleLabel"></span>
+            <button class="view-nav-btn" onclick="navSchedule(1)">›</button>
+            <button class="view-nav-btn" onclick="goToday()" style="width:auto;padding:0 10px;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px">HÔM NAY</button>
+          </div>
+          <div class="view-tabs">
+            <button class="view-tab active" id="vt-week" onclick="setView('week',this)">Tuần</button>
+            <button class="view-tab" id="vt-list" onclick="setView('list',this)">Danh sách</button>
+          </div>
+          <button class="btn-export" onclick="exportLichDay()">⬇ CSV</button>
+        </div>
+      </div>
+      <div id="scheduleBody"><div class="loading"><span class="spinner"></span>Đang tải lịch dạy...</div></div>
+    </div>
+
+    <!-- ĐĂNG KÝ CA THI -->
+    <div class="pane" id="pane-dangky">
       <div id="quotaWrap"></div>
-      <div class="sec-title">CA THI CẦN GIẢNG VIÊN GÁC</div>
+      <div class="sec-title">Ca thi cần Giảng viên gác</div>
       <div id="caGrid"><div class="loading"><span class="spinner"></span>Đang tải...</div></div>
     </div>
 
+    <!-- CA CỦA TÔI -->
     <div class="pane" id="pane-cuatoi">
-      <div class="sec-title">LỊCH GÁC THI CỦA TÔI
-        <button class="btn-export" onclick="exportCuaToi()">⬇ Tải CSV</button>
+      <div class="sec-title">Lịch gác thi của tôi
+        <button class="btn-export" onclick="exportCuaToi()">⬇ CSV</button>
       </div>
       <div id="cuaToiList"><div class="loading"><span class="spinner"></span></div></div>
     </div>
 
-    <div class="pane" id="pane-lichday">
-      <div class="sec-title">LỊCH DẠY CỦA TÔI
-        <button class="btn-export" onclick="exportLichDay()">⬇ Tải CSV</button>
-      </div>
-      <div id="lichDayList"><div class="loading"><span class="spinner"></span></div></div>
-    </div>
-
+    <!-- TÀI KHOẢN -->
     <div class="pane" id="pane-caidat">
-      <div class="sec-title">CÀI ĐẶT TÀI KHOẢN</div>
+      <div class="sec-title" style="margin-bottom:20px">Cài đặt tài khoản</div>
       <div class="set-card">
-        <h3>🔑 Đổi mật khẩu</h3>
+        <h3>Đổi mật khẩu</h3>
         <div class="set-field"><label>Mật khẩu hiện tại</label><input type="password" id="gvOldPw"></div>
         <div class="set-field"><label>Mật khẩu mới</label><input type="password" id="gvNewPw" placeholder="Ít nhất 6 ký tự"></div>
-        <div class="set-field"><label>Nhập lại</label><input type="password" id="gvNewPw2"></div>
-        <button class="btn-save" onclick="doiMkGV()">LƯU MẬT KHẨU →</button>
+        <div class="set-field"><label>Nhập lại mật khẩu mới</label><input type="password" id="gvNewPw2"></div>
+        <button class="btn-save" onclick="doiMkGV()">Lưu mật khẩu →</button>
       </div>
     </div>
 
   </main>
 </div>
 
-<!-- HOD SECRET MODAL -->
+<!-- HOD MODAL -->
 <div class="hod-ov" id="hodOv">
   <div class="hod-box">
     <button class="hod-close" onclick="closeHod()">✕</button>
@@ -374,12 +551,12 @@ body{font-family:'Crimson Pro',Georgia,serif;background:var(--light);color:var(-
 <!-- CONFIRM MODAL -->
 <div class="modal-ov" id="confirmModal">
   <div class="modal-box">
-    <div class="modal-title">XÁC NHẬN ĐĂNG KÝ</div>
+    <div class="modal-title">Xác nhận đăng ký</div>
     <div class="modal-sub">Bạn có chắc muốn đăng ký ca thi này không?</div>
     <div class="preview" id="previewContent"></div>
     <div class="modal-btns">
-      <button class="btn-confirm" id="confirmBtn" onclick="xacNhan()">XÁC NHẬN →</button>
-      <button class="btn-cancel" onclick="closeConfirm()">HỦY</button>
+      <button class="btn-confirm" id="confirmBtn" onclick="xacNhan()">Xác nhận →</button>
+      <button class="btn-cancel" onclick="closeConfirm()">Hủy</button>
     </div>
   </div>
 </div>
@@ -389,319 +566,446 @@ body{font-family:'Crimson Pro',Georgia,serif;background:var(--light);color:var(-
 <script src="config.js"></script>
 <script>
 /* ============================================================
-   STATE
+   LOADING SCREEN
 ============================================================ */
-let GV = null, pendingCa = null, soCaDaGac = 0;
-
-/* ============================================================
-   SCREEN SWITCHER (login / register / forgot)
-============================================================ */
-function showScreen(id) {
-  document.querySelectorAll('.auth-screen').forEach(s => s.classList.remove('active'));
-  const el = document.getElementById(id);
-  if (el) el.classList.add('active');
-  // Clear errors
-  document.querySelectorAll('.auth-err,.auth-ok').forEach(e => e.style.display='none');
-}
-
-/* ============================================================
-   LOGO 5 CLICKS → HOD MODAL
-============================================================ */
-let clicks=0, cTimer=null;
-document.getElementById('brand').addEventListener('click', () => {
-  const m = document.getElementById('brandMark');
-  m.classList.add('pop'); setTimeout(()=>m.classList.remove('pop'),120);
-  clicks++;
-  if (cTimer) clearTimeout(cTimer);
-  cTimer = setTimeout(()=>clicks=0, 2500);
-  if (clicks >= 5) { clicks=0; openHod(); }
+window.addEventListener('DOMContentLoaded', function() {
+  // Start progress line animation
+  setTimeout(function(){ document.getElementById('lsLine').classList.add('go'); }, 100);
+  // Hide loading after 1.6s (line finishes) or when ready
+  setTimeout(hideLoading, 1600);
 });
-function openHod(){
-  document.getElementById('hodPw').value='';
-  document.getElementById('hodErr').style.display='none';
-  document.getElementById('hodOv').classList.add('open');
-  setTimeout(()=>document.getElementById('hodPw').focus(),80);
+
+function hideLoading() {
+  var s = document.getElementById('loadingScreen');
+  s.classList.add('out');
+  setTimeout(function(){ s.style.display = 'none'; }, 500);
 }
-function closeHod(){ document.getElementById('hodOv').classList.remove('open'); }
-async function tryHOD(){
-  const pw=document.getElementById('hodPw').value;
-  const btn=document.getElementById('hodBtn');
-  btn.disabled=true; btn.textContent='...';
-  try{
-    const r=await api('dangNhapHOD',{matKhau:pw});
-    if(r.success){ closeHod(); window.location.href='hod.html'; }
-    else{ document.getElementById('hodErr').style.display='block'; document.getElementById('hodPw').value=''; document.getElementById('hodPw').focus(); }
-  }catch(e){ document.getElementById('hodErr').style.display='block'; }
-  btn.disabled=false; btn.textContent='→';
+
+/* ============================================================
+   LOGO 5 CLICKS → HOD
+============================================================ */
+var _clicks = 0, _cTimer = null;
+document.getElementById('brand').addEventListener('click', function() {
+  var m = document.getElementById('brandMark');
+  m.classList.add('pop'); setTimeout(function(){ m.classList.remove('pop'); }, 120);
+  _clicks++;
+  if (_cTimer) clearTimeout(_cTimer);
+  _cTimer = setTimeout(function(){ _clicks = 0; }, 2500);
+  if (_clicks >= 5) { _clicks = 0; openHod(); }
+});
+
+function openHod() {
+  document.getElementById('hodPw').value = '';
+  document.getElementById('hodErr').style.display = 'none';
+  document.getElementById('hodOv').classList.add('open');
+  setTimeout(function(){ document.getElementById('hodPw').focus(); }, 80);
+}
+function closeHod() { document.getElementById('hodOv').classList.remove('open'); }
+async function tryHOD() {
+  var pw = document.getElementById('hodPw').value;
+  var btn = document.getElementById('hodBtn');
+  btn.disabled = true; btn.textContent = '...';
+  try {
+    var r = await api('dangNhapHOD', { matKhau: pw });
+    if (r.success) { closeHod(); window.location.href = 'hod.html'; }
+    else { document.getElementById('hodErr').style.display = 'block'; document.getElementById('hodPw').value = ''; setTimeout(function(){ document.getElementById('hodPw').focus(); }, 50); }
+  } catch(e) { document.getElementById('hodErr').style.display = 'block'; }
+  btn.disabled = false; btn.textContent = '→';
+}
+
+/* ============================================================
+   AUTH TAB SWITCHER
+============================================================ */
+var GV = null, pendingCa = null, soCaDaGac = 0;
+var currentView = 'week';
+var scheduleOffset = 0; // weeks/months from today
+var allLichDay = [];
+
+function switchAuthTab(tab) {
+  var panes = { signin: 'paneSignIn', register: 'paneRegister', forgot: 'paneForgot' };
+  var tabs  = { signin: 'tabSignIn', register: 'tabRegister', forgot: null };
+  document.querySelectorAll('.auth-pane').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.auth-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById(panes[tab]).classList.add('active');
+  if (tabs[tab]) document.getElementById(tabs[tab]).classList.add('active');
+  // clear messages
+  document.querySelectorAll('.auth-err,.auth-ok').forEach(function(e){ e.style.display='none'; });
 }
 
 /* ============================================================
    LOGIN
 ============================================================ */
-async function doLogin(){
-  const id=document.getElementById('loginId').value.trim();
-  const pw=document.getElementById('loginPw').value.trim();
-  if(!id||!pw){ showAuthErr('loginErr','Vui lòng nhập đầy đủ thông tin.'); return; }
-  const btn=document.getElementById('btnLogin');
-  btn.textContent='⏳ ĐANG XÁC THỰC...'; btn.disabled=true;
-  try{
-    const r=await api('dangNhapGV',{loginId:id,password:pw});
-    btn.textContent='ĐĂNG NHẬP →'; btn.disabled=false;
-    if(!r.success){ showAuthErr('loginErr',r.message); return; }
-    GV=r;
-    document.querySelectorAll('.auth-screen').forEach(s=>s.classList.remove('active'));
-    document.getElementById('app').style.display='block';
-    document.getElementById('hdrUser').style.display='block';
-    document.getElementById('logoutBtn').style.display='block';
-    document.getElementById('hdrName').textContent=r.hoTen;
-    document.getElementById('hdrRole').textContent=r.vaiTro||'Giảng viên';
-    loadCaThi();
-  }catch(e){ btn.textContent='ĐĂNG NHẬP →'; btn.disabled=false; showAuthErr('loginErr','Lỗi kết nối: '+e.message); }
+async function doLogin() {
+  var id = document.getElementById('loginId').value.trim();
+  var pw = document.getElementById('loginPw').value.trim();
+  if (!id || !pw) { showErr('loginErr','Vui lòng nhập đầy đủ thông tin.'); return; }
+  var btn = document.getElementById('btnLogin');
+  btn.textContent = 'Đang xác thực...'; btn.disabled = true;
+  try {
+    var r = await api('dangNhapGV', { loginId: id, password: pw });
+    btn.textContent = 'Đăng nhập →'; btn.disabled = false;
+    if (!r.success) { showErr('loginErr', r.message); return; }
+    GV = r;
+    document.getElementById('authWrap').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('hdrUser').style.display = 'block';
+    document.getElementById('logoutBtn').style.display = 'block';
+    document.getElementById('hdrName').textContent = r.hoTen;
+    document.getElementById('hdrRole').textContent = r.vaiTro || 'Giảng viên';
+    loadLichDay();
+  } catch(e) {
+    btn.textContent = 'Đăng nhập →'; btn.disabled = false;
+    showErr('loginErr', 'Lỗi kết nối: ' + e.message);
+  }
 }
-document.getElementById('loginPw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('loginPw').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
 
-function logout(){
-  GV=null;
-  document.getElementById('app').style.display='none';
-  document.getElementById('hdrUser').style.display='none';
-  document.getElementById('logoutBtn').style.display='none';
-  showScreen('screenLogin');
-  document.getElementById('loginId').value='';
-  document.getElementById('loginPw').value='';
+function logout() {
+  GV = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('hdrUser').style.display = 'none';
+  document.getElementById('logoutBtn').style.display = 'none';
+  document.getElementById('authWrap').style.display = 'flex';
+  switchAuthTab('signin');
+  document.getElementById('loginId').value = '';
+  document.getElementById('loginPw').value = '';
 }
 
 /* ============================================================
    REGISTER
 ============================================================ */
-async function doRegister(){
-  const name =document.getElementById('regName').value.trim();
-  const email=document.getElementById('regEmail').value.trim();
-  const phone=document.getElementById('regPhone').value.trim();
-  const pw   =document.getElementById('regPw').value.trim();
-  const pw2  =document.getElementById('regPw2').value.trim();
-
-  if(!name||!email||!pw){ showAuthErr('regErr','Vui lòng điền đầy đủ họ tên, email và mật khẩu.'); return; }
-  if(pw!==pw2){ showAuthErr('regErr','Mật khẩu nhập lại không khớp.'); return; }
-  if(pw.length<6){ showAuthErr('regErr','Mật khẩu phải có ít nhất 6 ký tự.'); return; }
-
-  const btn=document.getElementById('btnRegister');
-  btn.textContent='⏳ ĐANG GỬI...'; btn.disabled=true;
-  try{
-    const r=await api('dangKyGVMoi',{hoTen:name,email,soDienThoai:phone,password:pw});
-    btn.textContent='GỬI ĐĂNG KÝ →'; btn.disabled=false;
-    if(r.success){
-      document.getElementById('regErr').style.display='none';
-      showAuthOk('regOk', r.message);
-      ['regName','regEmail','regPhone','regPw','regPw2'].forEach(id=>document.getElementById(id).value='');
-      // Tự động chuyển về login sau 2 giây
-      setTimeout(()=>showScreen('screenLogin'), 2000);
-    } else {
-      showAuthErr('regErr', r.message);
-    }
-  }catch(e){ btn.textContent='GỬI ĐĂNG KÝ →'; btn.disabled=false; showAuthErr('regErr','Lỗi kết nối: '+e.message); }
+async function doRegister() {
+  var name  = document.getElementById('regName').value.trim();
+  var email = document.getElementById('regEmail').value.trim();
+  var phone = document.getElementById('regPhone').value.trim();
+  var pw    = document.getElementById('regPw').value.trim();
+  var pw2   = document.getElementById('regPw2').value.trim();
+  if (!name || !email || !pw) { showErr('regErr','Vui lòng điền đầy đủ họ tên, email và mật khẩu.'); return; }
+  if (pw !== pw2)              { showErr('regErr','Mật khẩu nhập lại không khớp.'); return; }
+  if (pw.length < 6)           { showErr('regErr','Mật khẩu phải có ít nhất 6 ký tự.'); return; }
+  var btn = document.getElementById('btnRegister');
+  btn.textContent = 'Đang gửi...'; btn.disabled = true;
+  try {
+    var r = await api('dangKyGVMoi', { hoTen:name, email, soDienThoai:phone, password:pw });
+    btn.textContent = 'Tạo tài khoản →'; btn.disabled = false;
+    if (r.success) {
+      document.getElementById('regErr').style.display = 'none';
+      showOk('regOk', r.message);
+      ['regName','regEmail','regPhone','regPw','regPw2'].forEach(function(id){ document.getElementById(id).value=''; });
+      setTimeout(function(){ switchAuthTab('signin'); }, 2500);
+    } else { showErr('regErr', r.message); }
+  } catch(e) { btn.textContent = 'Tạo tài khoản →'; btn.disabled = false; showErr('regErr','Lỗi kết nối: '+e.message); }
 }
 
 /* ============================================================
    FORGOT PASSWORD
 ============================================================ */
-async function doForgot(){
-  const email=document.getElementById('forgotEmail').value.trim();
-  if(!email){ showAuthErr('forgotErr','Vui lòng nhập email.'); return; }
-  const btn=document.getElementById('btnForgot');
-  btn.textContent='⏳ ĐANG GỬI...'; btn.disabled=true;
-  try{
-    const r=await api('quenMatKhau',{email});
-    btn.textContent='GỬI MẬT KHẨU MỚI →'; btn.disabled=false;
-    if(r.success){
-      document.getElementById('forgotErr').style.display='none';
-      showAuthOk('forgotOk', r.message);
-      document.getElementById('forgotEmail').value='';
-    } else {
-      showAuthErr('forgotErr', r.message);
-    }
-  }catch(e){ btn.textContent='GỬI MẬT KHẨU MỚI →'; btn.disabled=false; showAuthErr('forgotErr','Lỗi kết nối: '+e.message); }
+async function doForgot() {
+  var email = document.getElementById('forgotEmail').value.trim();
+  if (!email) { showErr('forgotErr','Vui lòng nhập email.'); return; }
+  var btn = document.getElementById('btnForgot');
+  btn.textContent = 'Đang gửi...'; btn.disabled = true;
+  try {
+    var r = await api('quenMatKhau', { email });
+    btn.textContent = 'Gửi mật khẩu mới →'; btn.disabled = false;
+    if (r.success) { document.getElementById('forgotErr').style.display='none'; showOk('forgotOk',r.message); document.getElementById('forgotEmail').value=''; }
+    else showErr('forgotErr', r.message);
+  } catch(e) { btn.textContent='Gửi mật khẩu mới →'; btn.disabled=false; showErr('forgotErr','Lỗi: '+e.message); }
 }
 
 /* ============================================================
    TABS
 ============================================================ */
-function sw(name,btn){
-  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+function sw(name, btn) {
+  document.querySelectorAll('.pane').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
   document.getElementById('pane-'+name).classList.add('active');
   btn.classList.add('active');
-  if(name==='cuatoi')  loadCuaToi();
-  if(name==='lichday') loadLichDay();
+  if (name === 'dangky')  loadCaThi();
+  if (name === 'cuatoi')  loadCuaToi();
 }
+
+/* ============================================================
+   LỊCH DẠY — Calendar View
+============================================================ */
+async function loadLichDay() {
+  try {
+    var all = await api('getAllLichDay');
+    allLichDay = all.filter(function(r){ return String(r.maGV).trim() === String(GV.maGV).trim(); });
+    scheduleOffset = 0;
+    renderSchedule();
+  } catch(e) {
+    document.getElementById('scheduleBody').innerHTML = '<p style="color:red;padding:20px">'+e.message+'</p>';
+  }
+}
+
+function setView(v, btn) {
+  currentView = v;
+  document.querySelectorAll('.view-tab').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderSchedule();
+}
+
+function navSchedule(dir) { scheduleOffset += dir; renderSchedule(); }
+function goToday() { scheduleOffset = 0; renderSchedule(); }
+
+function renderSchedule() {
+  var today = new Date(); today.setHours(0,0,0,0);
+  if (currentView === 'week') renderWeek(today);
+  else renderList(today);
+}
+
+function getWeekStart(base, offset) {
+  var d = new Date(base);
+  var day = d.getDay(); // 0=Sun
+  d.setDate(d.getDate() - day + 1 + offset * 7); // Monday
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function renderWeek(today) {
+  var weekStart = getWeekStart(today, scheduleOffset);
+  var weekEnd   = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 6);
+  document.getElementById('scheduleLabel').textContent =
+    fmtShort(weekStart) + ' – ' + fmtShort(weekEnd);
+
+  var days = [];
+  for (var i = 0; i < 7; i++) {
+    var d = new Date(weekStart); d.setDate(d.getDate()+i);
+    days.push(d);
+  }
+
+  var DAY_VN = ['CN','T2','T3','T4','T5','T6','T7'];
+  var html = '<div style="overflow-x:auto"><div class="week-grid">';
+  // Header row
+  html += '<div class="wg-header corner"></div>';
+  days.forEach(function(d){
+    var isToday = d.toDateString() === today.toDateString();
+    html += '<div class="wg-header'+(isToday?' today':'')+'">'+DAY_VN[d.getDay()]+'<br><strong>'+d.getDate()+'</strong></div>';
+  });
+
+  // Buổi rows: Sáng, Chiều, Tối
+  ['Sáng','Chiều','Tối'].forEach(function(buoi){
+    html += '<div class="wg-time">'+buoi+'</div>';
+    days.forEach(function(d){
+      var isToday = d.toDateString() === today.toDateString();
+      html += '<div class="wg-cell'+(isToday?' today-col':'')+ '">';
+      allLichDay.filter(function(r){
+        if (!r.ngayDay) return false;
+        var rd = parseDMY(r.ngayDay);
+        return rd && rd.toDateString() === d.toDateString() && r.buoi === buoi;
+      }).forEach(function(r){
+        html += '<div class="wg-event" title="'+esc(r.monHoc)+' - '+esc(r.lop)+' - P.'+esc(r.phong)+'">'+
+          '<div style="font-weight:600;font-size:12px">'+esc(r.monHoc)+'</div>'+
+          '<div style="font-size:11px;opacity:.85">'+esc(r.lop)+' · P.'+esc(r.phong)+'</div>'+
+        '</div>';
+      });
+      html += '</div>';
+    });
+  });
+  html += '</div></div>';
+  document.getElementById('scheduleBody').innerHTML = allLichDay.length ? html :
+    '<div class="empty"><div class="ico">📭</div><p>Chưa có lịch dạy trong tuần này.</p></div>';
+}
+
+function renderList(today) {
+  var weekStart = getWeekStart(today, scheduleOffset);
+  var weekEnd   = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 6);
+  document.getElementById('scheduleLabel').textContent =
+    fmtShort(weekStart) + ' – ' + fmtShort(weekEnd);
+
+  var items = allLichDay.filter(function(r){
+    if (!r.ngayDay) return false;
+    var d = parseDMY(r.ngayDay);
+    return d && d >= weekStart && d <= weekEnd;
+  }).sort(function(a,b){ return parseDMY(a.ngayDay)-parseDMY(b.ngayDay); });
+
+  if (!items.length) {
+    document.getElementById('scheduleBody').innerHTML = '<div class="empty"><div class="ico">📭</div><p>Không có lịch dạy trong tuần này.</p></div>';
+    return;
+  }
+
+  var DAY_VN = ['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
+  var html = '<div class="list-view">';
+  var lastDay = '';
+  items.forEach(function(r){
+    var dayKey = r.ngayDay;
+    if (dayKey !== lastDay) {
+      var d = parseDMY(r.ngayDay);
+      html += '<div class="list-day-header">'+DAY_VN[d.getDay()]+', '+r.ngayDay+'</div>';
+      lastDay = dayKey;
+    }
+    html += '<div class="list-item">'+
+      '<div class="list-time">'+esc(r.buoi)+'<br>Tiết '+esc(String(r.tietBD))+'</div>'+
+      '<div class="list-dot"></div>'+
+      '<div class="list-info">'+
+        '<div class="list-subject">'+esc(r.monHoc)+'</div>'+
+        '<div class="list-meta">'+esc(r.lop)+' &nbsp;·&nbsp; Phòng '+esc(r.phong)+'</div>'+
+      '</div>'+
+    '</div>';
+  });
+  html += '</div>';
+  document.getElementById('scheduleBody').innerHTML = html;
+}
+
+function parseDMY(s) {
+  if (!s) return null;
+  var p = String(s).split('/');
+  if (p.length === 3) { var d = new Date(p[2], p[1]-1, p[0]); d.setHours(0,0,0,0); return isNaN(d)?null:d; }
+  var d2 = new Date(s); return isNaN(d2)?null:d2;
+}
+function fmtShort(d) { return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear(); }
 
 /* ============================================================
    ĐĂNG KÝ CA THI
 ============================================================ */
-async function loadCaThi(){
-  try{
-    const myList=await api('getCaThiCuaGV',{maGV:GV.maGV});
-    soCaDaGac=myList.length;
-    const con=Math.max(0,20-soCaDaGac), pct=Math.min(100,Math.round(soCaDaGac/20*100));
-    document.getElementById('quotaWrap').innerHTML=`
-      <div class="quota-wrap">
-        <div class="ql">HẠN NGẠCH GÁC THI — NĂM HỌC HIỆN TẠI</div>
-        <div style="display:flex;align-items:center;gap:16px">
-          <div class="qn">${soCaDaGac}<span style="font-size:18px;color:#aaa">/20</span></div>
-          <div><div class="q-sub">Còn lại: ${con} ca</div>
-            <div class="q-prog"><div class="q-fill ${pct<80?'safe':''}" style="width:${pct}%"></div></div>
-          </div>
-        </div>
-      </div>`;
-  }catch(e){}
-  try{
-    const list=await api('getDanhSachCaThiMo');
+async function loadCaThi() {
+  try {
+    var myList = await api('getCaThiCuaGV', { maGV: GV.maGV });
+    soCaDaGac = myList.length;
+    var con = Math.max(0, 20-soCaDaGac), pct = Math.min(100, Math.round(soCaDaGac/20*100));
+    document.getElementById('quotaWrap').innerHTML =
+      '<div class="quota-bar"><div class="ql">Hạn ngạch gác thi — Năm học hiện tại</div>'+
+      '<div style="display:flex;align-items:center;gap:16px">'+
+        '<div class="qn">'+soCaDaGac+'<span style="font-size:18px;color:#aaa">/20</span></div>'+
+        '<div><div class="q-sub">Còn lại: '+con+' ca</div>'+
+          '<div class="q-prog"><div class="q-fill '+(pct<80?'safe':'')+'" style="width:'+pct+'%"></div></div>'+
+        '</div></div></div>';
+  } catch(e) {}
+
+  try {
+    var list = await api('getDanhSachCaThiMo');
     renderCaThi(list);
-  }catch(e){ document.getElementById('caGrid').innerHTML='<p style="color:red;padding:20px">'+e.message+'</p>'; }
+  } catch(e) { document.getElementById('caGrid').innerHTML='<p style="color:red;padding:20px">'+e.message+'</p>'; }
 }
 
-function renderCaThi(list){
-  if(!list.length){ document.getElementById('caGrid').innerHTML=empty('🎉','Tất cả ca thi đã đủ giảng viên gác!'); return; }
-  const dis=soCaDaGac>=20;
-  document.getElementById('caGrid').innerHTML='<div class="ca-grid">'+list.map(ca=>{
-    const full=!ca.isMo, pct=Math.min(100,Math.round(ca.soDaDK/Math.max(1,ca.soCanCo)*100));
-    return `<div class="ca-card${full?' is-full':''}">
-      <div class="ca-tag">${esc(ca.nganh||'Gác thi')}</div>
-      <div class="ca-date">📅 ${esc(ca.ngayThi)}</div>
-      <div class="ca-time">🕐 ${esc(ca.caThi)} · ${esc(ca.gioThi)}</div>
-      <div class="ca-row">📚 Môn: <b>${esc(ca.monThi)}</b></div>
-      <div class="ca-row">🔬 <b>${esc(ca.hinhThuc)}</b></div>
-      <span class="ca-code">${esc(ca.maCaThi)}</span>
-      <div class="slot-row"><span class="slot-lbl">GV: ${ca.soDaDK}/${ca.soCanCo}</span>
-        <div class="slot-track"><div class="slot-fill${full?' done':''}" style="width:${pct}%"></div></div>
-      </div>
-      <button class="btn-dk" ${full||dis?'disabled':''} onclick='openConfirm(${JSON.stringify(ca)})'>
-        ${full?'✓ ĐÃ ĐỦ GV':dis?'ĐÃ ĐỦ 20 CA':'ĐĂNG KÝ →'}
-      </button></div>`;
+function renderCaThi(list) {
+  if (!list.length) { document.getElementById('caGrid').innerHTML=empty('🎉','Tất cả ca thi đã đủ giảng viên gác!'); return; }
+  var dis = soCaDaGac >= 20;
+  document.getElementById('caGrid').innerHTML = '<div class="ca-grid">'+list.map(function(ca){
+    var full = !ca.isMo, pct = Math.min(100, Math.round(ca.soDaDK/Math.max(1,ca.soCanCo)*100));
+    return '<div class="ca-card'+(full?' is-full':'')+'">'+
+      '<div class="ca-tag">'+(ca.nganh||'Gác thi')+'</div>'+
+      '<div class="ca-date">'+esc(ca.ngayThi)+'</div>'+
+      '<div class="ca-time">'+esc(ca.caThi)+' · '+esc(ca.gioThi)+'</div>'+
+      '<div class="ca-row">Môn: <strong>'+esc(ca.monThi)+'</strong></div>'+
+      '<div class="ca-row">'+esc(ca.hinhThuc)+'</div>'+
+      '<span class="ca-code">'+esc(ca.maCaThi)+'</span>'+
+      '<div class="slot-row"><span class="slot-lbl">GV: '+ca.soDaDK+'/'+ca.soCanCo+'</span>'+
+        '<div class="slot-track"><div class="slot-fill'+(full?' done':'')+'" style="width:'+pct+'%"></div></div></div>'+
+      '<button class="btn-dk" '+(full||dis?'disabled':'')+' onclick=\'openConfirm('+JSON.stringify(ca)+')\'>'+
+        (full?'Ca đã đủ GV':dis?'Đã đủ 20 ca/năm':'Đăng ký ca này →')+
+      '</button></div>';
   }).join('')+'</div>';
 }
 
-function openConfirm(ca){
-  pendingCa=ca;
-  document.getElementById('previewContent').innerHTML=`
-    <div>📅 <b>Ngày:</b> ${esc(ca.ngayThi)}</div><div>🕐 <b>Ca:</b> ${esc(ca.caThi)} (${esc(ca.gioThi)})</div>
-    <div>📚 <b>Môn:</b> ${esc(ca.monThi)}</div><div>🔬 <b>Hình thức:</b> ${esc(ca.hinhThuc)}</div>
-    <div>🔑 <b>Mã ca:</b> ${esc(ca.maCaThi)}</div>`;
+function openConfirm(ca) {
+  pendingCa = ca;
+  document.getElementById('previewContent').innerHTML =
+    '<div>Ngày thi: <strong>'+esc(ca.ngayThi)+'</strong></div>'+
+    '<div>Ca: <strong>'+esc(ca.caThi)+'</strong> ('+esc(ca.gioThi)+')</div>'+
+    '<div>Môn: <strong>'+esc(ca.monThi)+'</strong></div>'+
+    '<div>Mã ca: <strong>'+esc(ca.maCaThi)+'</strong></div>';
   document.getElementById('confirmModal').classList.add('open');
 }
-function closeConfirm(){ document.getElementById('confirmModal').classList.remove('open'); pendingCa=null; }
-async function xacNhan(){
-  if(!pendingCa) return;
-  const btn=document.getElementById('confirmBtn');
-  btn.textContent='⏳...'; btn.disabled=true;
-  try{
-    const r=await api('dangKyGacThi',{maGV:GV.maGV,maCaThi:pendingCa.maCaThi,ghiChu:''});
-    btn.textContent='XÁC NHẬN →'; btn.disabled=false;
-    closeConfirm(); toast(r.message,r.success);
-    if(r.success) loadCaThi();
-  }catch(e){ btn.textContent='XÁC NHẬN →'; btn.disabled=false; toast('❌ '+e.message); }
+function closeConfirm() { document.getElementById('confirmModal').classList.remove('open'); pendingCa=null; }
+
+async function xacNhan() {
+  if (!pendingCa) return;
+  var btn = document.getElementById('confirmBtn');
+  btn.textContent = '...'; btn.disabled = true;
+  try {
+    var r = await api('dangKyGacThi', { maGV:GV.maGV, maCaThi:pendingCa.maCaThi, ghiChu:'' });
+    btn.textContent = 'Xác nhận →'; btn.disabled = false;
+    closeConfirm(); toast(r.message, r.success);
+    if (r.success) loadCaThi();
+  } catch(e) { btn.textContent='Xác nhận →'; btn.disabled=false; toast('Lỗi: '+e.message); }
 }
 
 /* ============================================================
    CA CỦA TÔI
 ============================================================ */
-async function loadCuaToi(){
-  document.getElementById('cuaToiList').innerHTML=ld();
-  try{
-    const list=await api('getCaThiCuaGV',{maGV:GV.maGV});
-    if(!list.length){ document.getElementById('cuaToiList').innerHTML=empty('📭','Bạn chưa đăng ký ca gác thi nào.'); return; }
-    document.getElementById('cuaToiList').innerHTML=
-      `<p style="margin-bottom:14px;color:var(--silver)">Đã đăng ký <b>${list.length} ca</b>. Có mặt <b>15 phút trước</b> giờ thi.</p>`+
-      list.map(ca=>`<div class="my-row">
-        <div style="flex:1">
-          <div class="my-date">📅 ${esc(ca.ngayThi)} · ${esc(ca.caThi)}</div>
-          <div class="my-det">🕐 ${esc(ca.gioThi)} | 📚 ${esc(ca.monThi)} | <code>${esc(ca.maCaThi)}</code></div>
-          <span class="chip ${ca.xacNhan==='Đã xác nhận'?'chip-ok':'chip-wait'}">${esc(ca.xacNhan||'Chờ duyệt')}</span>
-        </div>
-        ${ca.xacNhan!=='Đã xác nhận'
-          ?`<button class="btn-huy" onclick="huyDK('${esc(ca.maCaThi)}',this)">HỦY</button>`
-          :'<span style="color:#2E7D32;font-weight:600;font-size:15px">✅ OK</span>'}
-      </div>`).join('');
-  }catch(e){ document.getElementById('cuaToiList').innerHTML='<p style="color:red;padding:20px">'+e.message+'</p>'; }
+async function loadCuaToi() {
+  document.getElementById('cuaToiList').innerHTML = ld();
+  try {
+    var list = await api('getCaThiCuaGV', { maGV: GV.maGV });
+    if (!list.length) { document.getElementById('cuaToiList').innerHTML=empty('📭','Bạn chưa đăng ký ca gác thi nào.'); return; }
+    document.getElementById('cuaToiList').innerHTML =
+      '<p style="margin-bottom:14px;color:var(--silver);font-style:italic">Đã đăng ký <strong>'+list.length+' ca</strong>. Có mặt <strong>15 phút trước</strong> giờ thi.</p>'+
+      list.map(function(ca){
+        return '<div class="my-row">'+
+          '<div style="flex:1">'+
+            '<div class="my-date">'+esc(ca.ngayThi)+' · '+esc(ca.caThi)+'</div>'+
+            '<div class="my-det">'+esc(ca.gioThi)+' | '+esc(ca.monThi)+' | <code>'+esc(ca.maCaThi)+'</code></div>'+
+            '<span class="chip '+(ca.xacNhan==='Đã xác nhận'?'chip-ok':'chip-wait')+'">'+(ca.xacNhan||'Chờ duyệt')+'</span>'+
+          '</div>'+
+          (ca.xacNhan!=='Đã xác nhận'?
+            '<button class="btn-huy" onclick="huyDK(\''+esc(ca.maCaThi)+'\',this)">Hủy</button>':
+            '<span style="color:#2E7D32;font-size:15px">✓ Xác nhận</span>')+
+        '</div>';
+      }).join('');
+  } catch(e) { document.getElementById('cuaToiList').innerHTML='<p style="color:red;padding:20px">'+e.message+'</p>'; }
 }
-async function huyDK(maCaThi,btn){
-  if(!confirm('Hủy đăng ký ca '+maCaThi+'?')) return;
+
+async function huyDK(maCaThi, btn) {
+  if (!confirm('Hủy đăng ký ca '+maCaThi+'?')) return;
   btn.textContent='...'; btn.disabled=true;
-  try{
-    const r=await api('huyDangKy',{maGV:GV.maGV,maCaThi});
-    toast(r.message,r.success);
-    if(r.success) loadCuaToi();
-    else{ btn.textContent='HỦY'; btn.disabled=false; }
-  }catch(e){ btn.textContent='HỦY'; btn.disabled=false; }
+  try {
+    var r = await api('huyDangKy', { maGV:GV.maGV, maCaThi });
+    toast(r.message, r.success);
+    if (r.success) loadCuaToi();
+    else { btn.textContent='Hủy'; btn.disabled=false; }
+  } catch(e) { btn.textContent='Hủy'; btn.disabled=false; }
 }
 
 /* ============================================================
-   LỊCH DẠY
+   ĐỔI MẬT KHẨU
 ============================================================ */
-async function loadLichDay(){
-  document.getElementById('lichDayList').innerHTML=ld();
-  try{
-    const all=await api('getAllLichDay');
-    const my=all.filter(r=>String(r.maGV).trim()===String(GV.maGV).trim());
-    if(!my.length){ document.getElementById('lichDayList').innerHTML=empty('📭','Chưa có lịch dạy trong học kỳ này.'); return; }
-    document.getElementById('lichDayList').innerHTML=`<div class="tbl-wrap"><table class="ld-table">
-      <thead><tr><th>Ngày dạy</th><th>Buổi</th><th>Tiết BD</th><th>Môn học</th><th>Lớp</th><th>Phòng</th></tr></thead>
-      <tbody>${my.map((r,i)=>`<tr style="${i%2?'background:#fafafa':''}">
-        <td><b>${esc(r.ngayDay)}</b></td><td>${esc(r.buoi)}</td><td>${esc(String(r.tietBD))}</td>
-        <td><b>${esc(r.monHoc)}</b></td><td>${esc(r.lop)}</td><td>${esc(r.phong)}</td>
-      </tr>`).join('')}</tbody></table></div>`;
-  }catch(e){ document.getElementById('lichDayList').innerHTML='<p style="color:red;padding:20px">'+e.message+'</p>'; }
-}
-
-/* ============================================================
-   ĐỔI MẬT KHẨU GV
-============================================================ */
-async function doiMkGV(){
-  const o=document.getElementById('gvOldPw').value.trim();
-  const n=document.getElementById('gvNewPw').value.trim();
-  const n2=document.getElementById('gvNewPw2').value.trim();
-  if(!o||!n||!n2){ toast('⚠ Điền đầy đủ!'); return; }
-  if(n!==n2){ toast('❌ Mật khẩu mới không khớp!'); return; }
-  try{
-    const r=await api('doiMatKhauGV',{maGV:GV.maGV,oldPw:o,newPw:n});
+async function doiMkGV() {
+  var o=document.getElementById('gvOldPw').value.trim();
+  var n=document.getElementById('gvNewPw').value.trim();
+  var n2=document.getElementById('gvNewPw2').value.trim();
+  if (!o||!n||!n2) { toast('Vui lòng điền đầy đủ!'); return; }
+  if (n!==n2) { toast('Mật khẩu mới không khớp!'); return; }
+  try {
+    var r=await api('doiMatKhauGV',{maGV:GV.maGV,oldPw:o,newPw:n});
     toast(r.message,r.success);
-    if(r.success){ document.getElementById('gvOldPw').value=''; document.getElementById('gvNewPw').value=''; document.getElementById('gvNewPw2').value=''; }
-  }catch(e){ toast('❌ '+e.message); }
+    if (r.success) { document.getElementById('gvOldPw').value=''; document.getElementById('gvNewPw').value=''; document.getElementById('gvNewPw2').value=''; }
+  } catch(e) { toast('Lỗi: '+e.message); }
 }
 
 /* ============================================================
    EXPORT CSV
 ============================================================ */
-async function exportCuaToi(){
-  const list=await api('getCaThiCuaGV',{maGV:GV.maGV});
+async function exportCuaToi() {
+  var list=await api('getCaThiCuaGV',{maGV:GV.maGV});
   dlCSV('Mã Ca,Ngày Thi,Ca Thi,Giờ Thi,Môn Thi,Hình Thức,Xác Nhận\n'+
-    list.map(r=>[r.maCaThi,r.ngayThi,r.caThi,r.gioThi,r.monThi,r.hinhThuc,r.xacNhan].join(',')).join('\n'),
+    list.map(function(r){return [r.maCaThi,r.ngayThi,r.caThi,r.gioThi,r.monThi,r.hinhThuc,r.xacNhan].join(',');}).join('\n'),
     'lichgacthi_'+GV.maGV);
 }
-async function exportLichDay(){
-  const all=await api('getAllLichDay');
-  const my=all.filter(r=>String(r.maGV).trim()===String(GV.maGV).trim());
+async function exportLichDay() {
   dlCSV('Ngày Dạy,Buổi,Tiết BD,Môn Học,Lớp,Phòng\n'+
-    my.map(r=>[r.ngayDay,r.buoi,r.tietBD,r.monHoc,r.lop,r.phong].join(',')).join('\n'),
+    allLichDay.map(function(r){return [r.ngayDay,r.buoi,r.tietBD,r.monHoc,r.lop,r.phong].join(',');}).join('\n'),
     'lichday_'+GV.maGV);
 }
-function dlCSV(content,name){
-  const a=document.createElement('a');
+function dlCSV(content, name) {
+  var a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob(['\uFEFF'+content],{type:'text/csv;charset=utf-8'}));
   a.download=name+'_'+new Date().toISOString().slice(0,10)+'.csv';
-  a.click(); toast('✅ Đã tải CSV!',true);
+  a.click(); toast('Đã tải CSV!',true);
 }
 
 /* ============================================================
    HELPERS
 ============================================================ */
-function showAuthErr(id,msg){ const el=document.getElementById(id); el.textContent=msg; el.style.display='block'; }
-function showAuthOk(id,msg){ const el=document.getElementById(id); el.textContent=msg; el.style.display='block'; }
+function showErr(id,msg){var el=document.getElementById(id);el.textContent=msg;el.style.display='block';}
+function showOk(id,msg){var el=document.getElementById(id);el.textContent=msg;el.style.display='block';}
 function ld(){return '<div class="loading"><span class="spinner"></span>Đang tải...</div>';}
-function empty(ico,msg){return `<div class="empty"><div class="ico">${ico}</div><p>${msg}</p></div>`;}
+function empty(ico,msg){return '<div class="empty"><div class="ico">'+ico+'</div><p>'+msg+'</p></div>';}
 function toast(msg,ok){
-  const t=document.getElementById('toast');
+  var t=document.getElementById('toast');
   t.textContent=msg; t.className='toast'+(ok?' ok':'');
-  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),4000);
+  t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},4000);
 }
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 </script>
