@@ -17,16 +17,17 @@
 body{font-family:'Crimson Pro',Georgia,serif;background:var(--light);color:var(--black);font-size:18px;line-height:1.65;min-height:100vh}
 
 /* LOGIN */
-.login-screen{position:fixed;inset:0;background:var(--black);z-index:900;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.login-screen::after{content:'HOD';position:absolute;font-family:'Barlow Condensed',sans-serif;font-size:200px;font-weight:800;color:rgba(211,47,47,.04);pointer-events:none;letter-spacing:-8px}
-.lbox{background:var(--charcoal);border-top:3px solid var(--red);padding:50px 44px;width:380px;max-width:95vw;position:relative;z-index:1}
-.lbox input{width:100%;padding:16px;background:#111;border:1px solid #333;color:var(--white);font-size:22px;font-family:'Barlow Condensed',sans-serif;letter-spacing:4px;text-align:center;outline:none;transition:border-color .2s}
+.login-screen{position:fixed;inset:0;background:var(--black);z-index:900;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .25s ease}
+.login-screen.out{opacity:0;pointer-events:none}
+.login-screen::after{content:'HOD';position:absolute;font-family:'Barlow Condensed',sans-serif;font-size:clamp(60px,15vw,200px);font-weight:800;color:rgba(211,47,47,.04);pointer-events:none;letter-spacing:-8px}
+.lbox{background:var(--charcoal);border-top:3px solid var(--red);padding:clamp(28px,5vw,50px) clamp(20px,5vw,44px);width:min(380px,92vw);position:relative;z-index:1}
+.lbox input{width:100%;padding:16px;background:#111;border:1px solid #333;color:var(--white);font-size:clamp(18px,4vw,22px);font-family:'Barlow Condensed',sans-serif;letter-spacing:4px;text-align:center;outline:none;transition:border-color .2s;-webkit-appearance:none;border-radius:0}
 .lbox input:focus{border-color:var(--red)}
-.lbox-btn{width:100%;margin-top:12px;padding:14px;background:var(--red);color:var(--white);border:none;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:3px;cursor:pointer;transition:background .2s}
+.lbox-btn{width:100%;margin-top:12px;padding:16px;background:var(--red);color:var(--white);border:none;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:3px;cursor:pointer;transition:background .2s;min-height:52px;touch-action:manipulation;border-radius:0}
 .lbox-btn:hover{background:var(--red-dk)}
 .lbox-btn:disabled{background:#333;cursor:not-allowed}
-.lbox-err{color:#ff6b6b;font-size:14px;text-align:center;margin-top:10px;display:none;font-family:'Barlow Condensed',sans-serif}
-.back-btn{margin-top:20px;color:#444;font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:2px;cursor:pointer;text-transform:uppercase;background:none;border:none;position:relative;z-index:1;transition:color .2s}
+.lbox-err{color:#ff6b6b;font-size:14px;text-align:center;margin-top:12px;display:none;font-family:'Barlow Condensed',sans-serif;padding:10px;background:rgba(211,47,47,.12);border:1px solid rgba(211,47,47,.25)}
+.back-btn{margin-top:22px;color:#555;font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:2px;cursor:pointer;text-transform:uppercase;background:none;border:none;position:relative;z-index:1;transition:color .2s;padding:10px 20px;min-height:44px;touch-action:manipulation}
 .back-btn:hover{color:#888}
 
 /* HEADER */
@@ -145,6 +146,41 @@ body{font-family:'Crimson Pro',Georgia,serif;background:var(--light);color:var(-
 .gv-card-btns{display:flex;gap:8px}
 
 @media(max-width:768px){.header{padding:0 16px}.tab-nav{padding:0 8px}.main{padding:16px}.settings-grid{grid-template-columns:1fr}}
+
+/* ============================================================
+   MOBILE RESPONSIVE
+============================================================ */
+@media(max-width:768px){
+  .header{padding:0 14px;height:60px}
+  .brand-text .top{font-size:14px;letter-spacing:1px}
+  .brand-text .bot{display:none}
+  .clock{display:none}
+  .btn-hdr{padding:6px 10px;font-size:12px}
+  .ribbon{padding:6px 14px;font-size:12px;letter-spacing:1px}
+  .tab-nav{padding:0 0;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .tab-nav::-webkit-scrollbar{display:none}
+  .tab-btn{padding:12px 14px;font-size:12px;letter-spacing:1px}
+  .main{padding:14px}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .stat-card{padding:14px 10px}
+  .sn{font-size:34px}
+  .sl{font-size:11px}
+  .sec-hdr{flex-direction:column;align-items:flex-start}
+  .data-table th{padding:10px 10px;font-size:11px}
+  .data-table td{padding:10px 10px;font-size:15px}
+  .settings-grid{grid-template-columns:1fr}
+  .set-card{padding:22px 18px}
+  .export-grid{grid-template-columns:1fr}
+  .gv-pending-grid{grid-template-columns:1fr}
+  .btn-group{flex-wrap:wrap}
+  .btn{min-height:40px;touch-action:manipulation}
+  .btn-save{min-height:44px;touch-action:manipulation}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .hdr-right .btn-hdr:first-child{display:none}
+  .tbl-wrap{border-radius:0}
+}
 </style>
 </head>
 <body>
@@ -382,27 +418,49 @@ body{font-family:'Crimson Pro',Georgia,serif;background:var(--light);color:var(-
 /* ============================================================
    LOGIN
 ============================================================ */
+// Kiểm tra session còn hạn không (30 phút)
+function isHODLoggedIn() {
+  var t = sessionStorage.getItem('hod_auth_ts');
+  if (!t) return false;
+  return (Date.now() - parseInt(t)) < 30 * 60 * 1000;
+}
+function markHODLoggedIn() {
+  sessionStorage.setItem('hod_auth_ts', Date.now().toString());
+}
+function dismissLogin() {
+  var scr = document.getElementById('loginScreen');
+  scr.classList.add('out');
+  setTimeout(function(){ scr.style.display = 'none'; }, 300);
+}
+
 async function loginHOD() {
-  const pw  = document.getElementById('hodPw').value;
-  const btn = document.getElementById('loginBtn');
+  var pw  = document.getElementById('hodPw').value;
+  var btn = document.getElementById('loginBtn');
   btn.disabled = true; btn.textContent = '...';
   try {
-    const r = await api('dangNhapHOD', { matKhau: pw });
+    var r = await api('dangNhapHOD', { matKhau: pw });
     if (r.success) {
-      document.getElementById('loginScreen').style.display = 'none';
+      markHODLoggedIn();
+      dismissLogin();
       refresh();
     } else {
       document.getElementById('lboxErr').style.display = 'block';
       document.getElementById('hodPw').value = '';
-      document.getElementById('hodPw').focus();
+      setTimeout(function(){ document.getElementById('hodPw').focus(); }, 50);
     }
   } catch(e) {
     document.getElementById('lboxErr').style.display = 'block';
-    document.getElementById('lboxErr').textContent = 'Lỗi kết nối GAS';
+    document.getElementById('lboxErr').textContent = 'Lỗi kết nối: ' + e.message;
   }
   btn.disabled = false; btn.textContent = '→';
 }
-document.getElementById('hodPw').addEventListener('keydown', e => { if(e.key==='Enter') loginHOD(); });
+document.getElementById('hodPw').addEventListener('keydown', function(e){ if(e.key==='Enter') loginHOD(); });
+
+// Nếu session còn hợp lệ → bỏ qua login ngay
+if (isHODLoggedIn()) {
+  dismissLogin();
+  window.addEventListener('DOMContentLoaded', function(){ refresh(); });
+}
 
 /* ============================================================
    CLOCK
