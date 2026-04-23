@@ -25,6 +25,14 @@ body {
   min-height: 100vh;
 }
 
+
+/* WEATHER BAR */
+.weather-bar{background:var(--black);color:var(--white);display:flex;align-items:center;justify-content:center;gap:clamp(12px,3vw,32px);padding:9px clamp(14px,3vw,40px);font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:.5px;flex-wrap:wrap;border-bottom:1px solid #222}
+.wb-item{display:flex;align-items:center;gap:6px;color:var(--pale)}
+.wb-item strong{color:var(--white);font-size:15px}
+.wb-date{font-size:16px;font-weight:700;color:var(--white);letter-spacing:1px}
+.wb-divider{color:#333;font-size:18px}
+
 /* ============================================================
    LOADING SCREEN
 ============================================================ */
@@ -405,6 +413,17 @@ body {
   </div>
 </header>
 
+<!-- WEATHER BAR -->
+<div class="weather-bar" id="weatherBar">
+  <div class="wb-item"><span class="wb-date" id="wbDate"></span></div>
+  <div class="wb-divider">|</div>
+  <div class="wb-item">🕐 <strong id="wbTime"></strong></div>
+  <div class="wb-divider">|</div>
+  <div class="wb-item">📍 Đồng Nai</div>
+  <div class="wb-divider">|</div>
+  <div class="wb-item" id="wbWeather">⏳ Đang tải thời tiết...</div>
+</div>
+
 <!-- AUTH WRAP -->
 <div class="auth-wrap" id="authWrap">
   <div class="auth-card">
@@ -481,6 +500,7 @@ body {
     <button class="tab-btn active" onclick="sw('lichday',this)">📚 Lịch dạy</button>
     <button class="tab-btn" onclick="sw('dangky',this)">📋 Đăng ký gác thi</button>
     <button class="tab-btn" onclick="sw('cuatoi',this)">✅ Ca của tôi</button>
+    <button class="tab-btn" onclick="sw('congvan',this)">📄 Công văn</button>
     <button class="tab-btn" onclick="sw('caidat',this)">⚙ Tài khoản</button>
   </nav>
 
@@ -520,6 +540,12 @@ body {
         <button class="btn-export" onclick="exportCuaToi()">⬇ CSV</button>
       </div>
       <div id="cuaToiList"><div class="loading"><span class="spinner"></span></div></div>
+    </div>
+
+    <!-- CÔNG VĂN -->
+    <div class="pane" id="pane-congvan">
+      <div class="sec-title" style="margin-bottom:20px">Công văn &amp; Thông báo</div>
+      <div id="gvCVList"><div class="loading"><span class="spinner"></span>Đang tải...</div></div>
     </div>
 
     <!-- TÀI KHOẢN -->
@@ -723,6 +749,7 @@ function sw(name, btn) {
   btn.classList.add('active');
   if (name === 'dangky')  loadCaThi();
   if (name === 'cuatoi')  loadCuaToi();
+  if (name === 'congvan') loadCongVanGV();
 }
 
 /* ============================================================
@@ -993,6 +1020,75 @@ function dlCSV(content, name) {
   a.href=URL.createObjectURL(new Blob(['\uFEFF'+content],{type:'text/csv;charset=utf-8'}));
   a.download=name+'_'+new Date().toISOString().slice(0,10)+'.csv';
   a.click(); toast('Đã tải CSV!',true);
+}
+
+/* ============================================================
+   WEATHER + DATETIME BAR
+============================================================ */
+var DAY_VN2=['Chủ nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'];
+var MON_VN=['tháng 1','tháng 2','tháng 3','tháng 4','tháng 5','tháng 6','tháng 7','tháng 8','tháng 9','tháng 10','tháng 11','tháng 12'];
+
+function updateClock2(){
+  var n=new Date();
+  document.getElementById('wbTime').textContent=pad2(n.getHours())+':'+pad2(n.getMinutes())+':'+pad2(n.getSeconds());
+  document.getElementById('wbDate').textContent=DAY_VN2[n.getDay()]+', '+n.getDate()+' '+MON_VN[n.getMonth()]+' '+n.getFullYear();
+}
+function pad2(x){return String(x).padStart(2,'0');}
+setInterval(updateClock2,1000); updateClock2();
+
+async function loadWeather(){
+  try{
+    var res=await fetch('https://wttr.in/Dong+Nai,Vietnam?format=j1');
+    var data=await res.json();
+    var cur=data.current_condition[0];
+    var desc=cur.lang_vi?cur.lang_vi[0].value:cur.weatherDesc[0].value;
+    var temp=cur.temp_C;
+    var feels=cur.FeelsLikeC;
+    var hum=cur.humidity;
+    document.getElementById('wbWeather').innerHTML=
+      '<span style="font-size:18px">'+getWeatherIcon(parseInt(cur.weatherCode))+'</span> '+
+      '<strong>'+temp+'°C</strong> '+esc(desc)+
+      ' · Cảm giác <strong>'+feels+'°C</strong> · Độ ẩm <strong>'+hum+'%</strong>';
+  }catch(e){
+    document.getElementById('wbWeather').textContent='Không tải được thời tiết';
+  }
+}
+function getWeatherIcon(code){
+  if(code===113) return '☀️';
+  if(code<=116) return '⛅';
+  if(code<=119) return '☁️';
+  if(code<=143) return '🌫️';
+  if(code<=176) return '🌦️';
+  if(code<=195) return '🌧️';
+  if(code<=260) return '🌨️';
+  if(code<=296) return '🌧️';
+  if(code<=314) return '🌧️';
+  if(code<=377) return '🌨️';
+  if(code<=395) return '⛈️';
+  return '🌡️';
+}
+loadWeather();
+
+/* ============================================================
+   CÔNG VĂN (GV xem)
+============================================================ */
+async function loadCongVanGV(){
+  document.getElementById('gvCVList').innerHTML=ld();
+  try{
+    var list=await api('getAllCongVan');
+    var daGui=list.filter(function(r){return r.trangThai==='Đã gửi';});
+    if(!daGui.length){document.getElementById('gvCVList').innerHTML=empty('📭','Chưa có thông báo nào.');return;}
+    document.getElementById('gvCVList').innerHTML=daGui.map(function(r){
+      return '<div style="background:var(--white);border:1px solid var(--border);border-left:3px solid var(--red);padding:18px 20px;margin-bottom:12px">'+
+        '<div style="font-family:\'EB Garamond\',serif;font-size:19px;font-weight:600;color:var(--ink);margin-bottom:6px">'+esc(r.tieuDe)+'</div>'+
+        (r.noiDung?'<div style="font-size:16px;color:var(--mid);margin-bottom:8px;white-space:pre-line">'+esc(r.noiDung)+'</div>':'')+
+        '<div style="display:flex;gap:16px;flex-wrap:wrap;font-family:\'Barlow Condensed\',sans-serif;font-size:13px;color:var(--silver);letter-spacing:.5px">'+
+          (r.deadline?'<span style="color:#E65100">⏰ Hạn chót: <strong>'+esc(r.deadline)+'</strong></span>':'')+
+          (r.linkFile?'<a href="'+esc(r.linkFile)+'" target="_blank" style="color:var(--red)">📎 Tài liệu đính kèm</a>':'')+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }catch(e){document.getElementById('gvCVList').innerHTML='<p style="color:red;padding:20px">'+e.message+'</p>';}
 }
 
 /* ============================================================

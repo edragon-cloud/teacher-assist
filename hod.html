@@ -16,6 +16,14 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'EB Garamond',Georgia,'Times New Roman',serif;background:var(--bg);color:var(--ink);font-size:18px;line-height:1.65;min-height:100vh}
 
+
+/* WEATHER BAR */
+.weather-bar{background:var(--black);color:var(--white);display:flex;align-items:center;justify-content:center;gap:clamp(10px,2vw,28px);padding:9px clamp(14px,3vw,40px);font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:.5px;flex-wrap:wrap;border-bottom:1px solid #222}
+.wb-item{display:flex;align-items:center;gap:6px;color:var(--pale)}
+.wb-item strong{color:var(--white);font-size:15px}
+.wb-date{font-size:16px;font-weight:700;color:var(--white);letter-spacing:1px}
+.wb-div{color:#333;font-size:18px}
+
 /* LOADING */
 .loading-screen{position:fixed;inset:0;background:var(--black);z-index:9999;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:clamp(30px,8vw,80px);transition:opacity .5s ease}
 .loading-screen.out{opacity:0;pointer-events:none}
@@ -287,11 +295,22 @@ body{font-family:'EB Garamond',Georgia,'Times New Roman',serif;background:var(--
 
 <div class="ribbon" id="ribbon">⏳ Đang tải...</div>
 
+<!-- WEATHER BAR -->
+<div class="weather-bar" id="weatherBar">
+  <div class="wb-item"><span class="wb-date" id="wbDate"></span></div>
+  <div class="wb-div">|</div>
+  <div class="wb-item">🕐 <strong id="wbTime"></strong></div>
+  <div class="wb-div">|</div>
+  <div class="wb-item">📍 Đồng Nai</div>
+  <div class="wb-div">|</div>
+  <div class="wb-item" id="wbWeather">⏳ Đang tải thời tiết...</div>
+</div>
+
 <!-- TABS -->
 <nav class="tab-nav">
   <button class="tab-btn active" onclick="sw('lichday',this)">📚 Lịch dạy</button>
-  <button class="tab-btn" onclick="sw('tongquan',this)">📊 Tổng quan</button>
-  <button class="tab-btn" onclick="sw('choduyet',this)">🔔 Chờ duyệt <span class="tab-badge" id="badgeChoDuyet"></span></button>
+  <button class="tab-btn" onclick="sw('deadlines',this)">⏰ Deadlines</button>
+
   <button class="tab-btn" onclick="sw('lichthi',this)">📅 Lịch thi</button>
   <button class="tab-btn" onclick="sw('giangday',this)">📋 Phân công GD</button>
   <button class="tab-btn" onclick="sw('chamthi',this)">✅ Ra đề &amp; Giám khảo</button>
@@ -321,26 +340,45 @@ body{font-family:'EB Garamond',Georgia,'Times New Roman',serif;background:var(--
         <div class="btn-group">
           <button class="btn btn-green btn-sm" onclick="exSheets('LichDay_Goc')">📤 Sheets</button>
           <button class="btn btn-blue btn-sm" onclick="exCSV('LichDay_Goc')">⬇ CSV</button>
+          <button class="btn btn-amber btn-sm" onclick="toggleImportLD()">📥 Import từ Sheet</button>
         </div>
       </div>
+    </div>
+    <!-- IMPORT LỊCH DẠY -->
+    <div id="importLDPanel" style="display:none;background:var(--white);border:1px solid var(--border);padding:20px;margin-bottom:18px">
+      <h3 style="font-family:'EB Garamond',serif;font-size:19px;font-weight:600;margin-bottom:12px;color:var(--red)">Import lịch dạy từ Google Sheet</h3>
+      <p style="font-size:15px;color:var(--silver);margin-bottom:14px;font-style:italic">Cột cần có: NamHoc, HocKy, Nganh, Khoa, MaGV, NgayDay, Buoi, TietBatDau, MonHoc, Lop, Phong. Sheet phải chia sẻ "Anyone with the link can view".</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        <div style="flex:1;min-width:200px"><label style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:var(--mid);display:block;margin-bottom:6px;text-transform:uppercase">Google Sheet ID</label><input type="text" id="ldSheetId" placeholder="Dán Sheet ID từ URL..." style="width:100%;padding:10px;border:1.5px solid var(--border);font-size:16px;font-family:'EB Garamond',serif;outline:none"></div>
+        <div style="min-width:100px"><label style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:var(--mid);display:block;margin-bottom:6px;text-transform:uppercase">Tên tab</label><input type="text" id="ldTabName" placeholder="Sheet1" style="width:100%;padding:10px;border:1.5px solid var(--border);font-size:16px;font-family:'EB Garamond',serif;outline:none"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="importLD(false)">+ Thêm vào</button>
+          <button class="btn btn-amber" onclick="importLD(true)">🗑 Xóa &amp; Import lại</button>
+        </div>
+      </div>
+      <div style="margin-top:14px;border-top:1px dashed var(--border);padding-top:14px">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;color:var(--mid);margin-bottom:8px;text-transform:uppercase">Hoặc upload file CSV</div>
+        <div class="upload-zone" style="padding:20px;text-align:center;border:2px dashed var(--border);background:var(--bg);cursor:pointer;position:relative">
+          <input type="file" accept=".csv" onchange="handleLDFile(this)" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%">
+          <div style="font-size:24px;margin-bottom:4px">📄</div>
+          <div style="font-family:'EB Garamond',serif;font-size:16px;color:var(--mid)">Kéo thả hoặc click để chọn file CSV</div>
+        </div>
+        <div id="ldFileResult" style="margin-top:8px;display:none"></div>
+      </div>
+      <div id="importLDResult" style="margin-top:12px;display:none"></div>
     </div>
     <div id="scheduleBody"><div class="loading"><span class="spinner"></span>Đang tải lịch dạy...</div></div>
   </div>
 
-  <!-- TỔNG QUAN -->
-  <div class="pane" id="pane-tongquan">
-    <div class="stats-grid" id="statsGrid"><div class="loading"><span class="spinner"></span></div></div>
-    <div class="sec-hdr" style="margin-top:8px"><h2>Công văn chờ gửi</h2></div>
-    <div id="cvPreview"><div class="loading"><span class="spinner"></span></div></div>
-  </div>
 
-  <!-- CHỜ DUYỆT -->
-  <div class="pane" id="pane-choduyet">
+
+  <!-- DEADLINES -->
+  <div class="pane" id="pane-deadlines">
     <div class="sec-hdr">
-      <h2>Giảng viên chờ phê duyệt</h2>
-      <button class="btn btn-dark btn-sm" onclick="loadChoDuyet()">↺ Làm mới</button>
+      <h2>Deadlines &amp; Nhắc nhở (30 ngày tới)</h2>
+      <button class="btn btn-dark btn-sm" onclick="loadDeadlines()">↺ Làm mới</button>
     </div>
-    <div id="choDuyetContent"><div class="loading"><span class="spinner"></span></div></div>
+    <div id="deadlinesContent"><div class="loading"><span class="spinner"></span></div></div>
   </div>
 
   <!-- LỊCH THI — Upload -->
@@ -390,7 +428,32 @@ body{font-family:'EB Garamond',Georgia,'Times New Roman',serif;background:var(--
       <div class="btn-group">
         <button class="btn btn-green btn-sm" onclick="exSheets('PhanCong_GiangDay')">📤 Sheets</button>
         <button class="btn btn-blue btn-sm" onclick="exCSV('PhanCong_GiangDay')">⬇ CSV</button>
+        <button class="btn btn-amber btn-sm" onclick="toggleImportPC()">📥 Import từ Sheet</button>
       </div>
+    </div>
+
+    <!-- IMPORT PHÂN CÔNG -->
+    <div id="importPCPanel" style="display:none;background:var(--white);border:1px solid var(--border);padding:20px;margin-bottom:18px">
+      <h3 style="font-family:'EB Garamond',serif;font-size:19px;font-weight:600;margin-bottom:12px;color:var(--red)">Import Phân công từ Google Sheet</h3>
+      <p style="font-size:15px;color:var(--silver);margin-bottom:14px;font-style:italic">Cột cần có: NamHoc, HocKy, MaGV, MonHoc, SoTiet, Nganh_Khoa, GhiChu</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        <div style="flex:1;min-width:200px"><label style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:var(--mid);display:block;margin-bottom:6px;text-transform:uppercase">Google Sheet ID</label><input type="text" id="pcSheetId" placeholder="Sheet ID..." style="width:100%;padding:10px 12px;border:1.5px solid var(--border);font-size:16px;font-family:'EB Garamond',serif;outline:none"></div>
+        <div style="min-width:100px"><label style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:var(--mid);display:block;margin-bottom:6px;text-transform:uppercase">Tab</label><input type="text" id="pcTabName" placeholder="Sheet1" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);font-size:16px;font-family:'EB Garamond',serif;outline:none"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="importPC(false)">+ Thêm</button>
+          <button class="btn btn-amber" onclick="importPC(true)">🗑 Xóa &amp; Import lại</button>
+        </div>
+      </div>
+      <div style="margin-top:14px;border-top:1px dashed var(--border);padding-top:14px">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;color:var(--mid);margin-bottom:8px;text-transform:uppercase">Hoặc upload file CSV</div>
+        <div class="upload-zone" style="padding:20px;text-align:center;border:2px dashed var(--border);background:var(--bg);cursor:pointer;position:relative">
+          <input type="file" accept=".csv" onchange="handlePCFile(this)" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%">
+          <div style="font-size:24px;margin-bottom:4px">📄</div>
+          <div style="font-family:'EB Garamond',serif;font-size:16px;color:var(--mid)">Kéo thả hoặc click để chọn file CSV</div>
+        </div>
+        <div id="pcFileResult" style="margin-top:8px;display:none"></div>
+      </div>
+      <div id="importPCResult" style="margin-top:12px;display:none"></div>
     </div>
 
     <div class="pc-grid" id="pcGrid">
@@ -436,8 +499,33 @@ body{font-family:'EB Garamond',Georgia,'Times New Roman',serif;background:var(--
       <div class="btn-group">
         <button class="btn btn-green btn-sm" onclick="exSheets('PhanCong_ChamThi')">📤 Sheets</button>
         <button class="btn btn-blue btn-sm" onclick="exCSV('PhanCong_ChamThi')">⬇ CSV</button>
+        <button class="btn btn-amber btn-sm" onclick="toggleImportCT()">📥 Import từ Sheet</button>
       </div>
     </div>
+
+    <div id="importCTPanel" style="display:none;background:var(--white);border:1px solid var(--border);padding:20px;margin-bottom:18px">
+      <h3 style="font-family:'EB Garamond',serif;font-size:19px;font-weight:600;margin-bottom:12px;color:var(--red)">Import Ra đề &amp; Chấm thi từ Google Sheet</h3>
+      <p style="font-size:15px;color:var(--silver);margin-bottom:14px;font-style:italic">Cột cần có: NamHoc, HocKy, MonThi, HinhThuc, SoLuong, GiamThi_1, GiamThi_2, HanCham, TrangThai, RaDeGV, GiamKhao</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        <div style="flex:1;min-width:200px"><label style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:var(--mid);display:block;margin-bottom:6px;text-transform:uppercase">Google Sheet ID</label><input type="text" id="ctSheetId" placeholder="Sheet ID..." style="width:100%;padding:10px 12px;border:1.5px solid var(--border);font-size:16px;font-family:'EB Garamond',serif;outline:none"></div>
+        <div style="min-width:100px"><label style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:var(--mid);display:block;margin-bottom:6px;text-transform:uppercase">Tab</label><input type="text" id="ctTabName" placeholder="Sheet1" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);font-size:16px;font-family:'EB Garamond',serif;outline:none"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="importCT(false)">+ Thêm</button>
+          <button class="btn btn-amber" onclick="importCT(true)">🗑 Xóa &amp; Import lại</button>
+        </div>
+      </div>
+      <div style="margin-top:14px;border-top:1px dashed var(--border);padding-top:14px">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;color:var(--mid);margin-bottom:8px;text-transform:uppercase">Hoặc upload file CSV</div>
+        <div class="upload-zone" style="padding:20px;text-align:center;border:2px dashed var(--border);background:var(--bg);cursor:pointer;position:relative">
+          <input type="file" accept=".csv" onchange="handleCTFile(this)" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%">
+          <div style="font-size:24px;margin-bottom:4px">📄</div>
+          <div style="font-family:'EB Garamond',serif;font-size:16px;color:var(--mid)">Kéo thả hoặc click để chọn file CSV</div>
+        </div>
+        <div id="ctFileResult" style="margin-top:8px;display:none"></div>
+      </div>
+      <div id="importCTResult" style="margin-top:12px;display:none"></div>
+    </div>
+
     <div class="tbl-wrap" id="ctTable"><div class="loading"><span class="spinner"></span></div></div>
   </div>
 
@@ -451,15 +539,26 @@ body{font-family:'EB Garamond',Georgia,'Times New Roman',serif;background:var(--
     <!-- FORM THÊM MỚI -->
     <div id="cvForm" style="display:none;background:var(--white);border:1px solid var(--border);padding:22px;margin-bottom:20px">
       <h3 style="font-family:'EB Garamond',serif;font-size:19px;font-weight:600;margin-bottom:18px;color:var(--red)">Thêm Công văn / Thông báo</h3>
-      <div class="form-group"><label>Tiêu đề</label><input type="text" id="cvTieuDe" placeholder="Nhập tiêu đề công văn..."></div>
+      <div class="form-group"><label>Tiêu đề công văn</label><input type="text" id="cvTieuDe" placeholder="Ví dụ: Thông báo nộp điểm HK2 2025-2026"></div>
+      <div class="form-group"><label>Tin nhắn / Nội dung thông báo</label><textarea id="cvNoiDung" placeholder="Nội dung tin nhắn bạn nhận được kèm theo công văn..." style="min-height:100px"></textarea></div>
       <div class="form-row">
         <div class="form-group"><label>Đối tượng nhận</label><input type="text" id="cvDoiTuong" value="Tất cả Giảng viên"></div>
         <div class="form-group"><label>Hạn chót (nếu có)</label><input type="date" id="cvDeadline"></div>
       </div>
-      <div class="form-group"><label>Nội dung</label><textarea id="cvNoiDung" placeholder="Nội dung thông báo..."></textarea></div>
-      <div class="form-group"><label>Link tài liệu đính kèm (nếu có)</label><input type="url" id="cvLink" placeholder="https://drive.google.com/..."></div>
+      <div class="form-row">
+        <div class="form-group"><label>Link tài liệu (PDF/Word/Drive)</label><input type="url" id="cvLink" placeholder="https://drive.google.com/..."></div>
+        <div class="form-group" style="display:flex;flex-direction:column;justify-content:flex-end">
+          <button class="btn btn-dark" onclick="aiTomTatCV()" id="btnAITomTat" style="min-height:48px;font-size:14px">✨ AI tóm tắt nội dung</button>
+        </div>
+      </div>
+      <!-- AI Summary result -->
+      <div id="cvAISummary" style="display:none;background:var(--red-lt);border-left:3px solid var(--red);padding:14px;margin-bottom:14px;font-family:'EB Garamond',serif;font-size:17px;line-height:1.7">
+        <strong style="font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--red);display:block;margin-bottom:6px">AI TÓM TẮT</strong>
+        <div id="cvAISummaryText"></div>
+      </div>
       <div style="display:flex;gap:12px;flex-wrap:wrap">
-        <button class="btn btn-primary" onclick="themCVMoi()">💾 Lưu công văn</button>
+        <button class="btn btn-primary btn-lg" onclick="themCVMoi()">💾 Lưu &amp; Duyệt đăng</button>
+        <button class="btn btn-outline" onclick="themCVMoiChoGui()">⏳ Lưu nháp (chưa gửi)</button>
         <button class="btn btn-outline" onclick="toggleCVForm()">Hủy</button>
       </div>
     </div>
@@ -592,8 +691,7 @@ function sw(name,btn){
 }
 function loadPane(n){
   if(n==='lichday')  loadLichDay();
-  if(n==='tongquan') loadTQ();
-  if(n==='choduyet') loadChoDuyet();
+  if(n==='deadlines') loadDeadlines();
   if(n==='lichthi')  loadLT();
   if(n==='giangday') loadPhanCong();
   if(n==='chamthi')  loadCT();
@@ -601,7 +699,7 @@ function loadPane(n){
   if(n==='giangvien')loadGV();
   if(n==='settings') loadSettings();
 }
-function refresh(){ loaded={}; loadPane('lichday'); loadChoDuyetBadge(); loadTQ(); }
+function refresh(){ loaded={}; loadPane('lichday'); }
 
 /* ============================================================
    LỊCH DẠY (tổng hợp tất cả GV)
@@ -996,7 +1094,7 @@ async function themCVMoi(){
   if(!tieuDe){toast('Vui lòng nhập tiêu đề.');return;}
   var r=await api('themCongVan',{tieuDe,doiTuong,noiDung,deadline,linkFile:link});
   toast(r.message,r.success);
-  if(r.success){toggleCVForm();['cvTieuDe','cvNoiDung','cvLink','cvDeadline'].forEach(function(id){document.getElementById(id).value='';});loaded['congvan']=false;loadCV();}
+  if(r.success){toggleCVForm();resetCVForm();loaded['congvan']=false;loadCV();}
 }
 async function markCV(idx,btn){btn.disabled=true;btn.textContent='...';await api('updateCongVanTrangThai',{idx,trangThai:'Đã gửi'});toast('Đã cập nhật!',true);loaded['congvan']=false;loadCV();}
 async function guiEmailCV(idx,btn){
@@ -1079,6 +1177,194 @@ async function doiMkHOD(){
 async function exSheets(name){toast('Đang tạo Google Sheets...');try{var r=await api('exportNewSheetAPI',{sheetName:name,title:name});if(r.success){toast('Xong!',true);window.open(r.url,'_blank');}else toast('Lỗi: '+r.message);}catch(e){toast('Lỗi: '+e.message);}}
 async function exToanBo(){toast('Đang tạo hồ sơ...');try{var r=await api('exportToanBoAPI');if(r.success){toast('Xong!',true);window.open(r.url,'_blank');}else toast('Lỗi: '+r.message);}catch(e){toast('Lỗi: '+e.message);}}
 async function exCSV(name){try{var r=await api('exportSheetAPI',{sheetName:name});if(!r.success){toast('Lỗi: '+r.message);return;}var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\uFEFF'+r.csv],{type:'text/csv;charset=utf-8'}));a.download=r.filename;a.click();toast('Đã tải '+r.filename,true);}catch(e){toast('Lỗi: '+e.message);}}
+
+
+
+/* ============================================================
+   FILE UPLOAD HANDLERS (CSV)
+============================================================ */
+function parseCSVtoRows(text){
+  var lines=text.split(/\r?\n/).filter(function(l){return l.trim();});
+  if(!lines.length) return [];
+  var headers=lines[0].split(',').map(function(h){return h.trim().replace(/^"|"$/g,'');});
+  return lines.slice(1).map(function(line){
+    var vals=line.match(/(".*?"|[^,]+)/g)||[];
+    var obj={};
+    headers.forEach(function(h,i){obj[h]=(vals[i]||'').replace(/^"|"$/g,'').trim();});
+    return obj;
+  }).filter(function(r){return Object.values(r).some(function(v){return v;});});
+}
+
+function handleLDFile(input){
+  var f=input.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=async function(e){
+    var rows=parseCSVtoRows(e.target.result);
+    var el=document.getElementById('ldFileResult'); el.style.display='block';
+    el.innerHTML='<p style="font-size:15px;color:var(--mid)">Đọc được <strong>'+rows.length+'</strong> dòng. Đang gửi...</p>';
+    var res=await api('uploadLichDayCSV',{rowsJson:JSON.stringify(rows)});
+    el.innerHTML='<p style="font-size:16px;color:'+(res.success?'#1B5E20':'var(--red)')+'">'+esc(res.message)+'</p>';
+    if(res.success){toast(res.message,true);loaded['lichday']=false;loadLichDay();}
+  };
+  r.readAsText(f,'UTF-8');
+}
+
+function handlePCFile(input){
+  var f=input.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=async function(e){
+    var rows=parseCSVtoRows(e.target.result);
+    var el=document.getElementById('pcFileResult'); el.style.display='block';
+    el.innerHTML='<p style="font-size:15px;color:var(--mid)">Đọc được <strong>'+rows.length+'</strong> dòng. Đang gửi...</p>';
+    var res=await api('luuPhanCongGiangDay',{pcJson:JSON.stringify(rows),replaceAll:'false'});
+    el.innerHTML='<p style="font-size:16px;color:'+(res.success?'#1B5E20':'var(--red)')+'">'+esc(res.message)+'</p>';
+    if(res.success){toast(res.message,true);loaded['giangday']=false;loadPhanCong();}
+  };
+  r.readAsText(f,'UTF-8');
+}
+
+function handleCTFile(input){
+  var f=input.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=async function(e){
+    var rows=parseCSVtoRows(e.target.result);
+    var el=document.getElementById('ctFileResult'); el.style.display='block';
+    el.innerHTML='<p style="font-size:15px;color:var(--mid)">Đọc được <strong>'+rows.length+'</strong> dòng. Đang gửi...</p>';
+    var res=await api('uploadLichThiCSV',{rowsJson:JSON.stringify(rows)});
+    el.innerHTML='<p style="font-size:16px;color:'+(res.success?'#1B5E20':'var(--red)')+'">'+esc(res.message)+'</p>';
+    if(res.success){toast(res.message,true);loaded['chamthi']=false;loadCT();}
+  };
+  r.readAsText(f,'UTF-8');
+}
+
+/* ============================================================
+   WEATHER + CLOCK
+============================================================ */
+var DAY_VN_H=['Chủ nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'];
+var MON_VN_H=['tháng 1','tháng 2','tháng 3','tháng 4','tháng 5','tháng 6','tháng 7','tháng 8','tháng 9','tháng 10','tháng 11','tháng 12'];
+function updateWClock(){
+  var n=new Date();
+  var el=document.getElementById('wbTime'); if(el) el.textContent=pad(n.getHours())+':'+pad(n.getMinutes())+':'+pad(n.getSeconds());
+  var el2=document.getElementById('wbDate'); if(el2) el2.textContent=DAY_VN_H[n.getDay()]+', '+n.getDate()+' '+MON_VN_H[n.getMonth()]+' '+n.getFullYear();
+}
+setInterval(updateWClock,1000); updateWClock();
+async function loadWeatherH(){
+  try{
+    var res=await fetch('https://wttr.in/Dong+Nai,Vietnam?format=j1');
+    var data=await res.json(); var cur=data.current_condition[0];
+    var desc=cur.lang_vi?cur.lang_vi[0].value:cur.weatherDesc[0].value;
+    var icons={113:'☀️',116:'⛅',119:'☁️',143:'🌫️',176:'🌦️',185:'🌦️',200:'⛈️',227:'🌨️',260:'🌫️',263:'🌦️',266:'🌧️',281:'🌧️',284:'🌧️',293:'🌦️',296:'🌦️',299:'🌧️',302:'🌧️',305:'🌧️',308:'🌧️',311:'🌧️',314:'🌧️',317:'🌨️',320:'🌨️',323:'🌨️',326:'🌨️',329:'❄️',332:'❄️',335:'❄️',338:'❄️',350:'🌧️',353:'🌦️',356:'🌧️',359:'🌧️',362:'🌨️',365:'🌨️',368:'🌨️',371:'🌨️',374:'🌨️',377:'🌨️',386:'⛈️',389:'⛈️',392:'⛈️',395:'⛈️'};
+    var code=parseInt(cur.weatherCode);
+    var icon=icons[code]||'🌡️';
+    var el=document.getElementById('wbWeather');
+    if(el) el.innerHTML=icon+' <strong>'+cur.temp_C+'°C</strong> '+esc(desc)+' · Độ ẩm <strong>'+cur.humidity+'%</strong>';
+  }catch(e){ var el=document.getElementById('wbWeather'); if(el) el.textContent='Đồng Nai'; }
+}
+loadWeatherH();
+
+/* ============================================================
+   DEADLINES
+============================================================ */
+async function loadDeadlines(){
+  loaded['deadlines']=true;
+  document.getElementById('deadlinesContent').innerHTML=ld();
+  try{
+    var items=await api('getDeadlines');
+    if(!items.length){document.getElementById('deadlinesContent').innerHTML=empty('🎉','Không có deadline nào trong 30 ngày tới!');return;}
+    var html='<div style="display:flex;flex-direction:column;gap:12px">';
+    items.forEach(function(item){
+      var borderColor=item.urgent?'var(--red)':'var(--border)';
+      var bg=item.urgent?'var(--red-lt)':'var(--white)';
+      var typeLabel=item.type==='congvan'?'Công văn':'Chấm thi';
+      var typeBadge=item.type==='congvan'?'b-blue':'b-amber';
+      html+='<div style="background:'+bg+';border:1px solid '+borderColor+';border-left:4px solid '+borderColor+';padding:16px 20px">'+
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px">'+
+          '<div>'+
+            '<span class="badge '+typeBadge+'" style="margin-bottom:6px;display:inline-block">'+typeLabel+'</span>'+
+            '<div style="font-family:\'EB Garamond\',serif;font-size:19px;font-weight:600;color:var(--ink)">'+esc(item.tieuDe)+'</div>'+
+          '</div>'+
+          '<div style="text-align:right;flex-shrink:0">'+
+            '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;letter-spacing:1px;color:var(--silver)">HẠN CHÓT</div>'+
+            '<div style="font-family:\'EB Garamond\',serif;font-size:20px;font-weight:600;color:'+(item.urgent?'var(--red)':'var(--ink)')+'">'+esc(item.deadline)+'</div>'+
+            '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;color:'+(item.urgent?'var(--red)':'var(--silver)')+'">'+
+              (item.diff===0?'HÔM NAY':item.diff===1?'NGÀY MAI':'Còn '+item.diff+' ngày')+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    });
+    html+='</div>';
+    document.getElementById('deadlinesContent').innerHTML=html;
+  }catch(e){document.getElementById('deadlinesContent').innerHTML='<p style="color:red;padding:20px">'+e.message+'</p>';}
+}
+
+/* ============================================================
+   IMPORT FROM GOOGLE SHEET
+============================================================ */
+function toggleImportLD(){ var p=document.getElementById('importLDPanel'); p.style.display=p.style.display==='none'?'block':'none'; }
+function toggleImportPC(){ var p=document.getElementById('importPCPanel'); p.style.display=p.style.display==='none'?'block':'none'; }
+function toggleImportCT(){ var p=document.getElementById('importCTPanel'); p.style.display=p.style.display==='none'?'block':'none'; }
+
+async function importLD(replace){
+  var id=document.getElementById('ldSheetId').value.trim();
+  var tab=document.getElementById('ldTabName').value.trim();
+  if(!id){toast('Vui lòng nhập Google Sheet ID.');return;}
+  var el=document.getElementById('importLDResult'); el.style.display='block'; el.innerHTML=ld();
+  var r=await api('importLichDay',{sheetId:id,tabName:tab,replaceAll:String(replace)});
+  el.innerHTML='<p style="font-size:16px;color:'+(r.success?'#1B5E20':'var(--red)')+'">'+esc(r.message)+'</p>';
+  if(r.success){toast(r.message,true);loaded['lichday']=false;loadLichDay();}
+}
+async function importPC(replace){
+  var id=document.getElementById('pcSheetId').value.trim();
+  var tab=document.getElementById('pcTabName').value.trim();
+  if(!id){toast('Vui lòng nhập Google Sheet ID.');return;}
+  var el=document.getElementById('importPCResult'); el.style.display='block'; el.innerHTML=ld();
+  var r=await api('importPhanCongGiangDay',{sheetId:id,tabName:tab,replaceAll:String(replace)});
+  el.innerHTML='<p style="font-size:16px;color:'+(r.success?'#1B5E20':'var(--red)')+'">'+esc(r.message)+'</p>';
+  if(r.success){toast(r.message,true);loaded['giangday']=false;loadPhanCong();}
+}
+async function importCT(replace){
+  var id=document.getElementById('ctSheetId').value.trim();
+  var tab=document.getElementById('ctTabName').value.trim();
+  if(!id){toast('Vui lòng nhập Google Sheet ID.');return;}
+  var el=document.getElementById('importCTResult'); el.style.display='block'; el.innerHTML=ld();
+  var r=await api('importPhanCongChamThi',{sheetId:id,tabName:tab,replaceAll:String(replace)});
+  el.innerHTML='<p style="font-size:16px;color:'+(r.success?'#1B5E20':'var(--red)')+'">'+esc(r.message)+'</p>';
+  if(r.success){toast(r.message,true);loaded['chamthi']=false;loadCT();}
+}
+
+/* ============================================================
+   AI TÓM TẮT CÔNG VĂN
+============================================================ */
+var currentCVIdx=null;
+async function aiTomTatCV(){
+  var tieuDe=document.getElementById('cvTieuDe').value.trim();
+  var noiDung=document.getElementById('cvNoiDung').value.trim();
+  if(!tieuDe&&!noiDung){toast('Nhập tiêu đề hoặc nội dung trước.');return;}
+  var btn=document.getElementById('btnAITomTat');
+  btn.disabled=true; btn.textContent='✨ AI đang tóm tắt...';
+  // Lưu nháp trước để có idx
+  var r=await api('themCongVan',{tieuDe:tieuDe,doiTuong:document.getElementById('cvDoiTuong').value,noiDung,deadline:document.getElementById('cvDeadline').value,linkFile:document.getElementById('cvLink').value});
+  if(!r.success){toast('Lỗi: '+r.message);btn.disabled=false;btn.textContent='✨ AI tóm tắt nội dung';return;}
+  currentCVIdx=r.idx||null;
+  // Gọi AI tóm tắt
+  var aiR=await api('aiTomTatCongVan',{idx:r.idx||0,tieuDe,noiDung});
+  btn.disabled=false; btn.textContent='✨ AI tóm tắt nội dung';
+  if(aiR.success){
+    document.getElementById('cvAISummary').style.display='block';
+    document.getElementById('cvAISummaryText').textContent=aiR.tomTat;
+    toast('AI đã tóm tắt xong!',true);
+  }else toast('AI lỗi: '+aiR.message);
+}
+
+async function themCVMoiChoGui(){
+  var tieuDe=document.getElementById('cvTieuDe').value.trim();
+  if(!tieuDe){toast('Nhập tiêu đề trước.');return;}
+  var r=await api('themCongVan',{tieuDe,doiTuong:document.getElementById('cvDoiTuong').value,noiDung:document.getElementById('cvNoiDung').value,deadline:document.getElementById('cvDeadline').value,linkFile:document.getElementById('cvLink').value});
+  toast(r.message,r.success);
+  if(r.success){toggleCVForm();resetCVForm();loaded['congvan']=false;loadCV();}
+}
+function resetCVForm(){['cvTieuDe','cvNoiDung','cvLink','cvDeadline'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('cvDoiTuong').value='Tất cả Giảng viên';document.getElementById('cvAISummary').style.display='none';}
 
 /* ============================================================
    HELPERS
