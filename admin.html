@@ -570,7 +570,7 @@ tbody tr:hover { background: var(--surface2); }
       <div class="card" style="margin-bottom:14px;padding:14px 18px;background:linear-gradient(135deg,#fefce8,#fef9c3);border-color:#fde047">
         <strong style="font-size:13px">⚠️ Lưu ý quan trọng:</strong> <span style="font-size:13px">Tất cả ca coi thi tại Cơ sở 1 – CBCT có mặt trước <strong>8h45</strong>. Mang theo CMND/CCCD và thẻ GV.</span>
       </div>
-      <div class="tbl-wrap"><table><thead><tr><th>TT</th><th>Mã GV</th><th>Họ tên GV</th><th>22/5</th><th>25/5</th><th>27/5</th><th>29/5</th><th>1/6</th><th>3/6</th><th>5/6</th><th>Cộng</th></tr></thead><tbody id="examTbl"></tbody></table></div>
+      <div class="tbl-wrap"><table><thead><tr><th>TT</th><th>Họ tên GV</th><th>Đợt 1 (22/5)</th><th>Đợt 1 (25/5)</th><th>Đợt 1 (27/5)</th><th>Đợt 2 (29/5)</th><th>Đợt 2 (1/6)</th><th>Đợt 2 (3/6)</th><th>Đợt 2 (5/6)</th><th>Cộng</th></tr></thead><tbody id="examTbl"></tbody></table></div>
     </div>
 
     <!-- ── NOTICES ───────────────────────────────────── -->
@@ -584,7 +584,7 @@ tbody tr:hover { background: var(--surface2); }
       <div class="upload-zone" onclick="openModal('modalUpload')">
         <div class="up-icon">📤</div>
         <p style="font-size:15px;font-weight:600">Kéo thả hoặc nhấn để tải lên</p>
-        <p style="font-size:13px;margin-top:4px">AI sẽ tự động tóm tắt nội dung và phát hiện deadline</p>
+        <p style="font-size:13px;margin-top:4px">AI sẽ tự động tóm tắt nội dung và phát hiện deadline. File được lưu vào Google Drive theo tên + ngày.</p>
       </div>
       <div class="notice-list" id="noticeList"></div>
     </div>
@@ -614,13 +614,20 @@ tbody tr:hover { background: var(--surface2); }
     <!-- ── EXAM ASSIGN ───────────────────────────────── -->
     <div class="view" id="v-examassign">
       <div class="page-hdr">
-        <div><h2>Phân công thi cử</h2><p>SPA K14 (A, B) – HK IV 2025-2026</p></div>
+        <div><h2>Phân công thi cử</h2><p id="examAssignSub">SPA K14 (A, B) – HK IV 2025-2026</p></div>
         <div class="hdr-actions">
           <button class="btn btn-ai btn-sm" onclick="askAI('Đề xuất phân công giám khảo công bằng cho kỳ thi tới, dựa trên tải hiện tại')">🤖 AI đề xuất GK</button>
-          <button class="btn btn-primary btn-sm" onclick="showToast('success','Đã gửi phân công','📧')">📧 Gửi GV</button>
+          <button class="btn btn-secondary btn-sm" onclick="openModal('modalAddExamRound')">➕ Thêm đợt thi</button>
+          <button class="btn btn-primary btn-sm" onclick="openAddExamItemModal()">+ Thêm ca thi</button>
+          <button class="btn btn-success btn-sm" onclick="showToast('success','Đã gửi phân công','📧')">📧 Gửi GV</button>
         </div>
       </div>
-      <div class="tbl-wrap"><table><thead><tr><th>TT</th><th>Học phần/Lớp</th><th>Ngày thi</th><th>Hình thức</th><th>GV ra đề</th><th>GK1</th><th>GK2</th><th>Số bài / SV</th><th>SĐT</th><th>Thao tác</th></tr></thead><tbody id="examAssignTbl"></tbody></table></div>
+
+      <!-- Round tabs -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center" id="examRoundTabs"></div>
+
+      <!-- Table per round -->
+      <div id="examRoundContent"></div>
     </div>
 
     <!-- ── MEMBERS ───────────────────────────────────── -->
@@ -654,7 +661,7 @@ tbody tr:hover { background: var(--surface2); }
         <div class="chart-wrap"><h3>📊 Tiết giảng dạy – Từng GV</h3><div id="chartTeach"></div></div>
         <div class="chart-wrap"><h3>🏆 Ca coi thi – Từng GV</h3><div id="chartExam"></div></div>
       </div>
-      <div class="tbl-wrap"><table><thead><tr><th>Mã GV</th><th>Họ tên</th><th>Số lớp</th><th>Tiết LT</th><th>Tiết thực hiện</th><th>Định mức</th><th>Vượt/Thiếu</th><th>Ca thi</th><th>Trạng thái</th></tr></thead><tbody id="reportTbl"></tbody></table></div>
+      <div class="tbl-wrap"><table><thead><tr><th>Họ tên GV</th><th>Số lớp</th><th>Tiết LT</th><th>Tiết thực hiện</th><th>Định mức</th><th>Vượt/Thiếu</th><th>Ca thi</th><th>Trạng thái</th></tr></thead><tbody id="reportTbl"></tbody></table></div>
     </div>
 
     <!-- ── SETTINGS ──────────────────────────────────── -->
@@ -665,7 +672,7 @@ tbody tr:hover { background: var(--surface2); }
           <div class="settings-section">
             <h3>🔗 Kết nối dữ liệu</h3>
             <div class="form-group"><label>Google Apps Script URL</label><input class="form-input" id="gasUrl" placeholder="https://script.google.com/macros/s/.../exec"></div>
-            <div class="form-group"><label>Google Sheet ID</label><input class="form-input" id="sheetId" value="1MkafmPhf38qPrOoNcjIujiv72IbrZYwBe97v0VkMKoU"></div>
+            <div class="form-group"><label>Google Sheet ID</label><input class="form-input" id="sheetId" value="1SzF3PCEMcxGzvKE7LCdd7ROCrrKh0MvNhuv8_JUNBHM"></div>
             <button class="btn btn-primary btn-sm" onclick="testGASConnection()">🔌 Kiểm tra kết nối</button>
           </div>
           <div class="settings-section" style="margin-top:16px">
@@ -694,19 +701,60 @@ tbody tr:hover { background: var(--surface2); }
             <button class="btn btn-primary btn-sm" onclick="changePassword()">🔒 Đổi mật khẩu</button>
           </div>
           <div class="settings-section" style="margin-top:16px">
-            <h3>📧 Thông báo</h3>
+            <h3>📧 Thông báo & Telegram Bot</h3>
             <div class="toggle-row"><div class="toggle-info"><strong>Email thông báo</strong><small>Gửi email tự động cho GV</small></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
-            <div class="toggle-row"><div class="toggle-info"><strong>Telegram Bot</strong><small>Gửi tin nhắn Telegram</small></div><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></div>
-            <div class="form-group" style="margin-top:12px"><label>Telegram Bot Token</label><input class="form-input" type="password" placeholder="123456789:ABC..."></div>
+            <div class="toggle-row"><div class="toggle-info"><strong>Telegram Bot</strong><small>Ra lệnh & nhận báo cáo qua Telegram</small></div><label class="toggle"><input type="checkbox" id="telegramToggle" onchange="toggleTelegramFields(this)"><span class="toggle-slider"></span></label></div>
+            <div id="telegramFields" style="display:none;margin-top:10px;padding:12px;background:var(--bg);border-radius:10px;border:1px solid var(--border)">
+              <div class="form-group"><label>Bot Token</label><input class="form-input" id="telegramToken" type="password" placeholder="123456789:ABC-DEF..."></div>
+              <div class="form-group"><label>Admin Chat ID <small style="font-weight:400;color:var(--text3)">(chat với bot, gõ /start để lấy)</small></label><input class="form-input" id="telegramChatId" placeholder="123456789"></div>
+              <div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-radius:8px;padding:12px;font-size:13px;color:#0369a1;line-height:1.7">
+                <strong>🤖 Lệnh Telegram hỗ trợ:</strong><br>
+                <code>/ask [câu hỏi]</code> – Hỏi AI<br>
+                <code>/load</code> – Thống kê tải GV<br>
+                <code>/exam</code> – Lịch thi sắp tới<br>
+                <code>/remind [tên] [nội dung]</code> – Nhắc GV<br>
+                <code>/report</code> – Tóm tắt tuần
+              </div>
+              <div style="margin-top:10px;display:flex;gap:8px">
+                <button class="btn btn-primary btn-sm" onclick="saveTelegramConfig()">💾 Lưu Telegram</button>
+                <button class="btn btn-secondary btn-sm" onclick="testTelegram()">🔔 Test gửi tin</button>
+              </div>
+            </div>
             <div class="settings-section" style="margin-top:16px;border:none;padding:0">
               <h3 style="border:none;padding:0;margin-bottom:12px">📅 Học kỳ</h3>
               <div class="form-row">
                 <div class="form-group"><label>Bắt đầu HK</label><input class="form-input" type="date" value="2025-02-10"></div>
                 <div class="form-group"><label>Kết thúc HK</label><input class="form-input" type="date" value="2026-06-30"></div>
               </div>
-              <div class="form-group"><label>Tên học kỳ</label><input class="form-input" value="Học kỳ IV – 2025-2026"></div>
+              <div class="form-group"><label>Tên học kỳ</label><input class="form-input" id="semesterName" value="Học kỳ IV – 2025-2026"></div>
             </div>
             <button class="btn btn-primary btn-sm" onclick="showToast('success','Đã lưu cài đặt','💾')">💾 Lưu tất cả</button>
+          </div>
+
+          <!-- END OF YEAR -->
+          <div class="settings-section" style="margin-top:16px;border:2px solid var(--danger);background:linear-gradient(135deg,#fff5f5,#fff)">
+            <h3 style="color:var(--danger)">🎓 Kết thúc Năm học</h3>
+            <p style="font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:16px">
+              Xuất toàn bộ dữ liệu năm học hiện tại ra Google Sheets, sau đó reset hệ thống để bắt đầu năm học mới. <strong>Thao tác không thể hoàn tác.</strong>
+            </p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+              <div style="background:var(--surface2);border-radius:9px;padding:12px">
+                <div style="font-size:12px;color:var(--text2);margin-bottom:4px">Dữ liệu sẽ xuất</div>
+                <div style="font-size:13px;line-height:1.8">✅ Danh sách GV & tải GD<br>✅ Phân công giảng dạy<br>✅ Lịch & phân công thi<br>✅ Công văn & thông báo<br>✅ Báo cáo tổng kết</div>
+              </div>
+              <div style="background:var(--surface2);border-radius:9px;padding:12px">
+                <div style="font-size:12px;color:var(--text2);margin-bottom:4px">Sau khi reset</div>
+                <div style="font-size:13px;line-height:1.8">🔄 Xoá lịch dạy & thi<br>🔄 Xoá phân công<br>🔄 Xoá thông báo cũ<br>⚠️ Giữ lại danh sách GV<br>⚠️ Giữ lại cài đặt hệ thống</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Xác nhận bằng cách nhập tên học kỳ hiện tại</label>
+              <input class="form-input" id="endYearConfirm" placeholder='Nhập "Học kỳ IV – 2025-2026" để xác nhận'>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-secondary btn-sm" onclick="exportAllData()">⬇️ Chỉ xuất dữ liệu (không reset)</button>
+              <button class="btn btn-danger" onclick="endOfYear()" style="font-size:14px">🎓 Kết thúc năm học & Reset</button>
+            </div>
           </div>
         </div>
       </div>
@@ -752,7 +800,12 @@ tbody tr:hover { background: var(--surface2); }
         <div class="form-group"><label>Deadline</label><input class="form-input" type="date"></div>
       </div>
       <div class="form-group"><label>Ghi chú</label><textarea class="form-input" rows="3" placeholder="Tóm tắt nội dung..."></textarea></div>
-      <div style="background:var(--primary-l);border-radius:9px;padding:12px;margin-top:4px">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:12px;margin-top:4px;font-size:13px">
+        <div style="font-weight:700;margin-bottom:6px">📁 Lưu Google Drive</div>
+        <div style="color:var(--text2);line-height:1.7">Folder: <code style="background:var(--bg);padding:2px 6px;border-radius:4px">13VFlEW68Wplr2Wyx6BB_8sC9NM2FsK6f</code><br>
+        Tên file: <code style="background:var(--bg);padding:2px 6px;border-radius:4px" id="previewFileName">YYYYMMDD_[Tên công văn].[ext]</code></div>
+      </div>
+      <div style="background:var(--primary-l);border-radius:9px;padding:12px;margin-top:8px">
         <div style="font-size:12px;font-weight:700;color:var(--primary-d);margin-bottom:4px">🤖 AI sẽ tự động:</div>
         <div style="font-size:12px;color:#0369a1">• Trích xuất văn bản từ PDF/DOCX<br>• Tóm tắt nội dung chính<br>• Phát hiện deadline & người chịu trách nhiệm<br>• Soạn thông báo gửi cho GV</div>
       </div>
@@ -760,6 +813,88 @@ tbody tr:hover { background: var(--surface2); }
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('modalUpload')">Hủy</button>
       <button class="btn btn-ai" onclick="uploadAndProcess()">🤖 Tải lên & Phân tích AI</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add Exam Round (Đợt thi) -->
+<div class="modal-overlay" id="modalAddExamRound">
+  <div class="modal">
+    <div class="modal-hdr"><h3>📅 Thêm đợt thi mới</h3><button class="modal-close" onclick="closeModal('modalAddExamRound')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Tên đợt thi *</label><input class="form-input" id="newRoundName" placeholder="Vd: Đợt 1, Đợt 2, Thi lại HK IV..."></div>
+      <div class="form-row">
+        <div class="form-group"><label>Từ ngày</label><input class="form-input" type="date" id="newRoundFrom"></div>
+        <div class="form-group"><label>Đến ngày</label><input class="form-input" type="date" id="newRoundTo"></div>
+      </div>
+      <div class="form-group"><label>Ghi chú</label><input class="form-input" id="newRoundNote" placeholder="HK IV – SPA K14 A/B..."></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalAddExamRound')">Hủy</button>
+      <button class="btn btn-primary" onclick="addExamRound()">✓ Tạo đợt thi</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add Exam Item (Ca thi / Môn thi) -->
+<div class="modal-overlay" id="modalAddExamItem">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-hdr"><h3>➕ Thêm ca thi / môn thi</h3><button class="modal-close" onclick="closeModal('modalAddExamItem')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label>Đợt thi *</label>
+          <select class="form-input" id="newItemRound"></select>
+        </div>
+        <div class="form-group"><label>Học phần *</label><input class="form-input" id="newItemMon" placeholder="Viết 4, Nói 4..."></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Ngày thi *</label><input class="form-input" type="date" id="newItemNgay"></div>
+        <div class="form-group"><label>Ca thi *</label>
+          <select class="form-input" id="newItemCa">
+            <option value="Ca 1 (7h30)">Ca 1 – 7h30</option>
+            <option value="Ca 2 (13h00)" selected>Ca 2 – 13h00</option>
+            <option value="Ca 3 (17h00)">Ca 3 – 17h00</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Hình thức thi</label>
+          <select class="form-input" id="newItemHinhthuc" onchange="toggleGKFields()">
+            <option value="viet">📝 Viết</option>
+            <option value="vanDap">🗣️ Vấn đáp</option>
+            <option value="tracNghiem">📋 Trắc nghiệm</option>
+            <option value="thucHanh">🔬 Thực hành</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Số bài / SV dự kiến</label><input class="form-input" type="number" id="newItemBai" value="40"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>GV ra đề</label>
+          <select class="form-input" id="newItemRade"><option value="">-- Chọn GV --</option></select>
+        </div>
+        <div class="form-group"><label>SĐT liên hệ</label><input class="form-input" id="newItemSdt" placeholder="09xxxxxxxx"></div>
+      </div>
+      <div id="gkSingleFields">
+        <div class="form-row">
+          <div class="form-group"><label>Giám khảo 1 (GK1)</label>
+            <select class="form-input" id="newItemGk1"><option value="">-- Chọn GV --</option></select>
+          </div>
+          <div class="form-group"><label>Giám khảo 2 (GK2)</label>
+            <select class="form-input" id="newItemGk2"><option value="">-- Chọn GV --</option></select>
+          </div>
+        </div>
+      </div>
+      <div id="gkMultiFields" style="display:none">
+        <div style="background:var(--surface2);border-radius:9px;padding:12px;font-size:13px;color:var(--text2);margin-top:4px">
+          🗣️ <strong>Vấn đáp:</strong> Nhiều GV tham gia. Chọn GK1 và GK2 cho từng hội đồng.
+        </div>
+        <div id="gkMultiList" style="margin-top:10px;display:flex;flex-direction:column;gap:8px"></div>
+        <button class="btn btn-secondary btn-sm" style="margin-top:8px" onclick="addGKPair()">+ Thêm hội đồng</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalAddExamItem')">Hủy</button>
+      <button class="btn btn-primary" onclick="addExamItem()">✓ Thêm ca thi</button>
     </div>
   </div>
 </div>
@@ -794,7 +929,7 @@ tbody tr:hover { background: var(--surface2); }
 // ══════════════════════════════════════════════════════════
 // CONFIG
 // ══════════════════════════════════════════════════════════
-const SHEET_ID = '1MkafmPhf38qPrOoNcjIujiv72IbrZYwBe97v0VkMKoU';
+const SHEET_ID = '1SzF3PCEMcxGzvKE7LCdd7ROCrrKh0MvNhuv8_JUNBHM';
 let CLAUDE_API_KEY = localStorage.getItem('dnu_claude_key') || '';
 let CLAUDE_MODEL   = localStorage.getItem('dnu_claude_model') || 'claude-sonnet-4-20250514';
 let ADMIN_PASSWORD = localStorage.getItem('dnu_admin_pwd') || 'DNU@tudragon220406';
@@ -827,48 +962,59 @@ const EXAM_DATA = [
 ];
 
 // hinhthuc: 'viet' | 'vanDap' | 'tracNghiem' | 'thucHanh'
-// gk1, gk2: string (1 người) hoặc mảng [{tid, ten}] (vấn đáp nhiều hội đồng)
-const EXAM_ASSIGN = [
-  { tt:1, mon:'PP giảng dạy TA 1', ngay:'Ca 2, T5 07/05', hinhthuc:'viet',
-    rade:'SPA-004', radeHo:'Bùi Hồng Hà',
-    gk1:[{tid:'SPA-004', ten:'Bùi Hồng Hà'}],
-    gk2:[{tid:'SPA-005', ten:'Mai Thị Lan Anh'}],
-    bai:80, sdt:'0919817975' },
-  { tt:2, mon:'Nghe 4', ngay:'Ca 2, T6 08/05', hinhthuc:'tracNghiem',
-    rade:'EXT-001', radeHo:'Ng.T.Hồng Khanh',
-    gk1:[{tid:'EXT-001', ten:'Ng.T.Hồng Khanh'}],
-    gk2:[{tid:'SPA-006', ten:'Ng.T.Hà Phương'}],
-    bai:80, sdt:'0837926532' },
-  { tt:3, mon:'Đọc 4', ngay:'Ca 2, T2 11/05', hinhthuc:'viet',
-    rade:'EXT-002', radeHo:'Ngô Ngọc Thụy',
-    gk1:[{tid:'EXT-002', ten:'Ngô Ngọc Thụy'}],
-    gk2:[{tid:'EXT-003', ten:'Bùi Công Ng.Phong'}],
-    bai:80, sdt:'0918957870' },
-  { tt:4, mon:'Viết 4', ngay:'Ca 2, T4 13/05', hinhthuc:'viet',
-    rade:'SPA-005', radeHo:'Mai Thị Lan Anh',
-    gk1:[{tid:'SPA-005', ten:'Mai Thị Lan Anh'}],
-    gk2:[{tid:'SPA-004', ten:'Bùi Hồng Hà'}],
-    bai:80, sdt:'0937479286' },
-  { tt:5, mon:'Nói 4', ngay:'Ca 1, T5 14/05', hinhthuc:'vanDap',
-    rade:'SPA-002', radeHo:'Ng.L.Như Quỳnh',
-    gk1:[
-      {tid:'SPA-001', ten:'Dương Thanh Tú'},
-      {tid:'SPA-002', ten:'Ng.L.Như Quỳnh'},
-      {tid:'SPA-004', ten:'Bùi Hồng Hà'},
-      {tid:'SPA-006', ten:'Ng.T.Hà Phương'},
-    ],
-    gk2:[
-      {tid:'SPA-003', ten:'Vũ Thu Hà'},
-      {tid:'SPA-005', ten:'Mai Thị Lan Anh'},
-      {tid:'SPA-007', ten:'Trương Phi Luân'},
-      {tid:'SPA-008', ten:'Trần Văn Tuấn'},
-    ],
-    bai:80, sdt:'0942359088' },
-  { tt:6, mon:'Âm vị học', ngay:'Ca 2, T6 15/05', hinhthuc:'viet',
-    rade:'EXT-003', radeHo:'Bùi Công Ng.Phong',
-    gk1:[{tid:'EXT-003', ten:'Bùi Công Ng.Phong'}],
-    gk2:[{tid:'EXT-002', ten:'Ngô Ngọc Thụy'}],
-    bai:80, sdt:'0913150200' },
+// gk1, gk2: [{tid, ten}]
+// EXAM_ROUNDS: array of { id, name, from, to, note, items:[] }
+let EXAM_ROUNDS = [
+  {
+    id: 'r1', name: 'Đợt 1', from:'2026-05-22', to:'2026-05-27', note:'SPA K14 A/B – HK IV',
+    items: [
+      { tt:1, mon:'PP giảng dạy TA 1', ngay:'2026-05-07', ca:'Ca 2 (13h00)', hinhthuc:'viet',
+        rade:'SPA-004', radeHo:'Bùi Hồng Hà',
+        gk1:[{tid:'SPA-004', ten:'Bùi Hồng Hà'}],
+        gk2:[{tid:'SPA-005', ten:'Mai Thị Lan Anh'}],
+        bai:80, sdt:'0919817975' },
+      { tt:2, mon:'Nghe 4', ngay:'2026-05-08', ca:'Ca 2 (13h00)', hinhthuc:'tracNghiem',
+        rade:'EXT-001', radeHo:'Ng.T.Hồng Khanh',
+        gk1:[{tid:'EXT-001', ten:'Ng.T.Hồng Khanh'}],
+        gk2:[{tid:'SPA-006', ten:'Ng.T.Hà Phương'}],
+        bai:80, sdt:'0837926532' },
+      { tt:3, mon:'Đọc 4', ngay:'2026-05-11', ca:'Ca 2 (13h00)', hinhthuc:'viet',
+        rade:'EXT-002', radeHo:'Ngô Ngọc Thụy',
+        gk1:[{tid:'EXT-002', ten:'Ngô Ngọc Thụy'}],
+        gk2:[{tid:'EXT-003', ten:'Bùi Công Ng.Phong'}],
+        bai:80, sdt:'0918957870' },
+    ]
+  },
+  {
+    id: 'r2', name: 'Đợt 2', from:'2026-05-13', to:'2026-05-15', note:'SPA K14 A/B – HK IV',
+    items: [
+      { tt:1, mon:'Viết 4', ngay:'2026-05-13', ca:'Ca 2 (13h00)', hinhthuc:'viet',
+        rade:'SPA-005', radeHo:'Mai Thị Lan Anh',
+        gk1:[{tid:'SPA-005', ten:'Mai Thị Lan Anh'}],
+        gk2:[{tid:'SPA-004', ten:'Bùi Hồng Hà'}],
+        bai:80, sdt:'0937479286' },
+      { tt:2, mon:'Nói 4', ngay:'2026-05-14', ca:'Ca 1 (7h30)', hinhthuc:'vanDap',
+        rade:'SPA-002', radeHo:'Ng.L.Như Quỳnh',
+        gk1:[
+          {tid:'SPA-001', ten:'Dương Thanh Tú'},
+          {tid:'SPA-002', ten:'Ng.L.Như Quỳnh'},
+          {tid:'SPA-004', ten:'Bùi Hồng Hà'},
+          {tid:'SPA-006', ten:'Ng.T.Hà Phương'},
+        ],
+        gk2:[
+          {tid:'SPA-003', ten:'Vũ Thu Hà'},
+          {tid:'SPA-005', ten:'Mai Thị Lan Anh'},
+          {tid:'SPA-007', ten:'Trương Phi Luân'},
+          {tid:'SPA-008', ten:'Trần Văn Tuấn'},
+        ],
+        bai:80, sdt:'0942359088' },
+      { tt:3, mon:'Âm vị học', ngay:'2026-05-15', ca:'Ca 2 (13h00)', hinhthuc:'viet',
+        rade:'EXT-003', radeHo:'Bùi Công Ng.Phong',
+        gk1:[{tid:'EXT-003', ten:'Bùi Công Ng.Phong'}],
+        gk2:[{tid:'EXT-002', ten:'Ngô Ngọc Thụy'}],
+        bai:80, sdt:'0913150200' },
+    ]
+  },
 ];
 
 const TEACHING_ASSIGN = [
@@ -937,6 +1083,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // Restore settings
   if (CLAUDE_API_KEY) document.getElementById('claudeKey').value = CLAUDE_API_KEY;
   if (CLAUDE_MODEL)   document.getElementById('claudeModel').value = CLAUDE_MODEL;
+  const savedGasUrl = localStorage.getItem('dnu_gas_url');
+  if (savedGasUrl) document.getElementById('gasUrl').value = savedGasUrl;
+  const tToken = localStorage.getItem('dnu_telegram_token');
+  const tChat  = localStorage.getItem('dnu_telegram_chatid');
+  if (tToken) { document.getElementById('telegramToken').value = tToken; }
+  if (tChat)  { document.getElementById('telegramChatId').value = tChat; }
+  if (tToken || tChat) {
+    document.getElementById('telegramToggle').checked = true;
+    document.getElementById('telegramFields').style.display = 'block';
+  }
+
+  // Upload filename preview wiring
+  document.addEventListener('input', e => {
+    if (e.target.placeholder === 'Tên công văn / thông báo...') updateFilenamePreview();
+  });
 
   renderInsights();
   renderUpcomingExams();
@@ -1014,67 +1175,321 @@ function renderExamTable() {
   tb.innerHTML = EXAM_DATA.map((e,i) => `
     <tr>
       <td>${i+1}</td>
-      <td><span class="badge badge-neutral" style="font-family:monospace">${e.tid}</span></td>
       <td><strong>${e.gv}</strong></td>
       ${e.days.map(d => `<td style="text-align:center">${d ? '<span class="badge badge-primary">✓</span>' : ''}</td>`).join('')}
       <td><strong>${e.total}</strong></td>
     </tr>`).join('') +
-    `<tr style="background:var(--surface2)"><td colspan="3"><strong>Tổng</strong></td>${[2,2,2,2,2,2,8].map(n=>`<td style="text-align:center"><strong>${n}</strong></td>`).join('')}<td><strong>20</strong></td></tr>`;
+    `<tr style="background:var(--surface2)"><td colspan="2"><strong>Tổng</strong></td>${[2,2,2,2,2,2,8].map(n=>`<td style="text-align:center"><strong>${n}</strong></td>`).join('')}<td><strong>20</strong></td></tr>`;
 }
 
-function renderExamAssign() {
-  const tb = document.getElementById('examAssignTbl');
-  if (!tb) return;
+// ── EXAM ASSIGN – ROUNDS ─────────────────────────────────
+let activeRoundId = null;
 
+function renderExamRounds() {
+  if (!EXAM_ROUNDS.length) {
+    document.getElementById('examRoundTabs').innerHTML = '<span style="color:var(--text3);font-size:14px">Chưa có đợt thi nào. Nhấn "Thêm đợt thi" để tạo.</span>';
+    document.getElementById('examRoundContent').innerHTML = '';
+    return;
+  }
+  if (!activeRoundId || !EXAM_ROUNDS.find(r => r.id === activeRoundId)) {
+    activeRoundId = EXAM_ROUNDS[0].id;
+  }
+  const tabs = document.getElementById('examRoundTabs');
+  tabs.innerHTML = EXAM_ROUNDS.map(r => `
+    <button class="btn ${r.id===activeRoundId?'btn-primary':'btn-secondary'} btn-sm"
+      onclick="switchRound('${r.id}')"
+      style="display:flex;align-items:center;gap:6px">
+      📅 ${r.name}
+      <span style="font-size:11px;opacity:.7">${r.from ? r.from.slice(5).replace('-','/') : ''}</span>
+    </button>`).join('') +
+    `<span style="color:var(--text3);font-size:13px;margin-left:4px">${EXAM_ROUNDS.reduce((s,r)=>s+r.items.length,0)} ca thi tổng cộng</span>`;
+
+  const round = EXAM_ROUNDS.find(r => r.id === activeRoundId);
+  renderRoundTable(round);
+}
+
+function switchRound(id) {
+  activeRoundId = id;
+  renderExamRounds();
+}
+
+function renderRoundTable(round) {
   const htLabel = { viet:'📝 Viết', vanDap:'🗣️ Vấn đáp', tracNghiem:'📋 Trắc nghiệm', thucHanh:'🔬 Thực hành' };
   const htBadge = { viet:'badge-primary', vanDap:'badge-danger', tracNghiem:'badge-success', thucHanh:'badge-purple' };
 
-  function renderGKList(list) {
-    if (list.length === 1) {
-      return `<div style="font-size:13px">${list[0].ten}</div>
-              <div style="font-size:11px;color:var(--text3);font-family:monospace">${list[0].tid}</div>`;
-    }
-    // Vấn đáp – multiple examiners shown as numbered list
-    return `<div style="display:flex;flex-direction:column;gap:3px">
-      ${list.map((g,i) => `
-        <div style="display:flex;align-items:center;gap:6px">
-          <span style="font-size:10px;font-weight:700;color:var(--text3);min-width:14px">${i+1}.</span>
-          <div>
-            <div style="font-size:13px;font-weight:500">${g.ten}</div>
-            <div style="font-size:10px;color:var(--text3);font-family:monospace">${g.tid}</div>
-          </div>
-        </div>`).join('')}
-    </div>`;
+  function fmtDate(d) {
+    if (!d) return '–';
+    const p = d.split('-');
+    return `${p[2]}/${p[1]}/${p[0]}`;
   }
 
-  tb.innerHTML = EXAM_ASSIGN.map(e => {
-    const isVanDap = e.hinhthuc === 'vanDap';
-    const rowBg = isVanDap ? 'background:linear-gradient(90deg,#fff7ed,#fff)' : '';
-    return `<tr style="${rowBg}">
-      <td>${e.tt}</td>
-      <td>
-        <div style="font-weight:700">${e.mon}</div>
-        ${isVanDap ? `<div style="font-size:11px;color:var(--danger);font-weight:600;margin-top:2px">▶ ${e.gk1.length + e.gk2.length} GV tham gia</div>` : ''}
-      </td>
-      <td>${e.ngay}</td>
-      <td><span class="badge ${htBadge[e.hinhthuc]||'badge-neutral'}">${htLabel[e.hinhthuc]||e.hinhthuc}</span></td>
-      <td>
-        <div style="font-size:13px">${e.radeHo}</div>
-        <div style="font-size:11px;color:var(--text3);font-family:monospace">${e.rade}</div>
-      </td>
-      <td style="min-width:160px">${renderGKList(e.gk1)}</td>
-      <td style="min-width:160px">${renderGKList(e.gk2)}</td>
-      <td>~${e.bai}</td>
-      <td><small style="font-family:monospace">${e.sdt}</small></td>
-      <td>
-        <div class="td-act">
-          <button class="btn btn-secondary btn-sm" onclick="showToast('info','Chỉnh sửa','✏️')">✏️</button>
-          <button class="btn btn-ai btn-sm" onclick="askAI('Đề xuất giám khảo thay thế cho môn ${e.mon} (${htLabel[e.hinhthuc]})')">🤖</button>
-        </div>
-      </td>
-    </tr>`;
-  }).join('');
+  function renderGKList(list) {
+    if (!list || !list.length) return '–';
+    if (list.length === 1) return `<div style="font-size:13px;font-weight:500">${list[0].ten}</div>`;
+    return `<div style="display:flex;flex-direction:column;gap:3px">${list.map((g,i)=>`
+      <div style="display:flex;align-items:center;gap:5px">
+        <span style="font-size:11px;color:var(--text3);min-width:14px">${i+1}.</span>
+        <span style="font-size:13px">${g.ten}</span>
+      </div>`).join('')}</div>`;
+  }
+
+  const content = document.getElementById('examRoundContent');
+  if (!round.items.length) {
+    content.innerHTML = `<div class="card" style="padding:32px;text-align:center;color:var(--text3)">
+      <div style="font-size:32px;margin-bottom:10px">📋</div>
+      <div style="font-size:15px;font-weight:600">Đợt thi <strong>${round.name}</strong> chưa có ca thi nào</div>
+      <div style="font-size:13px;margin-top:6px">Nhấn <strong>"+ Thêm ca thi"</strong> để thêm môn thi vào đợt này</div>
+    </div>`;
+    return;
+  }
+
+  content.innerHTML = `
+    <div style="margin-bottom:8px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:13px;color:var(--text2)">📅 ${round.name}: ${fmtDate(round.from)} – ${fmtDate(round.to)}</span>
+      ${round.note ? `<span class="badge badge-neutral">${round.note}</span>` : ''}
+      <button class="btn btn-danger btn-sm" onclick="deleteRound('${round.id}')" style="margin-left:auto">🗑️ Xoá đợt</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>TT</th><th>Học phần</th><th>Ngày thi</th><th>Ca thi</th><th>Hình thức</th><th>GV ra đề</th><th>GK1</th><th>GK2</th><th>Số bài</th><th>SĐT</th><th>Thao tác</th></tr></thead>
+        <tbody>${round.items.map((e,idx) => {
+          const isVanDap = e.hinhthuc === 'vanDap';
+          return `<tr style="${isVanDap?'background:linear-gradient(90deg,#fff7ed,#fff)':''}">
+            <td>${idx+1}</td>
+            <td><div style="font-weight:600">${e.mon}</div>${isVanDap?`<div style="font-size:11px;color:var(--danger)">${e.gk1.length+e.gk2.length} GV tham gia</div>`:''}</td>
+            <td><strong>${fmtDate(e.ngay)}</strong></td>
+            <td><span class="badge badge-primary">${e.ca}</span></td>
+            <td><span class="badge ${htBadge[e.hinhthuc]||'badge-neutral'}">${htLabel[e.hinhthuc]||e.hinhthuc}</span></td>
+            <td style="font-size:13px">${e.radeHo}</td>
+            <td style="min-width:140px">${renderGKList(e.gk1)}</td>
+            <td style="min-width:140px">${renderGKList(e.gk2)}</td>
+            <td>~${e.bai}</td>
+            <td><small style="font-family:monospace">${e.sdt}</small></td>
+            <td><div class="td-act">
+              <button class="btn btn-danger btn-sm" onclick="deleteExamItem('${round.id}',${idx})">🗑️</button>
+              <button class="btn btn-ai btn-sm" onclick="askAI('Đề xuất GK thay thế cho môn ${e.mon} (${htLabel[e.hinhthuc]})')">🤖</button>
+            </div></td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`;
 }
+
+function addExamRound() {
+  const name = document.getElementById('newRoundName').value.trim();
+  if (!name) { showToast('error','Vui lòng nhập tên đợt thi','⚠️'); return; }
+  const r = {
+    id: 'r' + Date.now(),
+    name,
+    from: document.getElementById('newRoundFrom').value,
+    to:   document.getElementById('newRoundTo').value,
+    note: document.getElementById('newRoundNote').value,
+    items: []
+  };
+  EXAM_ROUNDS.push(r);
+  activeRoundId = r.id;
+  closeModal('modalAddExamRound');
+  renderExamRounds();
+  showToast('success', `Đã tạo đợt thi: ${name}`, '📅');
+  ['newRoundName','newRoundFrom','newRoundTo','newRoundNote'].forEach(id => { document.getElementById(id).value=''; });
+}
+
+function deleteRound(id) {
+  if (!confirm('Xoá đợt thi này? Tất cả ca thi trong đợt sẽ bị xoá.')) return;
+  EXAM_ROUNDS = EXAM_ROUNDS.filter(r => r.id !== id);
+  activeRoundId = EXAM_ROUNDS.length ? EXAM_ROUNDS[0].id : null;
+  renderExamRounds();
+  showToast('success','Đã xoá đợt thi','🗑️');
+}
+
+function deleteExamItem(roundId, idx) {
+  if (!confirm('Xoá ca thi này?')) return;
+  const r = EXAM_ROUNDS.find(r => r.id === roundId);
+  if (r) r.items.splice(idx, 1);
+  renderExamRounds();
+  showToast('success','Đã xoá ca thi','🗑️');
+}
+
+function openAddExamItemModal() {
+  // Populate round select
+  const sel = document.getElementById('newItemRound');
+  sel.innerHTML = EXAM_ROUNDS.map(r => `<option value="${r.id}" ${r.id===activeRoundId?'selected':''}>${r.name}</option>`).join('');
+  // Populate GV selects
+  const gvOpts = '<option value="">-- Chọn GV --</option>' + USERS.map(u=>`<option value="${u.teacherId}">${u.fullname}</option>`).join('');
+  ['newItemRade','newItemGk1','newItemGk2'].forEach(id => { document.getElementById(id).innerHTML = gvOpts; });
+  openModal('modalAddExamItem');
+}
+
+function toggleGKFields() {
+  const ht = document.getElementById('newItemHinhthuc').value;
+  document.getElementById('gkSingleFields').style.display = ht === 'vanDap' ? 'none' : 'block';
+  document.getElementById('gkMultiFields').style.display  = ht === 'vanDap' ? 'block' : 'none';
+}
+
+let gkPairCount = 1;
+function addGKPair() {
+  gkPairCount++;
+  const gvOpts = USERS.map(u=>`<option value="${u.teacherId}">${u.fullname}</option>`).join('');
+  const div = document.createElement('div');
+  div.className = 'form-row';
+  div.innerHTML = `
+    <div class="form-group"><label>GK1 – Hội đồng ${gkPairCount}</label>
+      <select class="form-input gk1-extra"><option value="">-- Chọn GV --</option>${gvOpts}</select></div>
+    <div class="form-group"><label>GK2 – Hội đồng ${gkPairCount}</label>
+      <select class="form-input gk2-extra"><option value="">-- Chọn GV --</option>${gvOpts}</select></div>`;
+  document.getElementById('gkMultiList').appendChild(div);
+}
+
+function addExamItem() {
+  const roundId = document.getElementById('newItemRound').value;
+  const mon     = document.getElementById('newItemMon').value.trim();
+  const ngay    = document.getElementById('newItemNgay').value;
+  const ca      = document.getElementById('newItemCa').value;
+  const ht      = document.getElementById('newItemHinhthuc').value;
+  if (!roundId || !mon || !ngay) { showToast('error','Vui lòng điền đầy đủ thông tin bắt buộc','⚠️'); return; }
+
+  const radeTid = document.getElementById('newItemRade').value;
+  const radeHo  = radeTid ? (USERS.find(u=>u.teacherId===radeTid)||{fullname:radeTid}).fullname : '–';
+
+  let gk1 = [], gk2 = [];
+  if (ht === 'vanDap') {
+    // collect all gk pairs including first (from newItemGk1/newItemGk2 if exist in multi)
+    const gk1Els = document.querySelectorAll('#gkMultiList .gk1-extra');
+    const gk2Els = document.querySelectorAll('#gkMultiList .gk2-extra');
+    gk1Els.forEach(s => { if(s.value) { const u=USERS.find(x=>x.teacherId===s.value); gk1.push({tid:s.value,ten:u?u.fullname:s.value}); }});
+    gk2Els.forEach(s => { if(s.value) { const u=USERS.find(x=>x.teacherId===s.value); gk2.push({tid:s.value,ten:u?u.fullname:s.value}); }});
+  } else {
+    const g1tid = document.getElementById('newItemGk1').value;
+    const g2tid = document.getElementById('newItemGk2').value;
+    if (g1tid) { const u=USERS.find(x=>x.teacherId===g1tid); gk1.push({tid:g1tid,ten:u?u.fullname:g1tid}); }
+    if (g2tid) { const u=USERS.find(x=>x.teacherId===g2tid); gk2.push({tid:g2tid,ten:u?u.fullname:g2tid}); }
+  }
+
+  const round = EXAM_ROUNDS.find(r => r.id === roundId);
+  round.items.push({
+    tt: round.items.length + 1, mon, ngay, ca, hinhthuc: ht,
+    rade: radeTid, radeHo, gk1, gk2,
+    bai: parseInt(document.getElementById('newItemBai').value) || 40,
+    sdt: document.getElementById('newItemSdt').value
+  });
+
+  activeRoundId = roundId;
+  closeModal('modalAddExamItem');
+  renderExamRounds();
+  showToast('success', `Đã thêm: ${mon} vào ${round.name}`, '✅');
+  // reset
+  ['newItemMon','newItemNgay','newItemSdt','newItemBai'].forEach(id => { document.getElementById(id).value=''; });
+  document.getElementById('gkMultiList').innerHTML = '';
+  gkPairCount = 1;
+}
+
+// ── UPLOAD FILENAME PREVIEW ───────────────────────────────
+function updateFilenamePreview() {
+  const titleEl = document.querySelector('#modalUpload .form-input[placeholder="Tên công văn / thông báo..."]');
+  if (!titleEl) return;
+  const title = titleEl.value.trim().replace(/\s+/g,'_') || 'TenCongVan';
+  const d = new Date();
+  const yyyymmdd = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  const prev = document.getElementById('previewFileName');
+  if (prev) prev.textContent = `${yyyymmdd}_${title}.[pdf/docx/jpg]`;
+}
+
+// ── TELEGRAM ─────────────────────────────────────────────
+function toggleTelegramFields(el) {
+  document.getElementById('telegramFields').style.display = el.checked ? 'block' : 'none';
+}
+function saveTelegramConfig() {
+  const token  = document.getElementById('telegramToken').value.trim();
+  const chatId = document.getElementById('telegramChatId').value.trim();
+  if (!token || !chatId) { showToast('error','Vui lòng nhập Bot Token và Chat ID','⚠️'); return; }
+  localStorage.setItem('dnu_telegram_token', token);
+  localStorage.setItem('dnu_telegram_chatid', chatId);
+  showToast('success','Đã lưu cấu hình Telegram','📱');
+}
+async function testTelegram() {
+  const token  = document.getElementById('telegramToken').value || localStorage.getItem('dnu_telegram_token');
+  const chatId = document.getElementById('telegramChatId').value || localStorage.getItem('dnu_telegram_chatid');
+  if (!token || !chatId) { showToast('error','Cần nhập Bot Token và Chat ID trước','⚠️'); return; }
+  showLoading();
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${token}/sendMessage`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ chat_id: chatId, text: '✅ Kết nối Telegram thành công từ Quản lý Bộ môn DNU!' })
+    });
+    const d = await r.json();
+    hideLoading();
+    if (d.ok) showToast('success','Đã gửi tin nhắn test thành công!','📱');
+    else showToast('error','Lỗi: ' + d.description,'❌');
+  } catch(e) { hideLoading(); showToast('error','Không thể kết nối Telegram','❌'); }
+}
+
+// ── EXPORT ALL DATA ───────────────────────────────────────
+function exportAllData() {
+  showLoading();
+  const semName = document.getElementById('semesterName')?.value || 'HK_IV_2025-2026';
+  const data = {
+    exportedAt: new Date().toISOString(),
+    semester: semName,
+    users: USERS,
+    examRounds: EXAM_ROUNDS,
+    teachingAssign: TEACHING_ASSIGN,
+    schedule: SCHEDULE_DATA,
+    notices: NOTICES_DATA,
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `DNU_BM_${semName.replace(/\s/g,'_')}_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  hideLoading();
+  showToast('success', 'Đã xuất dữ liệu thành công', '⬇️');
+
+  const gasUrl = localStorage.getItem('dnu_gas_url');
+  if (gasUrl) {
+    fetch(gasUrl, { method:'POST', body: JSON.stringify({ action:'exportYearData', data }) })
+      .then(() => showToast('success','Đã lưu vào Google Sheets','📊'))
+      .catch(() => {});
+  }
+}
+
+function endOfYear() {
+  const confirm1 = document.getElementById('endYearConfirm').value.trim();
+  const semName  = document.getElementById('semesterName')?.value || 'Học kỳ IV – 2025-2026';
+  if (confirm1 !== semName) {
+    showToast('error', 'Tên học kỳ không khớp. Vui lòng nhập chính xác.', '⚠️');
+    return;
+  }
+  if (!confirm(`Xác nhận kết thúc năm học "${semName}"?\n\nDữ liệu sẽ được xuất và hệ thống sẽ reset.\nThao tác này không thể hoàn tác.`)) return;
+
+  // Export first
+  exportAllData();
+
+  // Reset data (keep users & settings)
+  setTimeout(() => {
+    EXAM_ROUNDS.length = 0;
+    TEACHING_ASSIGN.length = 0;
+    SCHEDULE_DATA.length = 0;
+    NOTICES_DATA.length = 0;
+    activeRoundId = null;
+
+    // Re-render
+    renderExamRounds();
+    renderTeachingTable();
+    renderScheduleTable();
+    renderNotices();
+    renderReportCharts();
+    renderReportTable();
+
+    document.getElementById('endYearConfirm').value = '';
+    showToast('success', `Đã kết thúc năm học "${semName}" và reset hệ thống`, '🎓');
+    goView('overview', null);
+  }, 1000);
+}
+
+// ── EXAM ASSIGN ENTRY POINT ───────────────────────────────
+function renderExamAssign() { renderExamRounds(); }
 
 function renderTeachingTable() {
   const tb = document.getElementById('teachTbl');
@@ -1171,7 +1586,6 @@ function renderReportTable() {
     const def = 270; const diff = u.hours - def;
     const diffColor = diff >= 0 ? 'var(--success)' : 'var(--primary)';
     return `<tr>
-      <td><span style="font-family:monospace;font-size:13px;font-weight:700;color:var(--text2)">${u.teacherId}</span></td>
       <td><strong>${u.fullname}</strong></td>
       <td>${u.classes}</td><td>${u.hours}</td><td>${u.hours}</td><td>${def}</td>
       <td style="color:${diffColor};font-weight:600">${diff>=0?'+':''}${diff}</td>
@@ -1376,6 +1790,7 @@ function saveClaudeKey() {
 function testGASConnection() {
   const url = document.getElementById('gasUrl').value.trim();
   if (!url) { showToast('error','Vui lòng nhập GAS URL','⚠️'); return; }
+  localStorage.setItem('dnu_gas_url', url);
   showLoading();
   setTimeout(() => { hideLoading(); showToast('success','Kết nối GAS thành công!','🔌'); }, 1200);
 }
