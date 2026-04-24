@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Giảng Viên – Khoa Ngoại Ngữ DNU</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sidebar: #1e2535;
+  --sidebar-icon: #6b7a99;
+  --sidebar-active: #f97316;
+  --bg: #f0f0ed;
+  --surface: #ffffff;
+  --text: #1a1a2e;
+  --text2: #6b7280;
+  --text3: #9ca3af;
+  --border: #e8e8e4;
+  --accent: #f97316;
+  --accent2: #3b82f6;
+  --success: #22c55e;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --font: 'DM Sans', sans-serif;
+  --sidebar-w: 68px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+
+/* SIDEBAR */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--sidebar);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+  position: fixed;
+  left: 0; top: 0;
+  z-index: 100;
+}
+.sidebar-logo {
+  width: 36px; height: 36px;
+  background: var(--accent);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; margin-bottom: 32px;
+}
+.sidebar-nav { flex: 1; display: flex; flex-direction: column; gap: 4px; width: 100%; align-items: center; padding: 0 12px; }
+.nav-icon-btn {
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--sidebar-icon);
+  font-size: 20px;
+  position: relative;
+}
+.nav-icon-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.nav-icon-btn.active { background: rgba(249,115,22,0.15); color: var(--accent); }
+.nav-icon-btn .tooltip {
+  position: absolute;
+  left: 56px; top: 50%;
+  transform: translateY(-50%);
+  background: var(--sidebar);
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 999;
+}
+.nav-icon-btn:hover .tooltip { opacity: 1; }
+.sidebar-footer { display: flex; flex-direction: column; gap: 4px; align-items: center; padding: 0 12px; }
+.sidebar-divider { width: 32px; height: 1px; background: rgba(255,255,255,0.1); margin: 8px 0; }
+
+/* MAIN */
+.main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; padding: 28px 28px 28px; }
+
+/* TOPBAR */
+.topbar { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+.topbar-greeting { flex: 1; }
+.topbar-greeting h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+.topbar-greeting p { color: var(--text2); margin-top: 2px; font-size: 15px; }
+.search-bar {
+  flex: 1; max-width: 420px;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 16px;
+}
+.search-bar input { flex: 1; border: none; outline: none; font-family: var(--font); font-size: 14px; color: var(--text); background: transparent; }
+.search-bar input::placeholder { color: var(--text3); }
+.search-icon { color: var(--text3); font-size: 16px; }
+.avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f97316, #fb923c);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 700; color: #fff;
+  cursor: pointer; flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(249,115,22,0.3);
+}
+
+/* GRID LAYOUT */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 20px;
+}
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 22px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.card-title {
+  font-size: 16px; font-weight: 700;
+  background: #1a1a2e;
+  color: #fff;
+  display: inline-block;
+  padding: 5px 14px;
+  border-radius: 8px;
+  margin-bottom: 18px;
+}
+
+/* CALENDAR */
+.calendar-card { grid-column: 1; }
+.cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.cal-header h3 { font-size: 15px; font-weight: 700; }
+.cal-nav { display: flex; gap: 6px; }
+.cal-nav button {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 12px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.cal-nav button:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; }
+.cal-day-label { font-size: 11px; font-weight: 600; color: var(--text3); padding: 4px 0; }
+.cal-day {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  font-size: 13px;
+  cursor: pointer;
+  margin: 1px auto;
+  transition: all 0.2s;
+  position: relative;
+}
+.cal-day:hover { background: var(--bg); }
+.cal-day.other-month { color: var(--text3); }
+.cal-day.today { background: var(--accent); color: #fff; font-weight: 700; }
+.cal-day.has-event::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  width: 4px; height: 4px;
+  background: var(--accent2);
+  border-radius: 50%;
+}
+.cal-day.today::after { background: #fff; }
+
+/* DEADLINES */
+.deadlines-card { grid-column: 2 / 4; }
+.deadline-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.deadline-item:last-child { border-bottom: none; padding-bottom: 0; }
+.deadline-check {
+  width: 22px; height: 22px;
+  border: 2px solid #d1d5db;
+  border-radius: 50%;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+}
+.deadline-check:hover { border-color: var(--accent); }
+.deadline-check.done { background: var(--success); border-color: var(--success); color: #fff; font-size: 12px; }
+.deadline-text { flex: 1; font-size: 14px; font-weight: 500; }
+.deadline-text.done { text-decoration: line-through; color: var(--text3); }
+.deadline-when { font-size: 13px; font-weight: 600; }
+.deadline-when.today { color: #f43f5e; }
+.deadline-when.soon { color: var(--warning); }
+.deadline-when.ok { color: var(--text3); }
+
+/* TODAY'S CLASSES */
+.classes-card { grid-column: 1; }
+.class-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.class-item:last-child { border-bottom: none; }
+.class-item:hover { opacity: 0.75; }
+.class-icon { color: var(--text3); font-size: 14px; }
+.class-name { flex: 1; font-size: 14px; font-weight: 500; }
+.class-avatars { display: flex; }
+.class-avatar {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: 2px solid var(--surface);
+  margin-left: -6px;
+  font-size: 11px; font-weight: 700; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.class-avatar:first-child { margin-left: 0; }
+.class-avatar.orange { background: linear-gradient(135deg, #f97316, #fb923c); }
+.class-avatar.green { background: linear-gradient(135deg, #22c55e, #4ade80); }
+.class-avatar.blue { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+.class-avatar.pink { background: linear-gradient(135deg, #ec4899, #f472b6); }
+
+/* NOTICES */
+.notices-card { grid-column: 2; }
+.notice-item-mini {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.notice-item-mini:hover { opacity: 0.75; }
+.notice-item-mini:last-child { border-bottom: none; padding-bottom: 0; }
+.notice-avatar-mini {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f97316, #fb923c);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: #fff;
+}
+.notice-body-mini { flex: 1; min-width: 0; }
+.notice-from { font-size: 11px; color: var(--text3); }
+.notice-preview { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.notice-arrow { color: var(--text3); font-size: 16px; align-self: center; }
+.exam-stats { margin-top: 16px; }
+.exam-stats-title { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+.exam-hk-grid { display: flex; gap: 8px; }
+.hk-box {
+  flex: 1;
+  background: #1a1a2e;
+  border-radius: 10px;
+  padding: 12px 8px;
+  text-align: center;
+}
+.hk-label { font-size: 11px; font-weight: 700; color: #22c55e; letter-spacing: 1px; }
+.hk-count { font-size: 22px; font-weight: 800; color: #fff; }
+.hk-sub { font-size: 10px; color: #9ca3af; }
+
+/* SYLLABUS */
+.syllabus-card { grid-column: 3; }
+.syllabus-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.syllabus-item:last-child { border-bottom: none; }
+.syllabus-item:hover { opacity: 0.75; }
+.syllabus-icon { color: var(--text3); font-size: 13px; }
+.syllabus-name { flex: 1; font-size: 14px; font-weight: 500; }
+.syllabus-status {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+}
+.syllabus-status.pending { background: var(--warning); }
+.syllabus-status.missing { background: var(--danger); }
+
+/* VIEWS */
+.view { display: none; }
+.view.active { display: block; }
+
+/* DEADLINE PAGE */
+.deadline-page { }
+.deadline-section { background: var(--surface); border-radius: var(--radius); padding: 22px; margin-bottom: 16px; }
+.deadline-section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+.deadline-row {
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.deadline-row:last-child { border-bottom: none; }
+.dl-check {
+  width: 22px; height: 22px;
+  border: 2px solid #d1d5db;
+  border-radius: 50%; flex-shrink: 0;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+}
+.dl-check:hover { border-color: var(--success); }
+.dl-check.done { background: var(--success); border-color: var(--success); color: #fff; font-size: 12px; }
+.dl-name { flex: 1; font-size: 14px; font-weight: 500; }
+.dl-name.done { text-decoration: line-through; color: var(--text3); }
+.dl-date { font-size: 13px; font-weight: 600; color: #f43f5e; min-width: 80px; }
+.dl-date.tomorrow { color: var(--warning); }
+.dl-date.week { color: var(--accent2); }
+.pill {
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.pill-blue { background: #dbeafe; color: #2563eb; }
+.pill-purple { background: #ede9fe; color: #7c3aed; }
+.pill-green { background: #dcfce7; color: #16a34a; }
+.pill-pink { background: #fce7f3; color: #db2777; }
+.pill-orange { background: #ffedd5; color: #ea580c; }
+.dl-dept { font-size: 13px; color: var(--text2); min-width: 120px; }
+.dl-avatars { display: flex; }
+
+/* LỊCH CÁ NHÂN (full calendar) */
+.full-cal-wrapper { background: var(--surface); border-radius: var(--radius); padding: 22px; }
+.full-cal-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.full-cal-header h2 { font-size: 20px; font-weight: 700; flex: 1; }
+.week-view { display: grid; grid-template-columns: 60px repeat(5, 1fr); gap: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.wv-header { background: var(--bg); padding: 10px; text-align: center; font-size: 12px; font-weight: 700; color: var(--text2); border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
+.wv-header.today-col { background: #fff7ed; color: var(--accent); }
+.wv-time { background: var(--bg); padding: 10px 8px; font-size: 11px; color: var(--text3); border-right: 2px solid var(--border); border-bottom: 1px solid var(--border); text-align: center; min-height: 70px; display: flex; align-items: flex-start; justify-content: center; padding-top: 10px; }
+.wv-cell { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 6px; min-height: 70px; }
+.wv-event { background: #fff7ed; border-left: 3px solid var(--accent); border-radius: 6px; padding: 5px 7px; font-size: 11px; margin-bottom: 3px; cursor: pointer; }
+.wv-event strong { display: block; font-size: 12px; color: var(--accent); }
+.wv-event.exam { background: #fef3c7; border-color: var(--warning); }
+.wv-event.exam strong { color: var(--warning); }
+
+/* PROFILE VIEW */
+.profile-layout { display: grid; grid-template-columns: 280px 1fr; gap: 20px; }
+.profile-card-big { background: var(--surface); border-radius: var(--radius); padding: 28px; text-align: center; }
+.profile-avatar-big {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f97316, #fb923c);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; font-weight: 800; color: #fff;
+  margin: 0 auto 16px;
+  box-shadow: 0 4px 16px rgba(249,115,22,0.3);
+}
+.profile-name { font-size: 20px; font-weight: 800; }
+.profile-role { color: var(--text2); font-size: 14px; margin-top: 4px; }
+.profile-stats { display: flex; justify-content: space-around; margin: 20px 0; padding: 16px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.p-stat .num { font-size: 22px; font-weight: 800; color: var(--accent); }
+.p-stat .lbl { font-size: 11px; color: var(--text2); }
+.profile-edit-card { background: var(--surface); border-radius: var(--radius); padding: 24px; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 6px; }
+.form-input { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-family: var(--font); font-size: 14px; color: var(--text); background: var(--surface); transition: border-color 0.2s; }
+.form-input:focus { outline: none; border-color: var(--accent); }
+.btn-save { background: var(--accent); color: #fff; padding: 10px 24px; border-radius: 10px; font-family: var(--font); font-weight: 600; font-size: 14px; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-save:hover { background: #ea580c; }
+
+/* TOAST */
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 999; display: flex; flex-direction: column; gap: 8px; }
+.toast { background: var(--sidebar); color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; animation: toastIn 0.3s ease; box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+@keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
+
+/* BOTTOM NAV MOBILE */
+.bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 8px 0; z-index: 90; }
+.bottom-nav-inner { display: flex; justify-content: space-around; }
+.bnav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; color: var(--text3); cursor: pointer; padding: 4px 12px; border-radius: 8px; }
+.bnav-item.active { color: var(--accent); }
+.bnav-item .icon { font-size: 20px; }
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: 16px 16px 80px; }
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .calendar-card, .deadlines-card, .classes-card, .notices-card, .syllabus-card { grid-column: 1 !important; }
+  .bottom-nav { display: block; }
+  .profile-layout { grid-template-columns: 1fr; }
+  .topbar { gap: 10px; }
+  .search-bar { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">🏛️</div>
+  <div class="sidebar-nav">
+    <div class="nav-icon-btn active" onclick="switchView('home',this)" title="">
+      🏠<span class="tooltip">Trang chủ</span>
+    </div>
+    <div class="nav-icon-btn" onclick="switchView('schedule',this)">
+      📅<span class="tooltip">Lịch cá nhân</span>
+    </div>
+    <div class="nav-icon-btn" onclick="switchView('teaching',this)">
+      🎓<span class="tooltip">Phân công dạy</span>
+    </div>
+    <div class="nav-icon-btn" onclick="switchView('tasks',this)">
+      ✅<span class="tooltip">Deadline</span>
+    </div>
+    <div class="nav-icon-btn" onclick="switchView('syllabus',this)">
+      📋<span class="tooltip">Đề cương</span>
+    </div>
+  </div>
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-footer">
+    <div class="nav-icon-btn" onclick="switchView('profile',this)">
+      ⚙️<span class="tooltip">Hồ sơ & Cài đặt</span>
+    </div>
+    <div class="nav-icon-btn" onclick="doLogout()">
+      🚪<span class="tooltip">Đăng xuất</span>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- VIEW: HOME -->
+  <div class="view active" id="view-home">
+    <div class="topbar">
+      <div class="topbar-greeting">
+        <h1 id="welcomeTitle">Xin chào, Thanh Tú!</h1>
+        <p>Đây là lịch công việc hôm nay của bạn</p>
+      </div>
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search" oninput="handleSearch(this.value)">
+      </div>
+      <div class="avatar" id="mainAvatar">T</div>
+    </div>
+
+    <div class="dashboard-grid">
+
+      <!-- CALENDAR -->
+      <div class="card calendar-card">
+        <div class="cal-header">
+          <h3 id="calMonthLabel">Tháng 4, 2026</h3>
+          <div class="cal-nav">
+            <button onclick="prevMonth()">‹</button>
+            <button onclick="nextMonth()">›</button>
+          </div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+
+      <!-- DEADLINES -->
+      <div class="card deadlines-card">
+        <div class="card-title">Deadlines công việc</div>
+        <div id="deadlinesList"></div>
+      </div>
+
+      <!-- TODAY'S CLASSES -->
+      <div class="card classes-card">
+        <div class="card-title">Các lớp học ngày hôm nay</div>
+        <div id="classesList"></div>
+      </div>
+
+      <!-- NOTICES + EXAM STATS -->
+      <div class="card notices-card">
+        <div class="card-title">Thông báo & công văn</div>
+        <div id="noticesMini"></div>
+        <div class="exam-stats">
+          <div class="exam-stats-title">Số ca thi đã gác trong năm</div>
+          <div class="exam-hk-grid" id="examHkGrid"></div>
+        </div>
+      </div>
+
+      <!-- SYLLABUS -->
+      <div class="card syllabus-card">
+        <div class="card-title">Đề cương chi tiết</div>
+        <div id="syllabusList"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- VIEW: TASKS/DEADLINES -->
+  <div class="view" id="view-tasks">
+    <div class="topbar">
+      <div class="topbar-greeting"><h1>Deadline công việc</h1></div>
+      <div class="avatar" id="taskAvatar">T</div>
+    </div>
+    <div class="deadline-page" id="deadlinePage"></div>
+  </div>
+
+  <!-- VIEW: SCHEDULE -->
+  <div class="view" id="view-schedule">
+    <div class="topbar">
+      <div class="topbar-greeting"><h1>Lịch cá nhân</h1></div>
+      <div class="avatar">T</div>
+    </div>
+    <div class="full-cal-wrapper">
+      <div class="full-cal-header">
+        <h2 id="weekTitle">Tuần 18: 20/4 – 25/4/2026</h2>
+        <button class="btn-save" style="background:var(--bg);color:var(--text);border:1.5px solid var(--border)" onclick="prevWeek()">← Trước</button>
+        <button class="btn-save" onclick="nextWeek()">Tiếp →</button>
+      </div>
+      <div id="weekViewGrid"></div>
+    </div>
+  </div>
+
+  <!-- VIEW: TEACHING -->
+  <div class="view" id="view-teaching">
+    <div class="topbar">
+      <div class="topbar-greeting"><h1>Phân công giảng dạy</h1></div>
+      <div class="avatar">T</div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr style="background:var(--bg)">
+            <th style="padding:14px 16px;text-align:left;font-size:12px;font-weight:700;color:var(--text2);border-bottom:1px solid var(--border)">MÔN HỌC</th>
+            <th style="padding:14px 16px;text-align:left;font-size:12px;font-weight:700;color:var(--text2);border-bottom:1px solid var(--border)">LỚP</th>
+            <th style="padding:14px 16px;text-align:left;font-size:12px;font-weight:700;color:var(--text2);border-bottom:1px solid var(--border)">TIẾT LT</th>
+            <th style="padding:14px 16px;text-align:left;font-size:12px;font-weight:700;color:var(--text2);border-bottom:1px solid var(--border)">LỊCH</th>
+            <th style="padding:14px 16px;text-align:left;font-size:12px;font-weight:700;color:var(--text2);border-bottom:1px solid var(--border)">PHÒNG</th>
+            <th style="padding:14px 16px;text-align:left;font-size:12px;font-weight:700;color:var(--text2);border-bottom:1px solid var(--border)">TRẠNG THÁI</th>
+          </tr>
+        </thead>
+        <tbody id="teachingTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- VIEW: SYLLABUS -->
+  <div class="view" id="view-syllabus">
+    <div class="topbar">
+      <div class="topbar-greeting"><h1>Đề cương chi tiết</h1></div>
+      <div class="avatar">T</div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr style="background:var(--bg)">
+            <th style="padding:14px 16px;text-align:left;font-size:12px;font-weight:700;color:var(--text2);border-bottom:1px solid var(--border)">MÔN HỌC</th>
+            <th style="padding:14px 16px;text-align:left;font-size:12px;font-weight:700;color:var(--text2);border-bottom:1px solid var(--border)">HỌC KỲ</th>
+            <th style="padding:14px 16px;text-align:left;font-size:12px;font-weight:700;color:var(--text2);border-bottom:1px solid var(--border)">CẬP NHẬT</th>
+            <th style="padding:14px 16px;text-align:left;font-size:12px;font-weight:700;color:var(--text2);border-bottom:1px solid var(--border)">TRẠNG THÁI</th>
+            <th style="padding:14px 16px;text-align:left;font-size:12px;font-weight:700;color:var(--text2);border-bottom:1px solid var(--border)">HÀNH ĐỘNG</th>
+          </tr>
+        </thead>
+        <tbody id="syllabusTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- VIEW: PROFILE -->
+  <div class="view" id="view-profile">
+    <div class="topbar">
+      <div class="topbar-greeting"><h1>Hồ sơ cá nhân</h1></div>
+    </div>
+    <div class="profile-layout">
+      <div class="profile-card-big">
+        <div class="profile-avatar-big" id="profileAvatarBig">T</div>
+        <div class="profile-name" id="profileNameBig">Dương Thanh Tú</div>
+        <div class="profile-role">Giảng viên – Tổ SPA</div>
+        <div class="profile-stats">
+          <div class="p-stat"><div class="num">4</div><div class="lbl">Lớp</div></div>
+          <div class="p-stat"><div class="num">120</div><div class="lbl">Tiết</div></div>
+          <div class="p-stat"><div class="num">4</div><div class="lbl">Ca thi</div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2)"><span>📧</span><span id="profileEmail">duongthanhtu@dnu.edu.vn</span></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2)"><span>📱</span><span id="profilePhone">0942359088</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="profile-edit-card mb-16" style="margin-bottom:16px">
+          <h3 style="font-size:16px;font-weight:700;margin-bottom:16px">✏️ Cập nhật thông tin</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div class="form-group"><label>Họ và tên</label><input class="form-input" id="editName" value="Dương Thanh Tú"></div>
+            <div class="form-group"><label>Email</label><input class="form-input" id="editEmail" value="duongthanhtu@dnu.edu.vn"></div>
+            <div class="form-group"><label>Điện thoại</label><input class="form-input" id="editPhone" value="0942359088"></div>
+            <div class="form-group"><label>Chuyên môn</label><input class="form-input" id="editSpecial" value="PP giảng dạy, Kỹ năng ngôn ngữ"></div>
+          </div>
+          <button class="btn-save" onclick="saveProfile()">💾 Lưu thay đổi</button>
+        </div>
+        <div class="profile-edit-card">
+          <h3 style="font-size:16px;font-weight:700;margin-bottom:16px">🔒 Đổi mật khẩu</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+            <div class="form-group"><label>Mật khẩu hiện tại</label><input class="form-input" type="password" placeholder="••••••••"></div>
+            <div class="form-group"><label>Mật khẩu mới</label><input class="form-input" type="password" placeholder="••••••••"></div>
+            <div class="form-group"><label>Xác nhận</label><input class="form-input" type="password" placeholder="••••••••"></div>
+          </div>
+          <button class="btn-save" onclick="toast('✅ Đã đổi mật khẩu thành công')">🔒 Đổi mật khẩu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <div class="bnav-item active" onclick="switchView('home',null);setBottomNav(this)"><span class="icon">🏠</span>Nhà</div>
+    <div class="bnav-item" onclick="switchView('schedule',null);setBottomNav(this)"><span class="icon">📅</span>Lịch</div>
+    <div class="bnav-item" onclick="switchView('tasks',null);setBottomNav(this)"><span class="icon">✅</span>Việc</div>
+    <div class="bnav-item" onclick="switchView('syllabus',null);setBottomNav(this)"><span class="icon">📋</span>Đề cương</div>
+    <div class="bnav-item" onclick="switchView('profile',null);setBottomNav(this)"><span class="icon">⚙️</span>Hồ sơ</div>
+  </div>
+</nav>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbx-PLACEHOLDER/exec';
+const SHEET_ID = '1MkafmPhf38qPrOoNcjIujiv72IbrZYwBe97v0VkMKoU';
+
+let currentUser = JSON.parse(sessionStorage.getItem('dnu_member') || 'null');
+if (!currentUser) {
+  // Demo mode
+  currentUser = { id:1, fullname:'Dương Thanh Tú', username:'admin', role:'member', color:'#f97316', avatar:'T', email:'duongthanhtu@dnu.edu.vn', phone:'0942359088' };
+}
+
+const TASKS_DATA = [
+  { id:1, title:'Nộp đề thi Viết 4 – SPA K14', when:'Hôm nay', status:'Đang làm', priority:'high', dept:'SPA K14', urgent:true, done:false },
+  { id:2, title:'Xác nhận lịch coi thi 22/5', when:'Hôm nay', status:'Đang làm', priority:'medium', dept:'Tổ SPA', urgent:true, done:false },
+  { id:3, title:'Nhập điểm quá trình K13B', when:'Hôm nay', status:'Đang làm', priority:'high', dept:'SPA K13B', urgent:true, done:false },
+  { id:4, title:'Tham dự họp tổ BM 25/4', when:'Ngày mai', status:'Chưa bắt đầu', priority:'high', dept:'Tổ SPA', urgent:false, done:false },
+  { id:5, title:'Cập nhật đề cương Viết 4', when:'Ngày mai', status:'Đang làm', priority:'medium', dept:'SPA', urgent:false, done:false },
+  { id:6, title:'Báo cáo kế hoạch HK IV', when:'Ngày mai', status:'Chưa bắt đầu', priority:'low', dept:'Khoa NN', urgent:false, done:false },
+  { id:7, title:'Chấm bài tập cuối kỳ K13A', when:'Tuần này', status:'Chưa bắt đầu', priority:'medium', dept:'SPA K13A', urgent:false, done:false },
+  { id:8, title:'Tổng hợp điểm chuyên cần K14', when:'Tuần này', status:'Đang làm', priority:'medium', dept:'SPA K14', urgent:false, done:false },
+  { id:9, title:'Viết báo cáo tự đánh giá GV', when:'Tuần này', status:'Đang làm', priority:'low', dept:'Khoa NN', urgent:false, done:false },
+];
+
+const CLASSES_DATA = [
+  { name:'Viết 3 – SPA K13B', avatars:['T','Q'], colors:['orange','blue'] },
+  { name:'Viết 4 – SPA K13A', avatars:['T'], colors:['orange'] },
+  { name:'Viết 4 – SPA K14A', avatars:['T','L'], colors:['orange','pink'] },
+  { name:'Viết 5 – NNA K12B', avatars:['T'], colors:['orange'] },
+];
+
+const NOTICES_DATA = [
+  { from:'Tổ trưởng', context:'Họp tổ tháng 4', preview:'Nhắc nhở: Họp tổ BM lúc 14h thứ Sáu...', avatar:'TT' },
+  { from:'P.Đào tạo', context:'Lịch thi HK IV', preview:'Lịch thi chính thức đã được cập nhật...', avatar:'ĐT' },
+];
+
+const EXAM_HK = [
+  { hk:'HK 1', count:2, sub:'ca' },
+  { hk:'HK 2', count:3, sub:'ca' },
+  { hk:'HK 3', count:4, sub:'ca' },
+];
+
+const SYLLABUS_DATA = [
+  { name:'Viết 3', hk:'HK III', updated:'15/03/2026', status:'done' },
+  { name:'Viết 4', hk:'HK IV', updated:'10/04/2026', status:'done' },
+  { name:'Viết 5', hk:'HK IV', updated:'–', status:'pending' },
+  { name:'PP Dạy TA 1', hk:'HK IV', updated:'01/04/2026', status:'done' },
+  { name:'Kỹ năng Viết nâng cao', hk:'HK IV', updated:'–', status:'missing' },
+];
+
+const TEACHING_DATA = [
+  { mon:'Viết 3', lop:'SPA K13 B', lt:30, lich:'T3, Ca 1', phong:'B201', status:'confirmed' },
+  { mon:'Viết 4', lop:'SPA K13 A', lt:30, lich:'T4, Ca 2', phong:'B202', status:'confirmed' },
+  { mon:'Viết 4', lop:'SPA K14 A', lt:30, lich:'T5, Ca 1', phong:'B301', status:'pending' },
+  { mon:'Viết 5', lop:'NNA K12 B', lt:30, lich:'T5, Ca 2', phong:'B201', status:'confirmed' },
+];
+
+// ── CALENDAR ──────────────────────────────────────────────
+let calDate = new Date(2026, 3, 1); // April 2026
+const MONTHS_VI = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
+const eventDays = [14, 19, 22, 25];
+
+function renderCalendar() {
+  const y = calDate.getFullYear(), m = calDate.getMonth();
+  document.getElementById('calMonthLabel').textContent = `${MONTHS_VI[m]}, ${y}`;
+  const grid = document.getElementById('calGrid');
+  const days = ['CN','T2','T3','T4','T5','T6','T7'];
+  let html = days.map(d => `<div class="cal-day-label">${d}</div>`).join('');
+  const first = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m+1, 0).getDate();
+  const prevDays = new Date(y, m, 0).getDate();
+  const today = new Date();
+  for (let i = 0; i < first; i++) html += `<div class="cal-day other-month">${prevDays - first + i + 1}</div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = d === today.getDate() && m === today.getMonth() && y === today.getFullYear();
+    const hasEv = eventDays.includes(d);
+    html += `<div class="cal-day ${isToday ? 'today' : ''} ${hasEv && !isToday ? 'has-event' : ''}" onclick="toast('📅 ' + ${d} + '/${m+1}/${y}')">${d}</div>`;
+  }
+  const remain = 42 - first - daysInMonth;
+  for (let i = 1; i <= remain; i++) html += `<div class="cal-day other-month">${i}</div>`;
+  grid.innerHTML = html;
+}
+function prevMonth() { calDate.setMonth(calDate.getMonth()-1); renderCalendar(); }
+function nextMonth() { calDate.setMonth(calDate.getMonth()+1); renderCalendar(); }
+
+// ── RENDER HOME ──────────────────────────────────────────
+function renderHome() {
+  // Deadlines
+  const dl = document.getElementById('deadlinesList');
+  dl.innerHTML = TASKS_DATA.filter(t => t.urgent).slice(0,3).map(t => `
+    <div class="deadline-item">
+      <div class="deadline-check ${t.done?'done':''}" onclick="toggleTask(${t.id},this)">${t.done?'✓':''}</div>
+      <span class="deadline-text ${t.done?'done':''}">${t.title}</span>
+      <span class="deadline-when today">● Hôm nay</span>
+    </div>`).join('');
+
+  // Classes
+  const cl = document.getElementById('classesList');
+  cl.innerHTML = CLASSES_DATA.map(c => `
+    <div class="class-item" onclick="switchView('teaching',null)">
+      <span class="class-icon">🔗</span>
+      <span class="class-name">${c.name}</span>
+      <div class="class-avatars">
+        ${c.avatars.map((a,i) => `<div class="class-avatar ${c.colors[i]||''}">${a}</div>`).join('')}
+      </div>
+    </div>`).join('');
+
+  // Notices
+  const nm = document.getElementById('noticesMini');
+  nm.innerHTML = NOTICES_DATA.map(n => `
+    <div class="notice-item-mini">
+      <div class="notice-avatar-mini">${n.avatar}</div>
+      <div class="notice-body-mini">
+        <div class="notice-from">${n.from} – ${n.context}</div>
+        <div class="notice-preview">${n.preview}</div>
+      </div>
+      <span class="notice-arrow">›</span>
+    </div>`).join('');
+
+  // Exam HK stats
+  const eg = document.getElementById('examHkGrid');
+  eg.innerHTML = EXAM_HK.map(e => `
+    <div class="hk-box">
+      <div class="hk-label">${e.hk}</div>
+      <div class="hk-count">${e.count}</div>
+      <div class="hk-sub">${e.sub}</div>
+    </div>`).join('');
+
+  // Syllabus
+  const sl = document.getElementById('syllabusList');
+  sl.innerHTML = SYLLABUS_DATA.map(s => `
+    <div class="syllabus-item" onclick="switchView('syllabus',null)">
+      <span class="syllabus-icon">🔗</span>
+      <span class="syllabus-name">${s.name}</span>
+      <span class="syllabus-status ${s.status}"></span>
+    </div>`).join('');
+}
+
+// ── DEADLINE PAGE ────────────────────────────────────────
+function renderDeadlinePage() {
+  const groups = { 'Hôm nay': [], 'Ngày mai': [], 'Tuần này': [] };
+  TASKS_DATA.forEach(t => { if (groups[t.when]) groups[t.when].push(t); });
+  const priorityPill = { high:'pill-pink', medium:'pill-orange', low:'pill-green' };
+  const priorityLabel = { high:'Cao', medium:'Trung bình', low:'Thấp' };
+  const statusPill = { 'Đang làm':'pill-blue', 'Chưa bắt đầu':'pill-purple' };
+  const dateColor = { 'Hôm nay':'', 'Ngày mai':'tomorrow', 'Tuần này':'week' };
+  const pageTitles = { 'Hôm nay':'Today', 'Ngày mai':'Tomorrow', 'Tuần này':'This week' };
+  let html = '';
+  Object.entries(groups).forEach(([g, tasks]) => {
+    if (!tasks.length) return;
+    html += `<div class="deadline-section">
+      <div class="deadline-section-title">${pageTitles[g]}</div>
+      ${tasks.map(t => `
+        <div class="deadline-row">
+          <div class="dl-check ${t.done?'done':''}" onclick="toggleTask(${t.id},this)">${t.done?'✓':''}</div>
+          <span class="dl-name ${t.done?'done':''}">${t.title}</span>
+          <span class="dl-date ${dateColor[t.when]}">${g}</span>
+          <span class="pill ${statusPill[t.status]||'pill-blue'}">${t.status}</span>
+          <span class="pill ${priorityPill[t.priority]||'pill-orange'}">${priorityLabel[t.priority]} priority</span>
+          <span class="dl-dept">${t.dept}</span>
+          <div class="dl-avatars"><div class="class-avatar orange">T</div></div>
+        </div>`).join('')}
+    </div>`;
+  });
+  document.getElementById('deadlinePage').innerHTML = html;
+}
+
+// ── WEEK CALENDAR ────────────────────────────────────────
+let weekOffset = 0;
+const weekEvents = [
+  { day:1, ca:0, label:'Viết 3', sub:'K13B · B201' },
+  { day:2, ca:0, label:'Viết 4', sub:'K13A · B202' },
+  { day:3, ca:1, label:'Viết 4', sub:'K14A · B301' },
+  { day:4, ca:0, label:'Họp tổ', sub:'Phòng B201', exam:true },
+  { day:4, ca:1, label:'Viết 5', sub:'K12B · B201' },
+];
+function renderWeek() {
+  const days = ['','T2\n21/4','T3\n22/4','T4\n23/4','T5\n24/4','T6\n25/4'];
+  const sessions = ['Ca 1\n7h30','Ca 2\n13h00','Ca 3\n17h00'];
+  let html = `<div class="week-view">`;
+  days.forEach((d,i) => html += `<div class="wv-header ${i===3?'today-col':''}" style="white-space:pre-line">${d}</div>`);
+  sessions.forEach((s,si) => {
+    html += `<div class="wv-time" style="white-space:pre-line">${s}</div>`;
+    for (let di=1; di<=5; di++) {
+      const evs = weekEvents.filter(e => e.day===di && e.ca===si);
+      html += `<div class="wv-cell">${evs.map(e=>`<div class="wv-event ${e.exam?'exam':''}"><strong>${e.label}</strong>${e.sub}</div>`).join('')}</div>`;
+    }
+  });
+  html += `</div>`;
+  document.getElementById('weekViewGrid').innerHTML = html;
+}
+function prevWeek() { weekOffset--; updateWeekTitle(); }
+function nextWeek() { weekOffset++; updateWeekTitle(); }
+function updateWeekTitle() {
+  const base = new Date(2026,3,20); base.setDate(base.getDate()+weekOffset*7);
+  const end = new Date(base); end.setDate(end.getDate()+5);
+  document.getElementById('weekTitle').textContent = `Tuần ${18+weekOffset}: ${base.getDate()}/${base.getMonth()+1} – ${end.getDate()}/${end.getMonth()+1}/${end.getFullYear()}`;
+}
+
+// ── TEACHING TABLE ───────────────────────────────────────
+function renderTeaching() {
+  const statusMap = { confirmed:`<span class="pill pill-green">✓ Đã xác nhận</span>`, pending:`<span class="pill pill-orange">⏳ Chờ xác nhận</span>` };
+  document.getElementById('teachingTableBody').innerHTML = TEACHING_DATA.map(t => `
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:14px 16px;font-weight:600">${t.mon}</td>
+      <td style="padding:14px 16px">${t.lop}</td>
+      <td style="padding:14px 16px">${t.lt}</td>
+      <td style="padding:14px 16px">${t.lich}</td>
+      <td style="padding:14px 16px">${t.phong}</td>
+      <td style="padding:14px 16px">${statusMap[t.status]||''}</td>
+    </tr>`).join('');
+}
+
+// ── SYLLABUS TABLE ───────────────────────────────────────
+function renderSyllabus() {
+  const statusMap = {
+    done:`<span class="pill pill-green">✓ Hoàn thành</span>`,
+    pending:`<span class="pill pill-orange">⏳ Đang làm</span>`,
+    missing:`<span class="pill" style="background:#fee2e2;color:#dc2626">✗ Chưa có</span>`
+  };
+  document.getElementById('syllabusTableBody').innerHTML = SYLLABUS_DATA.map(s => `
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:14px 16px;font-weight:600">${s.name}</td>
+      <td style="padding:14px 16px">${s.hk}</td>
+      <td style="padding:14px 16px;color:var(--text2)">${s.updated}</td>
+      <td style="padding:14px 16px">${statusMap[s.status]||''}</td>
+      <td style="padding:14px 16px">
+        <button onclick="toast('📋 Mở đề cương ${s.name}')" style="background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;font-family:var(--font)">📄 Xem</button>
+        ${s.status!=='done'?`<button onclick="toast('✏️ Chỉnh sửa ${s.name}')" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;margin-left:6px;font-family:var(--font)">✏️ Sửa</button>`:''}
+      </td>
+    </tr>`).join('');
+}
+
+// ── NAVIGATION ───────────────────────────────────────────
+const viewTitles = { home:'Trang chủ', schedule:'Lịch cá nhân', teaching:'Phân công dạy', tasks:'Deadline', syllabus:'Đề cương', profile:'Hồ sơ' };
+function switchView(name, navEl) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.querySelectorAll('.nav-icon-btn').forEach(b => b.classList.remove('active'));
+  if (navEl) navEl.classList.add('active');
+}
+function setBottomNav(el) {
+  el.closest('.bottom-nav-inner').querySelectorAll('.bnav-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── TASK TOGGLE ───────────────────────────────────────────
+function toggleTask(id, el) {
+  const t = TASKS_DATA.find(t => t.id===id);
+  if (t) { t.done = !t.done; el.className = `deadline-check ${t.done?'done':''}`; el.textContent = t.done?'✓':''; }
+}
+
+// ── PROFILE ───────────────────────────────────────────────
+function saveProfile() {
+  toast('✅ Đã cập nhật hồ sơ thành công');
+}
+
+// ── SEARCH ───────────────────────────────────────────────
+function handleSearch(q) {
+  if (!q.trim()) return;
+  toast(`🔍 Tìm: "${q}"`);
+}
+
+// ── TOAST ────────────────────────────────────────────────
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast'; el.textContent = msg;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// ── AUTH ─────────────────────────────────────────────────
+function doLogout() {
+  sessionStorage.removeItem('dnu_member');
+  window.location.href = 'index.html';
+}
+
+// ── INIT ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const u = currentUser;
+  document.getElementById('welcomeTitle').textContent = `Xin chào, ${u.fullname.split(' ').pop()}!`;
+  document.getElementById('mainAvatar').textContent = u.avatar || u.fullname[0];
+  document.getElementById('taskAvatar').textContent = u.avatar || u.fullname[0];
+  document.getElementById('profileAvatarBig').textContent = u.avatar || u.fullname[0];
+  document.getElementById('profileNameBig').textContent = u.fullname;
+  document.getElementById('profileEmail').textContent = u.email;
+  document.getElementById('profilePhone').textContent = u.phone || '–';
+  renderCalendar();
+  renderHome();
+  renderDeadlinePage();
+  renderWeek();
+  renderTeaching();
+  renderSyllabus();
+});
+</script>
+</body>
+</html>
