@@ -214,7 +214,7 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 .card-body { padding: 20px; }
 
 /* STATS GRID */
-.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+.stats-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 22px; }
 .stat-card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 20px; display: flex; align-items: flex-start; gap: 14px; transition: transform 0.2s, box-shadow 0.2s; }
 .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
 .stat-ic { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
@@ -387,8 +387,30 @@ tbody tr:hover { background: var(--surface2); }
   .ai-panel { width: calc(100vw - 48px); right: -12px; }
 }
 @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } }
+/* TAGS & DRAG-DROP */
+.tag-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:12px;font-weight:600;cursor:grab;user-select:none;transition:opacity .18s}
+.tag-pill:active{cursor:grabbing;opacity:.7}
+.tag-pill.teacher{background:#e0f2fe;color:#0284c7}
+.tag-pill.nganh{background:#ede9fe;color:#6d28d9}
+.tag-pill.lop{background:#dcfce7;color:#15803d}
+.tag-pill.mon{background:#ffedd5;color:#ea580c}
+.tag-pill .tx{cursor:pointer;opacity:.6;font-size:11px;margin-left:2px}
+.tag-pill .tx:hover{opacity:1}
+.drop-zone{min-height:48px;padding:8px 10px;border:2px dashed var(--border);border-radius:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:flex-start;transition:border-color .18s,background .18s}
+.drop-zone.over{border-color:var(--primary);background:var(--primary-l)}
+.teacher-row{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:14px 16px;margin-bottom:0}
+.teacher-row-hdr{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.teacher-row-name{font-size:14px;font-weight:700}
+.teacher-row-sub{font-size:12px;color:var(--text2)}
+/* STAT MODAL */
+#statTable thead th{background:#f8fafc;padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;white-space:nowrap}
+#statTable thead th:hover{background:#f1f5f9}
+#statTable tbody td{padding:11px 14px;border-top:1px solid var(--border);font-size:13px}
+#statTable tbody tr:hover{background:#f8fafc}
+.hl-red{color:var(--danger);font-weight:700}
+.hl-ok{color:var(--success);font-weight:600}
 </style>
-</head>
+
 <body>
 
 <!-- LOADING -->
@@ -467,14 +489,24 @@ tbody tr:hover { background: var(--surface2); }
         </div>
       </div>
       <div class="stats-grid">
-        <div class="stat-card"><div class="stat-ic ic-blue">👥</div><div class="stat-inf"><div class="val">9</div><div class="lbl">Giảng viên</div><div class="chg">Tổ SPA</div></div></div>
-        <div class="stat-card"><div class="stat-ic ic-green">📚</div><div class="stat-inf"><div class="val">24</div><div class="lbl">Lớp học phần</div><div class="chg">HK IV 2025-2026</div></div></div>
-        <div class="stat-card"><div class="stat-ic ic-orange">📖</div><div class="stat-inf"><div class="val">12</div><div class="lbl">Môn học</div><div class="chg">Đang giảng dạy</div></div></div>
-        <div class="stat-card"><div class="stat-ic ic-red">🗓️</div><div class="stat-inf"><div class="val">7</div><div class="lbl">Ngày thi coi</div><div class="chg">22/5 – 5/6</div></div></div>
-        <div class="stat-card"><div class="stat-ic ic-purple">📋</div><div class="stat-inf"><div class="val">3</div><div class="lbl">Thông báo mới</div><div class="chg">Chưa xử lý</div></div></div>
-        <div class="stat-card"><div class="stat-ic ic-yellow">⏰</div><div class="stat-inf"><div class="val">5</div><div class="lbl">Deadline sắp tới</div><div class="chg">Trong 7 ngày</div></div></div>
-        <div class="stat-card"><div class="stat-ic ic-red">⚠️</div><div class="stat-inf"><div class="val">3</div><div class="lbl">Việc tồn đọng</div><div class="chg">Cần xử lý</div></div></div>
-        <div class="stat-card"><div class="stat-ic ic-blue">🏆</div><div class="stat-inf"><div class="val">20</div><div class="lbl">Ca gác thi</div><div class="chg">Đã phân công</div></div></div>
+        <div class="stat-card" style="cursor:pointer" onclick="showStatModal('teachers')">
+          <div class="stat-ic ic-blue">👥</div><div class="stat-inf"><div class="val">9</div><div class="lbl">Giảng viên</div><div class="chg">Tổ SPA · click để xem</div></div>
+        </div>
+        <div class="stat-card" style="cursor:pointer" onclick="showStatModal('subjects')">
+          <div class="stat-ic ic-orange">📖</div><div class="stat-inf"><div class="val">12</div><div class="lbl">Môn học phần</div><div class="chg">Đang giảng dạy · click để xem</div></div>
+        </div>
+        <div class="stat-card" style="cursor:pointer" onclick="showStatModal('classes')">
+          <div class="stat-ic ic-green">📚</div><div class="stat-inf"><div class="val">24</div><div class="lbl">Lớp học phần</div><div class="chg">HK IV 2025-2026 · click để xem</div></div>
+        </div>
+        <div class="stat-card" style="cursor:pointer" onclick="goView('notices',null)">
+          <div class="stat-ic ic-purple">📋</div><div class="stat-inf"><div class="val">3</div><div class="lbl">Thông báo mới</div><div class="chg">Chưa xử lý · click để xem</div></div>
+        </div>
+        <div class="stat-card" style="cursor:pointer" onclick="goView('notices',null)">
+          <div class="stat-ic ic-yellow">⏰</div><div class="stat-inf"><div class="val">5</div><div class="lbl">Deadline sắp tới</div><div class="chg">Trong 7 ngày · click để xem</div></div>
+        </div>
+        <div class="stat-card" style="cursor:pointer" onclick="goView('exams',null)">
+          <div class="stat-ic ic-blue">🏆</div><div class="stat-inf"><div class="val">20</div><div class="lbl">Thi cử</div><div class="chg">Ca đã phân công · click để xem</div></div>
+        </div>
       </div>
 
       <!-- AI INSIGHTS -->
@@ -543,34 +575,66 @@ tbody tr:hover { background: var(--surface2); }
       <div class="page-hdr">
         <div><h2>Lịch dạy</h2><p>HK IV 2025-2026</p></div>
         <div class="hdr-actions">
-          <button class="btn btn-ai btn-sm" onclick="askAI('Tuần tới có ai bị trùng lịch dạy và coi thi không?')">🤖 Kiểm tra trùng lịch</button>
-          <button class="btn btn-primary btn-sm" onclick="showToast('info','Nhập TKB từ file Excel','📥 Nhập TKB')">📥 Nhập TKB</button>
+          <input type="text" class="form-input" id="schedSearch" placeholder="🔍 Tìm GV, môn, lớp..." style="width:200px;font-size:13px" oninput="filterSched(this.value)">
+          <button class="btn btn-primary btn-sm" onclick="showToast('info','Nhập TKB từ file Excel','📥')">📥 Nhập TKB</button>
         </div>
       </div>
-      <div class="card mb-16" style="margin-bottom:16px">
-        <div class="card-body" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
-          <select class="form-input" style="width:160px" onchange="filterSchedule(this.value)"><option value="">Tất cả GV</option><option>Dương Thanh Tú</option><option>Nguyễn Lưu Như Quỳnh</option><option>Vũ Thu Hà</option><option>Bùi Hồng Hà</option></select>
-          <select class="form-input" style="width:130px"><option>Ca 1 (7h30)</option><option>Ca 2 (13h00)</option><option>Tất cả ca</option></select>
-          <select class="form-input" style="width:160px"><option>Tất cả lớp</option><option>SPA K13 A</option><option>SPA K13 B</option><option>SPA K14 A/B</option></select>
-          <button class="btn btn-secondary btn-sm">🔍 Lọc</button>
-        </div>
+      <div class="tbl-wrap" id="schedTblWrap">
+        <table id="schedTbl" style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr>
+              <th onclick="sortSched('gv')" style="cursor:pointer;user-select:none">Giảng viên <span id="ss-gv">↕</span></th>
+              <th onclick="sortSched('mon')" style="cursor:pointer;user-select:none">Môn <span id="ss-mon">↕</span></th>
+              <th onclick="sortSched('lop')" style="cursor:pointer;user-select:none">Lớp <span id="ss-lop">↕</span></th>
+              <th onclick="sortSched('nganh')" style="cursor:pointer;user-select:none">Ngành <span id="ss-nganh">↕</span></th>
+              <th onclick="sortSched('phong')" style="cursor:pointer;user-select:none">Phòng <span id="ss-phong">↕</span></th>
+              <th onclick="sortSched('lich')" style="cursor:pointer;user-select:none">Lịch học <span id="ss-lich">↕</span></th>
+              <th>Ghi chú</th>
+            </tr>
+          </thead>
+          <tbody id="schedTbody"></tbody>
+        </table>
       </div>
-      <div class="tbl-wrap"><table><thead><tr><th>Môn học</th><th>Lớp</th><th>GV</th><th>SS</th><th>Tiết LT</th><th>Phòng</th><th>Lịch học</th><th>Ghi chú</th></tr></thead><tbody id="schedTbl"></tbody></table></div>
     </div>
 
     <!-- ── EXAMS ─────────────────────────────────────── -->
     <div class="view" id="v-exams">
       <div class="page-hdr">
-        <div><h2>Lịch gác thi</h2><p>HK IV 2025-2026 – Cơ sở 1, Ca 2 (8h45)</p></div>
+        <div><h2>Lịch gác thi</h2><p>HK IV 2025-2026</p></div>
         <div class="hdr-actions">
-          <button class="btn btn-ai btn-sm" onclick="askAI('Ai đang có lịch dạy trùng với ca gác thi?')">🤖 Kiểm tra xung đột</button>
-          <button class="btn btn-primary btn-sm" onclick="showToast('success','Đã xuất Excel','📊')">📊 Xuất Excel</button>
+          <button class="btn btn-secondary btn-sm" onclick="openModal('modalSheetLink')">🔗 Upload từ Sheet</button>
+          <button class="btn btn-primary btn-sm" onclick="openAddExamRowModal()">+ Thêm ca thi</button>
+          <button class="btn btn-success btn-sm" onclick="showToast('success','Đã xuất Excel','📊')">📊 Xuất Excel</button>
         </div>
       </div>
-      <div class="card" style="margin-bottom:14px;padding:14px 18px;background:linear-gradient(135deg,#fefce8,#fef9c3);border-color:#fde047">
-        <strong style="font-size:13px">⚠️ Lưu ý quan trọng:</strong> <span style="font-size:13px">Tất cả ca coi thi tại Cơ sở 1 – CBCT có mặt trước <strong>8h45</strong>. Mang theo CMND/CCCD và thẻ GV.</span>
+      <!-- Search + filter bar -->
+      <div style="display:flex;gap:9px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+        <input type="text" class="form-input" id="examInvigSearch" placeholder="🔍 Tìm GV, ngành, khoá..." style="width:240px;font-size:13px" oninput="filterExamInvig(this.value)">
+        <select class="form-input" id="examInvigCa" style="width:110px;font-size:13px" onchange="filterExamInvig()">
+          <option value="">Ca thi</option><option>Ca 1</option><option>Ca 2</option><option>Ca 3</option><option>Ca 4</option>
+        </select>
+        <select class="form-input" id="examInvigNg" style="width:150px;font-size:13px" onchange="filterExamInvig()">
+          <option value="">Ngành</option>
+        </select>
       </div>
-      <div class="tbl-wrap"><table><thead><tr><th>TT</th><th>Họ tên GV</th><th>Đợt 1 (22/5)</th><th>Đợt 1 (25/5)</th><th>Đợt 1 (27/5)</th><th>Đợt 2 (29/5)</th><th>Đợt 2 (1/6)</th><th>Đợt 2 (3/6)</th><th>Đợt 2 (5/6)</th><th>Cộng</th></tr></thead><tbody id="examTbl"></tbody></table></div>
+      <div class="tbl-wrap">
+        <table style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr>
+              <th onclick="sortExamInvig('ngay')" style="background:#f8fafc;padding:11px 14px;cursor:pointer;user-select:none;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Ngày thi ↕</th>
+              <th onclick="sortExamInvig('thu')" style="background:#f8fafc;padding:11px 14px;cursor:pointer;user-select:none;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Thứ ↕</th>
+              <th onclick="sortExamInvig('ca')" style="background:#f8fafc;padding:11px 14px;cursor:pointer;user-select:none;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Ca ↕</th>
+              <th style="background:#f8fafc;padding:11px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Buổi</th>
+              <th onclick="sortExamInvig('nganh')" style="background:#f8fafc;padding:11px 14px;cursor:pointer;user-select:none;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Ngành ↕</th>
+              <th onclick="sortExamInvig('khoa')" style="background:#f8fafc;padding:11px 14px;cursor:pointer;user-select:none;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Khoá ↕</th>
+              <th onclick="sortExamInvig('gv')" style="background:#f8fafc;padding:11px 14px;cursor:pointer;user-select:none;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Giảng viên ↕</th>
+              <th style="background:#f8fafc;padding:11px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Ghi chú</th>
+              <th style="background:#f8fafc;padding:11px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="examInvigTbl"></tbody>
+        </table>
+      </div>
     </div>
 
     <!-- ── NOTICES ───────────────────────────────────── -->
@@ -592,23 +656,65 @@ tbody tr:hover { background: var(--surface2); }
     <!-- ── TEACHING ───────────────────────────────────── -->
     <div class="view" id="v-teaching">
       <div class="page-hdr">
-        <div><h2>Phân công giảng dạy</h2><p>HK IV 2025-2026</p></div>
+        <div><h2>Phân công giảng dạy</h2><p>HK IV 2025-2026 – Kéo thả môn/lớp vào giảng viên</p></div>
         <div class="hdr-actions">
-          <button class="btn btn-ai btn-sm" onclick="askAI('Hãy phân tích tải giảng dạy hiện tại và đề xuất cân bằng lại')">🤖 AI cân tải</button>
-          <button class="btn btn-secondary btn-sm" onclick="showToast('success','Đã phát hiện xung đột','⚠️')">⚠️ Kiểm tra xung đột</button>
-          <button class="btn btn-success btn-sm" onclick="showToast('success','Đã phê duyệt','✓')">✓ Phê duyệt</button>
-          <button class="btn btn-primary btn-sm" onclick="showToast('info','Đang gửi email...','📧')">📧 Gửi GV</button>
+          <button class="btn btn-secondary btn-sm" onclick="detectConflicts()">⚠️ Xem xung đột</button>
+          <button class="btn btn-success btn-sm" onclick="approveTeaching()">✓ Phê duyệt & xuất Sheet</button>
+          <button class="btn btn-primary btn-sm" onclick="sendTeachingEmail()">📧 Gửi GV</button>
         </div>
       </div>
-      <div class="card" style="margin-bottom:16px;padding:16px 18px">
-        <div style="display:flex;gap:16px;flex-wrap:wrap">
-          <div style="flex:1;min-width:150px"><div style="font-size:12px;color:var(--text2)">Tổng tiết phân công</div><div style="font-size:24px;font-weight:800">405 tiết LT</div></div>
-          <div style="flex:1;min-width:150px"><div style="font-size:12px;color:var(--text2)">Định mức GV/năm</div><div style="font-size:24px;font-weight:800">270 tiết</div></div>
-          <div style="flex:1;min-width:150px"><div style="font-size:12px;color:var(--text2)">GV vượt định mức</div><div style="font-size:24px;font-weight:800;color:var(--warning)">3 GV</div></div>
-          <div style="flex:1;min-width:150px"><div style="font-size:12px;color:var(--text2)">GV dưới định mức</div><div style="font-size:24px;font-weight:800;color:var(--primary)">2 GV</div></div>
+
+      <!-- STEP 1: Tag selectors -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+        <!-- Add Teachers -->
+        <div class="card" style="padding:14px">
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">👥 Giảng viên</div>
+          <div id="teacherTagPool" style="display:flex;flex-wrap:wrap;gap:6px;min-height:36px"></div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:8px;width:100%" onclick="openModal_pickTeachers()">+ Thêm giảng viên</button>
+        </div>
+        <!-- Ngành -->
+        <div class="card" style="padding:14px">
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">🏫 Ngành</div>
+          <div id="nganhTagPool" style="display:flex;flex-wrap:wrap;gap:6px;min-height:36px"></div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:8px;width:100%" onclick="addNganhTag()">+ Thêm ngành</button>
+        </div>
+        <!-- Lớp -->
+        <div class="card" style="padding:14px">
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">📋 Lớp</div>
+          <div id="lopTagPool" style="display:flex;flex-wrap:wrap;gap:6px;min-height:36px" ondragover="event.preventDefault()" ondrop="dropToPool('lop',event)"></div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:8px;width:100%" onclick="addLopTag()">+ Thêm lớp</button>
+        </div>
+        <!-- Môn -->
+        <div class="card" style="padding:14px">
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">📖 Môn học</div>
+          <div id="monTagPool" style="display:flex;flex-wrap:wrap;gap:6px;min-height:36px" ondragover="event.preventDefault()" ondrop="dropToPool('mon',event)"></div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:8px;width:100%" onclick="addMonTag()">+ Thêm môn</button>
         </div>
       </div>
-      <div class="tbl-wrap"><table><thead><tr><th>GV</th><th>Môn học</th><th>Lớp</th><th>Hệ</th><th>SS</th><th>Tiết LT</th><th>% Tải</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody id="teachTbl"></tbody></table></div>
+
+      <!-- STEP 2: Drop zones per teacher -->
+      <div id="teacherDropZones" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px"></div>
+
+      <!-- STEP 3: Review table -->
+      <div id="teachingReviewSection" style="display:none">
+        <div class="card" style="margin-bottom:12px;padding:16px 18px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-color:#86efac">
+          <div style="font-size:14px;font-weight:700;color:#15803d;margin-bottom:4px">✅ Xem lại trước khi phê duyệt</div>
+          <div style="font-size:13px;color:#166534">Kiểm tra phân công bên dưới, sau đó nhấn <strong>Phê duyệt & Xuất Sheet</strong>.</div>
+        </div>
+        <div class="tbl-wrap">
+          <table style="width:100%;border-collapse:collapse">
+            <thead><tr>
+              <th style="background:#f8fafc;padding:11px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Giảng viên</th>
+              <th style="background:#f8fafc;padding:11px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Lớp</th>
+              <th style="background:#f8fafc;padding:11px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Môn học</th>
+              <th style="background:#f8fafc;padding:11px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Số tiết ước tính</th>
+              <th style="background:#f8fafc;padding:11px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Số tín chỉ</th>
+              <th style="background:#f8fafc;padding:11px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Thao tác</th>
+            </tr></thead>
+            <tbody id="teachingReviewTbl"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- ── EXAM ASSIGN ───────────────────────────────── -->
@@ -925,6 +1031,108 @@ tbody tr:hover { background: var(--surface2); }
   </div>
 </div>
 
+<!-- MODAL: Stat detail (teachers / subjects / classes) -->
+<div class="modal-overlay" id="modalStat" style="z-index:350">
+  <div class="modal" style="max-width:820px;max-height:90vh">
+    <div class="modal-hdr">
+      <h3 id="statModalTitle">Chi tiết</h3>
+      <button class="modal-close" onclick="closeModal('modalStat')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:0">
+      <div style="padding:12px 18px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input type="text" class="form-input" id="statSearch" placeholder="🔍 Tìm kiếm..." style="width:220px;font-size:13px" oninput="filterStatTable()">
+        <span id="statCount" style="font-size:12px;color:var(--text3)"></span>
+      </div>
+      <div style="overflow-x:auto;max-height:60vh">
+        <table id="statTable" style="width:100%;border-collapse:collapse">
+          <thead id="statThead"></thead>
+          <tbody id="statTbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalStat')">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Upload Sheet link for exam invig -->
+<div class="modal-overlay" id="modalSheetLink">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-hdr"><h3>📊 Import từ Google Sheet</h3><button class="modal-close" onclick="closeModal('modalSheetLink')">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Dán link Google Sheet hoặc Sheet ID vào ô bên dưới. Ứng dụng sẽ đọc dữ liệu và tự tạo bảng ca coi thi.</p>
+      <div class="form-group">
+        <label>Link Google Sheet hoặc Sheet ID</label>
+        <input class="form-input" id="sheetLinkInput" placeholder="https://docs.google.com/spreadsheets/d/...">
+      </div>
+      <div class="form-group">
+        <label>Tên tab (Sheet name, để trống = tab đầu tiên)</label>
+        <input class="form-input" id="sheetTabName" placeholder="Sheet1">
+      </div>
+      <div style="background:var(--surface2);border-radius:9px;padding:12px;font-size:12px;color:var(--text2);line-height:1.7;margin-top:4px">
+        <strong>Yêu cầu cột trong sheet:</strong><br>
+        Ngày thi · Thứ · Ca · Ngành · Khoá · Đơn vị · Học kỳ · Ghi chú
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalSheetLink')">Hủy</button>
+      <button class="btn btn-primary" onclick="importFromSheet()">📥 Import dữ liệu</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Pick Teachers for teaching assignment -->
+<div class="modal-overlay" id="modalPickTeachers">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-hdr"><h3>👥 Chọn Giảng viên</h3><button class="modal-close" onclick="closeModal('modalPickTeachers')">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:12px">Tick chọn giảng viên để thêm vào danh sách phân công:</p>
+      <div id="pickTeacherList" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalPickTeachers')">Hủy</button>
+      <button class="btn btn-primary" onclick="confirmPickTeachers()">✓ Thêm đã chọn</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add exam invigilation row -->
+<div class="modal-overlay" id="modalAddExamRow">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-hdr"><h3>➕ Thêm ca coi thi</h3><button class="modal-close" onclick="closeModal('modalAddExamRow')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label>Ngày thi *</label><input class="form-input" type="date" id="exRowNgay"></div>
+        <div class="form-group"><label>Ca thi *</label>
+          <select class="form-input" id="exRowCa">
+            <option>Ca 1</option><option>Ca 2</option><option>Ca 3</option><option>Ca 4</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Ngành *</label><input class="form-input" id="exRowNganh" placeholder="Sư phạm Anh, Mầm non..."></div>
+        <div class="form-group"><label>Khoá *</label><input class="form-input" id="exRowKhoa" placeholder="K22, K23..."></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Giảng viên phụ trách</label>
+          <select class="form-input" id="exRowGV"><option value="">-- Chọn GV --</option></select>
+        </div>
+        <div class="form-group"><label>Học kỳ</label>
+          <select class="form-input" id="exRowHK">
+            <option>Học kỳ 1</option><option>Học kỳ 2</option><option>Học kỳ hè</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Ghi chú</label><input class="form-input" id="exRowNote" placeholder="Mang đề, phòng vấn nói..."></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalAddExamRow')">Hủy</button>
+      <button class="btn btn-primary" onclick="addExamInvigRow()">✓ Thêm</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════════════════════════════
 // CONFIG
@@ -1029,15 +1237,29 @@ const TEACHING_ASSIGN = [
 ];
 
 const SCHEDULE_DATA = [
-  { mon:'Viết 3', lop:'SPA K13 B', gv:'Dương Thanh Tú', ss:40, lt:30, phong:'B201', lich:'T3, Ca 1' },
-  { mon:'Viết 4', lop:'SPA K13 A', gv:'Dương Thanh Tú', ss:40, lt:30, phong:'B202', lich:'T4, Ca 2' },
-  { mon:'Dịch VE', lop:'SPA K11 D', gv:'Nguyễn L.N.Quỳnh', ss:40, lt:45, phong:'B301', lich:'T2, Ca 1' },
-  { mon:'PP dạy TA 1', lop:'SPA K14 A/B', gv:'Bùi Hồng Hà', ss:80, lt:30, phong:'Hội trường', lich:'T5, Ca 2' },
-  { mon:'Nghe 4', lop:'SPA K14 A', gv:'Ng.T.Hồng Khanh', ss:40, lt:45, phong:'A102', lich:'T6, Ca 1' },
-  { mon:'Nói 4', lop:'SPA K14 A/B', gv:'Nguyễn L.N.Quỳnh', ss:80, lt:45, phong:'Hội trường', lich:'T7, Ca 1' },
-  { mon:'Âm vị học', lop:'SPA K14 A/B', gv:'Trương Thị Hoạt', ss:80, lt:45, phong:'B301', lich:'T2, Ca 2' },
-  { mon:'Thu tin TM', lop:'NNA K11 A', gv:'Vũ Thu Hà', ss:42, lt:30, phong:'C101', lich:'T3, Ca 2' },
+  { gv:'Dương Thanh Tú',     mon:'Viết 3',     lop:'SPA K13 B',   nganh:'Sư phạm Anh', phong:'B201',        lich:'T3, Ca 1', ghichu:'' },
+  { gv:'Dương Thanh Tú',     mon:'Viết 4',     lop:'SPA K13 A',   nganh:'Sư phạm Anh', phong:'B202',        lich:'T4, Ca 2', ghichu:'' },
+  { gv:'Nguyễn L.N.Quỳnh',  mon:'Dịch VE',    lop:'SPA K11 D',   nganh:'Sư phạm Anh', phong:'B301',        lich:'T2, Ca 1', ghichu:'' },
+  { gv:'Bùi Hồng Hà',       mon:'PP dạy TA 1',lop:'SPA K14 A/B', nganh:'Sư phạm Anh', phong:'Hội trường',  lich:'T5, Ca 2', ghichu:'' },
+  { gv:'Ng.T.Hồng Khanh',   mon:'Nghe 4',     lop:'SPA K14 A',   nganh:'Sư phạm Anh', phong:'A102',        lich:'T6, Ca 1', ghichu:'' },
+  { gv:'Nguyễn L.N.Quỳnh',  mon:'Nói 4',      lop:'SPA K14 A/B', nganh:'Sư phạm Anh', phong:'Hội trường',  lich:'T7, Ca 1', ghichu:'' },
+  { gv:'Trương Thị Hoạt',   mon:'Âm vị học',  lop:'SPA K14 A/B', nganh:'Sư phạm Anh', phong:'B301',        lich:'T2, Ca 2', ghichu:'' },
+  { gv:'Vũ Thu Hà',          mon:'Thu tin TM', lop:'NNA K11 A',   nganh:'Ngôn ngữ Anh',phong:'C101',        lich:'T3, Ca 2', ghichu:'' },
 ];
+
+// Exam invigilation rows (flat table, not matrix)
+let EXAM_INVIG_DATA = [
+  { ngay:'22/05/2026', thu:'T6', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Dương Thanh Tú',    hk:'Học kỳ 1', ghichu:'' },
+  { ngay:'22/05/2026', thu:'T6', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Mai Thị Lan Anh',   hk:'Học kỳ 1', ghichu:'' },
+  { ngay:'25/05/2026', thu:'T2', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Ng.L.Như Quỳnh',    hk:'Học kỳ 1', ghichu:'' },
+  { ngay:'27/05/2026', thu:'T4', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Dương Thanh Tú',    hk:'Học kỳ 1', ghichu:'' },
+  { ngay:'29/05/2026', thu:'T6', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Bùi Hồng Hà',       hk:'Học kỳ 1', ghichu:'' },
+  { ngay:'01/06/2026', thu:'T2', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Vũ Thu Hà',          hk:'Học kỳ 1', ghichu:'' },
+  { ngay:'03/06/2026', thu:'T4', ca:'Ca 2', nganh:'Mầm non',      khoa:'K22', gv:'Ng.T.Hà Phương',    hk:'Học kỳ 2', ghichu:'Mang đề' },
+  { ngay:'05/06/2026', thu:'T6', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Trương Thị Hoạt',   hk:'Học kỳ 1', ghichu:'' },
+];
+let examInvigSorted = [...EXAM_INVIG_DATA];
+let examInvigSortKey = '', examInvigAsc = true;
 
 const NOTICES_DATA = [
   { id:1, icon:'📄', type:'pdf', typeLabel:'Công văn', title:'Quy định coi thi HK IV 2025-2026', date:'18/04/2026', deadline:'22/04/2026', summary:'Tất cả CBCT coi thi tại Cơ sở 1 cần có mặt trước 8h45 (Ca 2). Mang theo CMND/CCCD và thẻ GV. Không sử dụng điện thoại trong phòng thi.', aiSummary:'⏰ Deadline: 22/04 – CBCT có mặt trước 8h45 Ca 2 tại CS1. Người phụ trách: Tất cả GV được phân công gác thi. Hành động: Gửi nhắc nhở cho 9 GV ngay hôm nay.', status:'new' },
@@ -1071,48 +1293,6 @@ const QUICK_CMDS = [
 const session = sessionStorage.getItem('dnu_admin_session');
 if (!session) window.location.href = 'index.html';
 
-// ══════════════════════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
-  const now = new Date();
-  const days = ['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
-  document.getElementById('overviewSub').textContent = `${days[now.getDay()]}, ${now.toLocaleDateString('vi-VN')} – Chào mừng trở lại!`;
-  document.getElementById('insightTime').textContent = `Cập nhật ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
-
-  // Restore settings
-  if (CLAUDE_API_KEY) document.getElementById('claudeKey').value = CLAUDE_API_KEY;
-  if (CLAUDE_MODEL)   document.getElementById('claudeModel').value = CLAUDE_MODEL;
-  const savedGasUrl = localStorage.getItem('dnu_gas_url');
-  if (savedGasUrl) document.getElementById('gasUrl').value = savedGasUrl;
-  const tToken = localStorage.getItem('dnu_telegram_token');
-  const tChat  = localStorage.getItem('dnu_telegram_chatid');
-  if (tToken) { document.getElementById('telegramToken').value = tToken; }
-  if (tChat)  { document.getElementById('telegramChatId').value = tChat; }
-  if (tToken || tChat) {
-    document.getElementById('telegramToggle').checked = true;
-    document.getElementById('telegramFields').style.display = 'block';
-  }
-
-  // Upload filename preview wiring
-  document.addEventListener('input', e => {
-    if (e.target.placeholder === 'Tên công văn / thông báo...') updateFilenamePreview();
-  });
-
-  renderInsights();
-  renderUpcomingExams();
-  renderTodayTasks();
-  renderExamTable();
-  renderExamAssign();
-  renderTeachingTable();
-  renderScheduleTable();
-  renderMemberGrid();
-  renderNotices();
-  renderReportCharts();
-  renderReportTable();
-  initAIChat();
-  initFullChat();
-});
 
 // ══════════════════════════════════════════════════════════
 // NAVIGATION
@@ -1491,24 +1671,501 @@ function endOfYear() {
 // ── EXAM ASSIGN ENTRY POINT ───────────────────────────────
 function renderExamAssign() { renderExamRounds(); }
 
-function renderTeachingTable() {
-  const tb = document.getElementById('teachTbl');
+// ── SCHEDULE TABLE (sortable) ─────────────────────────────
+let schedSorted = [...SCHEDULE_DATA];
+let schedSortKey = '', schedSortAsc = true;
+
+function renderScheduleTable(data) {
+  data = data || schedSorted;
+  const tb = document.getElementById('schedTbody');
   if (!tb) return;
-  tb.innerHTML = TEACHING_ASSIGN.map(t => {
-    const color = t.pct > 60 ? 'var(--danger)' : t.pct > 40 ? 'var(--warning)' : 'var(--success)';
-    return `<tr><td><strong>${t.gv}</strong></td><td>${t.mon}</td><td>${t.lop}</td><td>${t.he}</td><td>${t.ss}</td><td>${t.lt}</td>
-    <td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;background:var(--bg);border-radius:3px;height:8px;overflow:hidden"><div style="width:${t.pct}%;background:${color};height:100%;border-radius:3px"></div></div><span style="font-size:12px;font-weight:700;color:${color}">${t.pct}%</span></div></td>
-    <td><span class="badge badge-success">✓</span></td>
-    <td><div class="td-act"><button class="btn btn-secondary btn-sm" onclick="showToast('info','Chỉnh sửa','✏️')">✏️</button><button class="btn btn-ai btn-sm" onclick="askAI('Đề xuất GV thay thế hoặc cân tải cho lớp ${t.lop} môn ${t.mon}')">🤖</button></div></td></tr>`;
+  if (!data.length) { tb.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text3)">Không có dữ liệu</td></tr>`; return; }
+  tb.innerHTML = data.map(s => `
+    <tr>
+      <td><strong>${s.gv}</strong></td>
+      <td>${s.mon}</td>
+      <td>${s.lop}</td>
+      <td>${s.nganh}</td>
+      <td>${s.phong}</td>
+      <td><span class="badge badge-primary">${s.lich}</span></td>
+      <td style="color:var(--text2)">${s.ghichu||'–'}</td>
+    </tr>`).join('');
+}
+
+function sortSched(key) {
+  if (schedSortKey === key) schedSortAsc = !schedSortAsc;
+  else { schedSortKey = key; schedSortAsc = true; }
+  const icons = ['gv','mon','lop','nganh','phong','lich'];
+  icons.forEach(k => { const el = document.getElementById('ss-'+k); if(el) el.textContent = k===key?(schedSortAsc?'↑':'↓'):'↕'; });
+  schedSorted.sort((a,b) => schedSortAsc ? (a[key]||'').localeCompare(b[key]||'','vi') : (b[key]||'').localeCompare(a[key]||'','vi'));
+  renderScheduleTable(schedSorted);
+}
+
+function filterSched(q) {
+  if (!q) { renderScheduleTable(schedSorted); return; }
+  const lq = q.toLowerCase();
+  renderScheduleTable(schedSorted.filter(s =>
+    s.gv.toLowerCase().includes(lq) || s.mon.toLowerCase().includes(lq) ||
+    s.lop.toLowerCase().includes(lq) || s.nganh.toLowerCase().includes(lq)
+  ));
+}
+
+// ── EXAM INVIGILATION TABLE ───────────────────────────────
+function caToBuiloiAdmin(ca) { const n=parseInt(ca.replace(/\D/g,'')); return n<=2?'Sáng':'Chiều'; }
+
+function renderExamInvigTable(data) {
+  data = data || examInvigSorted;
+  const tb = document.getElementById('examInvigTbl');
+  if (!tb) return;
+  // populate ngành filter
+  const nganhs = [...new Set(EXAM_INVIG_DATA.map(e => e.nganh))].sort();
+  const ngSel = document.getElementById('examInvigNg');
+  if (ngSel) ngSel.innerHTML = `<option value="">Ngành</option>` + nganhs.map(n=>`<option>${n}</option>`).join('');
+  if (!data.length) { tb.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text3)">Không có dữ liệu</td></tr>`; return; }
+  const buoiBadge = b => b==='Sáng'?'background:#e0f2fe;color:#0284c7':'background:#ede9fe;color:#6d28d9';
+  tb.innerHTML = data.map((e,i) => {
+    const buoi = caToBuiloiAdmin(e.ca);
+    return `<tr>
+      <td style="font-weight:600;white-space:nowrap">${e.ngay}</td>
+      <td style="color:var(--text2)">${e.thu}</td>
+      <td><strong>${e.ca}</strong></td>
+      <td><span style="${buoiBadge(buoi)};padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">${buoi}</span></td>
+      <td>${e.nganh}</td>
+      <td>${e.khoa}</td>
+      <td>${e.gv}</td>
+      <td style="font-size:12px;color:var(--text2)">${e.ghichu||'–'}</td>
+      <td><div style="display:flex;gap:5px">
+        <button class="btn btn-secondary btn-sm" style="padding:4px 8px;font-size:11px" onclick="deleteExamInvigRow(${i})">🗑️</button>
+      </div></td>
+    </tr>`;
   }).join('');
 }
 
-function renderScheduleTable() {
-  const tb = document.getElementById('schedTbl');
-  if (!tb) return;
-  tb.innerHTML = SCHEDULE_DATA.map(s => `
-    <tr><td>${s.mon}</td><td>${s.lop}</td><td>${s.gv}</td><td>${s.ss}</td><td>${s.lt}</td><td>${s.phong}</td><td><span class="badge badge-primary">${s.lich}</span></td><td>–</td></tr>`).join('');
+function sortExamInvig(key) {
+  if (examInvigSortKey === key) examInvigAsc = !examInvigAsc;
+  else { examInvigSortKey = key; examInvigAsc = true; }
+  examInvigSorted.sort((a,b) => examInvigAsc ? (a[key]||'').localeCompare(b[key]||'','vi') : (b[key]||'').localeCompare(a[key]||'','vi'));
+  renderExamInvigTable(examInvigSorted);
 }
+
+function filterExamInvig(q) {
+  q = q !== undefined ? q : (document.getElementById('examInvigSearch')||{}).value||'';
+  const ca = (document.getElementById('examInvigCa')||{}).value||'';
+  const ng = (document.getElementById('examInvigNg')||{}).value||'';
+  const lq = q.toLowerCase();
+  renderExamInvigTable(examInvigSorted.filter(e =>
+    (!lq || e.gv.toLowerCase().includes(lq) || e.nganh.toLowerCase().includes(lq) || e.khoa.toLowerCase().includes(lq)) &&
+    (!ca || e.ca === ca) && (!ng || e.nganh === ng)
+  ));
+}
+
+function openAddExamRowModal() {
+  const gvOpts = '<option value="">-- Chọn GV --</option>' + USERS.map(u=>`<option>${u.fullname}</option>`).join('');
+  document.getElementById('exRowGV').innerHTML = gvOpts;
+  openModal('modalAddExamRow');
+}
+
+function addExamInvigRow() {
+  const ngay = document.getElementById('exRowNgay').value;
+  const ca   = document.getElementById('exRowCa').value;
+  const nganh= document.getElementById('exRowNganh').value.trim();
+  const khoa = document.getElementById('exRowKhoa').value.trim();
+  if (!ngay || !nganh || !khoa) { showToast('error','Vui lòng điền đầy đủ thông tin','⚠️'); return; }
+  // Format date dd/mm/yyyy
+  const d = new Date(ngay);
+  const fmtDate = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  const thuMap = ['CN','T2','T3','T4','T5','T6','T7'];
+  const row = {
+    ngay: fmtDate, thu: thuMap[d.getDay()], ca,
+    nganh, khoa, hk: document.getElementById('exRowHK').value,
+    gv: document.getElementById('exRowGV').value||'–',
+    ghichu: document.getElementById('exRowNote').value
+  };
+  EXAM_INVIG_DATA.push(row);
+  examInvigSorted = [...EXAM_INVIG_DATA];
+  closeModal('modalAddExamRow');
+  renderExamInvigTable(examInvigSorted);
+  showToast('success','Đã thêm ca coi thi','✅');
+  ['exRowNgay','exRowNganh','exRowKhoa','exRowNote'].forEach(id => { document.getElementById(id).value=''; });
+}
+
+function deleteExamInvigRow(idx) {
+  if (!confirm('Xoá ca coi thi này?')) return;
+  EXAM_INVIG_DATA.splice(idx, 1);
+  examInvigSorted = [...EXAM_INVIG_DATA];
+  renderExamInvigTable(examInvigSorted);
+  showToast('success','Đã xoá','🗑️');
+}
+
+function importFromSheet() {
+  const link = document.getElementById('sheetLinkInput').value.trim();
+  if (!link) { showToast('error','Vui lòng nhập link Sheet','⚠️'); return; }
+  showLoading();
+  // Extract sheet ID from URL if full URL provided
+  let sheetId = link;
+  const match = link.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (match) sheetId = match[1];
+  closeModal('modalSheetLink');
+  // In production: call GAS to fetch sheet data
+  setTimeout(() => {
+    hideLoading();
+    showToast('success','Đã import dữ liệu từ Sheet (cần kết nối GAS)','📊');
+  }, 1200);
+}
+
+// ── STAT MODAL ────────────────────────────────────────────
+let statAllData = [], statSortKey = '', statSortAsc = true;
+
+function showStatModal(type) {
+  openModal('modalStat');
+  statSortKey = ''; statSortAsc = true;
+  if (type === 'teachers') {
+    document.getElementById('statModalTitle').textContent = '👥 Chi tiết Giảng viên';
+    document.getElementById('statThead').innerHTML = `<tr>
+      <th onclick="sortStatTable('name')">Họ tên ↕</th>
+      <th onclick="sortStatTable('classes')">Số lớp ↕</th>
+      <th onclick="sortStatTable('subjects')">Môn học / Lớp</th>
+      <th onclick="sortStatTable('hours')">Tiết chuẩn ↕</th>
+      <th onclick="sortStatTable('examShifts')">Ca gác thi ↕</th>
+    </tr>`;
+    statAllData = USERS.map(u => {
+      const mySubjects = SCHEDULE_DATA.filter(s => s.gv === u.fullname || s.gv.includes(u.fullname.split(' ').pop()));
+      const subjectStr = mySubjects.map(s => `${s.mon} – ${s.lop}`).join('<br>') || '–';
+      const hoursOk = u.hours >= 270;
+      const examOk  = u.examShifts >= 20;
+      return {
+        name: u.fullname, classes: u.classes, subjects: subjectStr,
+        hours: u.hours, examShifts: u.examShifts,
+        hoursOk, examOk,
+        _hours: u.hours, _examShifts: u.examShifts, _classes: u.classes
+      };
+    });
+    renderStatRows(data => `<tr>
+      <td><strong>${data.name}</strong></td>
+      <td style="text-align:center">${data.classes}</td>
+      <td style="font-size:12px;line-height:1.6">${data.subjects}</td>
+      <td style="text-align:center"><span class="${data.hoursOk?'hl-ok':'hl-red'}">${data._hours}/270</span></td>
+      <td style="text-align:center"><span class="${data.examOk?'hl-ok':'hl-red'}">${data._examShifts}/20</span></td>
+    </tr>`);
+  } else if (type === 'subjects') {
+    document.getElementById('statModalTitle').textContent = '📖 Chi tiết Môn học phần';
+    document.getElementById('statThead').innerHTML = `<tr>
+      <th onclick="sortStatTable('mon')">Môn học ↕</th>
+      <th onclick="sortStatTable('nganh')">Ngành ↕</th>
+      <th onclick="sortStatTable('khoa')">Khoá ↕</th>
+      <th>Học kỳ</th>
+      <th onclick="sortStatTable('ngayThi')">Ngày thi ↕</th>
+      <th>Giảng viên phụ trách</th>
+    </tr>`;
+    // Build subject data: one row per unique subject from SCHEDULE_DATA + exam data
+    const seen = {};
+    statAllData = SCHEDULE_DATA.map(s => {
+      const examRow = EXAM_INVIG_DATA.find(e => e.nganh === s.nganh) || {};
+      const gvList = SCHEDULE_DATA.filter(x => x.mon === s.mon && x.lop === s.lop).map(x => x.gv).join(', ');
+      return { mon: s.mon, nganh: s.nganh, khoa: s.lop.match(/K\d+/)?.[0]||'–', hk:'HK IV', ngayThi: examRow.ngay||'–', gvList };
+    });
+    renderStatRows(d => `<tr>
+      <td><strong>${d.mon}</strong></td>
+      <td>${d.nganh}</td>
+      <td>${d.khoa}</td>
+      <td>${d.hk}</td>
+      <td style="white-space:nowrap">${d.ngayThi}</td>
+      <td style="font-size:12px">${d.gvList}</td>
+    </tr>`);
+  } else if (type === 'classes') {
+    document.getElementById('statModalTitle').textContent = '📚 Chi tiết Lớp học phần';
+    document.getElementById('statThead').innerHTML = `<tr>
+      <th onclick="sortStatTable('lop')">Lớp ↕</th>
+      <th onclick="sortStatTable('nganh')">Ngành ↕</th>
+      <th onclick="sortStatTable('khoa')">Khoá ↕</th>
+      <th>Môn học</th>
+    </tr>`;
+    const lopMap = {};
+    SCHEDULE_DATA.forEach(s => {
+      if (!lopMap[s.lop]) lopMap[s.lop] = { lop:s.lop, nganh:s.nganh, khoa:s.lop.match(/K\d+/)?.[0]||'–', mons:[] };
+      if (!lopMap[s.lop].mons.includes(s.mon)) lopMap[s.lop].mons.push(s.mon);
+    });
+    statAllData = Object.values(lopMap);
+    renderStatRows(d => `<tr>
+      <td><strong>${d.lop}</strong></td>
+      <td>${d.nganh}</td>
+      <td>${d.khoa}</td>
+      <td style="font-size:12px">${d.mons.join(', ')}</td>
+    </tr>`);
+  }
+}
+
+let statRowRenderer = null;
+function renderStatRows(renderer) {
+  statRowRenderer = renderer;
+  const data = statAllData;
+  document.getElementById('statCount').textContent = data.length + ' mục';
+  document.getElementById('statTbody').innerHTML = data.map(renderer).join('');
+}
+
+function filterStatTable() {
+  const q = document.getElementById('statSearch').value.toLowerCase();
+  if (!q) { renderStatRows(statRowRenderer); return; }
+  const filtered = statAllData.filter(d => JSON.stringify(d).toLowerCase().includes(q));
+  document.getElementById('statCount').textContent = filtered.length + ' mục';
+  document.getElementById('statTbody').innerHTML = filtered.map(statRowRenderer).join('');
+}
+
+function sortStatTable(key) {
+  if (statSortKey === key) statSortAsc = !statSortAsc;
+  else { statSortKey = key; statSortAsc = true; }
+  const kmap = { name:'name', classes:'_classes', hours:'_hours', examShifts:'_examShifts', mon:'mon', nganh:'nganh', lop:'lop', khoa:'khoa', ngayThi:'ngayThi' };
+  const k = kmap[key] || key;
+  statAllData.sort((a,b) => {
+    const av = a[k] !== undefined ? a[k] : (a[key]||'');
+    const bv = b[k] !== undefined ? b[k] : (b[key]||'');
+    if (typeof av === 'number') return statSortAsc ? av-bv : bv-av;
+    return statSortAsc ? String(av).localeCompare(String(bv),'vi') : String(bv).localeCompare(String(av),'vi');
+  });
+  renderStatRows(statRowRenderer);
+}
+
+// ── TEACHING DRAG-DROP ────────────────────────────────────
+let activeTeachers = [];
+let teachingAssignment = []; // [{gv, lop, mon, tiet, tc}]
+let dragItem = null, dragType = null;
+
+const NGANH_LIST_DEFAULT = ['Sư phạm Anh', 'Ngôn ngữ Anh', 'Mầm non', 'Tiểu học'];
+const LOP_LIST_DEFAULT   = ['SPA K13 A','SPA K13 B','SPA K14 A','SPA K14 B','NNA K11 A'];
+const MON_LIST_DEFAULT   = ['Viết 3','Viết 4','Viết 5','Nói 4','Nghe 4','Đọc 4','PP dạy TA 1','Âm vị học','Dịch VE'];
+
+function renderTeachingUI() {
+  renderNganhPool();
+  renderLopPool();
+  renderMonPool();
+  renderTeacherDropZones();
+  renderTeachingReview();
+}
+
+function renderNganhPool() {
+  document.getElementById('nganhTagPool').innerHTML = NGANH_LIST_DEFAULT.map(n =>
+    `<span class="tag-pill nganh" draggable="true" ondragstart="onDragStart('nganh','${n}',event)">${n}<span class="tx" onclick="removeTag('nganh','${n}')">✕</span></span>`
+  ).join('');
+}
+
+function renderLopPool() {
+  document.getElementById('lopTagPool').innerHTML = LOP_LIST_DEFAULT.map(l =>
+    `<span class="tag-pill lop" draggable="true" ondragstart="onDragStart('lop','${l}',event)" onclick="dragAndDrop_clickTag('lop','${l}')">${l}<span class="tx" onclick="event.stopPropagation();removeTag('lop','${l}')">✕</span></span>`
+  ).join('');
+}
+
+function renderMonPool() {
+  document.getElementById('monTagPool').innerHTML = MON_LIST_DEFAULT.map(m =>
+    `<span class="tag-pill mon" draggable="true" ondragstart="onDragStart('mon','${m}',event)" onclick="dragAndDrop_clickTag('mon','${m}')">${m}<span class="tx" onclick="event.stopPropagation();removeTag('mon','${m}')">✕</span></span>`
+  ).join('');
+}
+
+function renderTeacherDropZones() {
+  const cont = document.getElementById('teacherDropZones');
+  if (!activeTeachers.length) { cont.innerHTML = `<div style="color:var(--text3);font-size:13px;padding:12px">Chưa có giảng viên nào. Nhấn "+ Thêm giảng viên" để bắt đầu.</div>`; return; }
+  cont.innerHTML = activeTeachers.map(t => {
+    const assigned = teachingAssignment.filter(a => a.gv === t);
+    const totalTiet = assigned.reduce((s,a)=>s+a.tiet,0);
+    const pct = Math.round(totalTiet/270*100);
+    const col = pct>100?'var(--danger)':pct>70?'var(--warning)':'var(--success)';
+    return `<div class="teacher-row">
+      <div class="teacher-row-hdr">
+        <div class="teacher-row-name">👤 ${t}</div>
+        <div class="teacher-row-sub">${totalTiet}/270 tiết &nbsp;|&nbsp; <span style="color:${col};font-weight:700">${pct}% định mức</span></div>
+        <button class="btn btn-danger btn-sm" style="margin-left:auto;font-size:11px" onclick="removeTeacher('${t}')">✕ Bỏ</button>
+      </div>
+      <div class="drop-zone" id="dz-${t.replace(/\s/g,'_')}"
+           ondragover="event.preventDefault();this.classList.add('over')"
+           ondragleave="this.classList.remove('over')"
+           ondrop="dropToTeacher('${t}',event)">
+        ${assigned.map(a=>`<span class="tag-pill mon">${a.mon} / ${a.lop}<span class="tx" onclick="removeAssignment('${t}','${a.lop}','${a.mon}')">✕</span></span>`).join('')}
+        ${!assigned.length ? `<span style="font-size:12px;color:var(--text3)">Kéo thả lớp hoặc môn vào đây</span>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderTeachingReview() {
+  const sec = document.getElementById('teachingReviewSection');
+  if (!teachingAssignment.length) { sec.style.display='none'; return; }
+  sec.style.display='block';
+  document.getElementById('teachingReviewTbl').innerHTML = teachingAssignment.map((a,i) => `
+    <tr>
+      <td style="font-weight:600">${a.gv}</td>
+      <td>${a.lop}</td>
+      <td>${a.mon}</td>
+      <td><input type="number" value="${a.tiet}" min="15" max="90" style="width:70px;padding:4px 7px;border:1.5px solid var(--border);border-radius:7px;font-family:var(--font);font-size:13px" onchange="updateTiet(${i},this.value)"></td>
+      <td><input type="number" value="${a.tc}" min="1" max="5" style="width:60px;padding:4px 7px;border:1.5px solid var(--border);border-radius:7px;font-family:var(--font);font-size:13px" onchange="updateTC(${i},this.value)"></td>
+      <td><button class="btn btn-danger btn-sm" style="font-size:11px" onclick="removeAssignmentByIdx(${i})">🗑️</button></td>
+    </tr>`).join('');
+}
+
+function onDragStart(type, value, e) {
+  dragType = type; dragItem = value;
+  e.dataTransfer.setData('text', value);
+}
+
+function dropToTeacher(teacher, e) {
+  e.preventDefault();
+  e.target.closest('.drop-zone').classList.remove('over');
+  const value = dragItem || e.dataTransfer.getData('text');
+  if (!value) return;
+  if (dragType === 'lop' || dragType === 'mon') {
+    // Add assignment: if lop dropped, need mon; if mon dropped, need lop
+    // Simple: add as lop/mon pair; user can edit later
+    const existing = teachingAssignment.find(a => a.gv===teacher && a.lop===(dragType==='lop'?value:a.lop) && a.mon===(dragType==='mon'?value:a.mon));
+    if (!existing) {
+      teachingAssignment.push({ gv:teacher, lop:dragType==='lop'?value:'(chọn lớp)', mon:dragType==='mon'?value:'(chọn môn)', tiet:30, tc:2 });
+    }
+    dragType=null; dragItem=null;
+    renderTeacherDropZones();
+    renderTeachingReview();
+  }
+}
+
+function dropToPool(type, e) { e.preventDefault(); }
+
+function dragAndDrop_clickTag(type, value) {
+  // Click selects item for next assignment
+  showToast('info', `Đã chọn ${type==='lop'?'lớp':'môn'}: ${value}. Kéo vào GV để phân công.`, '📌');
+}
+
+function removeTeacher(t) { activeTeachers = activeTeachers.filter(x=>x!==t); teachingAssignment = teachingAssignment.filter(a=>a.gv!==t); renderTeachingUI(); }
+function removeTag(type, v) { if(type==='lop')LOP_LIST_DEFAULT.splice(LOP_LIST_DEFAULT.indexOf(v),1); else if(type==='mon')MON_LIST_DEFAULT.splice(MON_LIST_DEFAULT.indexOf(v),1); renderTeachingUI(); }
+function removeAssignment(gv,lop,mon){ teachingAssignment=teachingAssignment.filter(a=>!(a.gv===gv&&a.lop===lop&&a.mon===mon)); renderTeacherDropZones(); renderTeachingReview(); }
+function removeAssignmentByIdx(i){ teachingAssignment.splice(i,1); renderTeacherDropZones(); renderTeachingReview(); }
+function updateTiet(i,v){ teachingAssignment[i].tiet=parseInt(v)||30; renderTeacherDropZones(); }
+function updateTC(i,v){ teachingAssignment[i].tc=parseInt(v)||2; }
+
+function openModal_pickTeachers() {
+  document.getElementById('pickTeacherList').innerHTML = USERS.map(u => `
+    <label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .15s" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
+      <input type="checkbox" value="${u.fullname}" ${activeTeachers.includes(u.fullname)?'checked':''} style="width:16px;height:16px;accent-color:var(--primary)">
+      <span style="font-size:13px;font-weight:500">${u.fullname}</span>
+      <span style="font-size:11px;color:var(--text3);margin-left:auto">${u.hours}/270t</span>
+    </label>`).join('');
+  openModal('modalPickTeachers');
+}
+
+function confirmPickTeachers() {
+  activeTeachers = [...document.querySelectorAll('#pickTeacherList input:checked')].map(cb => cb.value);
+  closeModal('modalPickTeachers');
+  renderTeachingUI();
+}
+
+function addNganhTag() {
+  const n = prompt('Tên ngành mới:');
+  if (n && !NGANH_LIST_DEFAULT.includes(n)) { NGANH_LIST_DEFAULT.push(n); renderNganhPool(); }
+}
+function addLopTag() {
+  const l = prompt('Tên lớp mới:');
+  if (l && !LOP_LIST_DEFAULT.includes(l)) { LOP_LIST_DEFAULT.push(l); renderLopPool(); }
+}
+function addMonTag() {
+  const m = prompt('Tên môn mới:');
+  if (m && !MON_LIST_DEFAULT.includes(m)) { MON_LIST_DEFAULT.push(m); renderMonPool(); }
+}
+
+function detectConflicts() {
+  const conflicts = [];
+  teachingAssignment.forEach(a => {
+    const dup = teachingAssignment.filter(b => b.gv===a.gv && b.lop===a.lop && b.mon===a.mon);
+    if (dup.length>1) conflicts.push(`${a.gv}: trùng ${a.mon} – ${a.lop}`);
+  });
+  if (conflicts.length) showToast('error', conflicts.join(' | '), '⚠️');
+  else showToast('success', 'Không phát hiện xung đột', '✅');
+}
+
+function approveTeaching() {
+  if (!teachingAssignment.length) { showToast('error','Chưa có phân công nào','⚠️'); return; }
+  showLoading();
+  setTimeout(() => {
+    hideLoading();
+    showToast('success', `Đã phê duyệt ${teachingAssignment.length} phân công & xuất Sheet`, '✅');
+    // In production: POST to GAS with teachingAssignment data
+  }, 1000);
+}
+
+function sendTeachingEmail() {
+  if (!teachingAssignment.length) { showToast('error','Chưa có phân công nào','⚠️'); return; }
+  showToast('info','Đang gửi email thông báo phân công cho GV...','📧');
+}
+
+// ── NOTICES with auto-email on Approve ───────────────────
+function renderNotices() {
+  document.getElementById('noticeList').innerHTML = NOTICES_DATA.map(n => `
+    <div class="notice-item">
+      <div class="ni-icon" style="background:${n.type==='pdf'?'#fee2e2':n.type==='doc'?'#e0f2fe':'#dcfce7'}">${n.icon}</div>
+      <div class="ni-body">
+        <div class="ni-title">${n.title} ${n.status==='new'?'<span class="badge badge-danger" style="font-size:9px;margin-left:4px">MỚI</span>':''}</div>
+        <div class="ni-meta">${n.typeLabel} · ${n.date}${n.deadline?` · ⏰ Deadline: <strong>${n.deadline}</strong>`:''}</div>
+        <div class="ni-summary">${n.summary}</div>
+        <div class="ni-ai-box">
+          <div class="ni-ai-box-title">🤖 AI Analysis</div>
+          <p>${n.aiSummary}</p>
+        </div>
+        <div class="ni-footer">
+          ${n.deadline?`<span class="deadline-chip">⏰ ${n.deadline}</span>`:''}
+          <div class="ni-actions">
+            <button class="btn btn-success btn-sm" onclick="approveNotice(${n.id})">✓ Duyệt${n.deadline?' & gửi nhắc':''}  </button>
+            <button class="btn btn-primary btn-sm" onclick="showToast('info','Đang gửi email...','📧')">📧 Gửi GV</button>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function approveNotice(id) {
+  const n = NOTICES_DATA.find(x => x.id === id);
+  if (!n) return;
+  n.status = 'approved';
+  if (n.deadline) {
+    // Schedule reminder 24h before deadline
+    const parts = n.deadline.split('/');
+    if (parts.length === 3) {
+      const dl = new Date(+parts[2], +parts[1]-1, +parts[0]);
+      const reminderTime = new Date(dl.getTime() - 24*60*60*1000);
+      const now = new Date();
+      const msUntil = reminderTime - now;
+      const emailBody = `
+        <p>Kính gửi Quý Thầy/Cô,</p>
+        <p>Đây là thông báo nhắc nhở về: <strong>${n.title}</strong></p>
+        <p><strong>Deadline: ${n.deadline}</strong></p>
+        <p style="color:#666;font-style:italic">Đây là nhắc nhở tự động từ hệ thống Quản lý Bộ môn DNU. Nếu Thầy/Cô đã hoàn thành công việc thì có thể bỏ qua email này.</p>`;
+      if (msUntil > 0) {
+        showToast('success', `✅ Đã duyệt. Nhắc nhở sẽ gửi ${reminderTime.toLocaleDateString('vi-VN')} lúc ${reminderTime.getHours()}h (24h trước deadline)`, '📧');
+        setTimeout(() => sendReminderEmail(n, emailBody), msUntil);
+      } else {
+        showToast('success', '✅ Đã duyệt. Deadline đã qua, gửi nhắc ngay.', '📧');
+        sendReminderEmail(n, emailBody);
+      }
+    }
+  } else {
+    showToast('success', '✅ Đã duyệt công văn/thông báo', '✓');
+  }
+  renderNotices();
+}
+
+function sendReminderEmail(notice, htmlBody) {
+  const gasUrl = localStorage.getItem('dnu_gas_url');
+  if (!gasUrl) { showToast('info','GAS chưa kết nối – email không gửi được','⚠️'); return; }
+  const emails = USERS.map(u => u.email).filter(Boolean);
+  emails.forEach(email => {
+    fetch(gasUrl, {
+      method:'POST',
+      body: JSON.stringify({
+        action:'sendEmail', to: email,
+        subject: `[Nhắc nhở] ${notice.title} – Deadline ${notice.deadline}`,
+        html: htmlBody
+      })
+    }).catch(() => {});
+  });
+}
+
+// ── TEACHING TABLE OLD (kept for report) ─────────────────
+function renderTeachingTable() { /* replaced by drag-drop UI */ }
+
+
 
 function renderMemberGrid() {
   document.getElementById('memberGrid').innerHTML = USERS.map(u => {
@@ -1856,6 +2513,45 @@ function showToast(type, msg, title) {
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const days = ['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
+  document.getElementById('overviewSub').textContent = `${days[now.getDay()]}, ${now.toLocaleDateString('vi-VN')} – Chào mừng trở lại!`;
+  document.getElementById('insightTime').textContent = `Cập nhật ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+  if (CLAUDE_API_KEY) document.getElementById('claudeKey').value = CLAUDE_API_KEY;
+  if (CLAUDE_MODEL)   document.getElementById('claudeModel').value = CLAUDE_MODEL;
+  const savedGasUrl = localStorage.getItem('dnu_gas_url');
+  if (savedGasUrl) document.getElementById('gasUrl').value = savedGasUrl;
+  const tToken = localStorage.getItem('dnu_telegram_token');
+  const tChat  = localStorage.getItem('dnu_telegram_chatid');
+  if (tToken) document.getElementById('telegramToken').value = tToken;
+  if (tChat)  document.getElementById('telegramChatId').value = tChat;
+  if (tToken || tChat) {
+    document.getElementById('telegramToggle').checked = true;
+    document.getElementById('telegramFields').style.display = 'block';
+  }
+  document.addEventListener('input', e => {
+    if (e.target.placeholder === 'Tên công văn / thông báo...') updateFilenamePreview();
+  });
+
+  renderInsights();
+  renderUpcomingExams();
+  renderTodayTasks();
+  renderExamRounds();
+  schedSorted = [...SCHEDULE_DATA];
+  renderScheduleTable(schedSorted);
+  examInvigSorted = [...EXAM_INVIG_DATA];
+  renderExamInvigTable(examInvigSorted);
+  renderMemberGrid();
+  renderNotices();
+  renderReportCharts();
+  renderReportTable();
+  initAIChat();
+  initFullChat();
+  renderTeachingUI();
 });
 </script>
 </body>
