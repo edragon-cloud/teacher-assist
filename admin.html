@@ -577,7 +577,7 @@ tbody tr:hover { background: var(--surface2); }
         <div><h2>Lịch dạy</h2><p>HK IV 2025-2026</p></div>
         <div class="hdr-actions">
           <input type="text" class="form-input" id="schedSearch" placeholder="🔍 Tìm GV, môn, lớp..." style="width:200px;font-size:13px" oninput="filterSched(this.value)">
-          <button class="btn btn-primary btn-sm" onclick="showToast('info','Nhập TKB từ file Excel','📥')">📥 Nhập TKB</button>
+          <button class="btn btn-primary btn-sm" onclick="openSchedImportModal()">📥 Nhập TKB từ Sheet</button>
         </div>
       </div>
       <div class="tbl-wrap" id="schedTblWrap">
@@ -1268,6 +1268,31 @@ tbody tr:hover { background: var(--surface2); }
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('modalSheetLink')">Hủy</button>
       <button class="btn btn-primary" onclick="importFromSheet()">📥 Import dữ liệu</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Import TKB from Google Sheet -->
+<div class="modal-overlay" id="modalSchedImport">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-hdr"><h3>📥 Nhập thời khoá biểu từ Google Sheet</h3>
+      <button class="modal-close" onclick="closeModal('modalSchedImport')">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:14px">
+        Paste link Google Sheet chứa TKB. Sheet cần share <strong>"Anyone with link can view"</strong>.
+      </p>
+      <div class="form-group">
+        <label>Link Google Sheet</label>
+        <input class="form-input" id="schedSheetUrl" placeholder="https://docs.google.com/spreadsheets/d/...">
+      </div>
+      <div style="background:var(--surface2);border-radius:8px;padding:11px 14px;font-size:12px;color:var(--text2);line-height:1.8">
+        <strong>Cột cần có trong Sheet:</strong><br>
+        GV (hoặc Giảng viên) · Môn · Lớp · Ngành · Phòng · Lịch học · Ghi chú
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalSchedImport')">Hủy</button>
+      <button class="btn btn-primary" onclick="schedImportFromSheet()">📥 Import</button>
     </div>
   </div>
 </div>
@@ -1989,15 +2014,66 @@ function deleteExamInvigRow(idx) {
 function importFromSheet() {
   const link = document.getElementById('sheetLinkInput').value.trim();
   if (!link) { showToast('error','Vui lòng nhập link Sheet','⚠️'); return; }
-  showLoading();
-  let sheetId = link;
-  const match = link.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  if (match) sheetId = match[1];
+
+  const idMatch = link.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  const sheetId = idMatch ? idMatch[1] : link.trim();
+  const gidMatch = link.match(/[#&]gid=(\d+)/);
+  const gid = gidMatch ? gidMatch[1] : '0';
+  const tabName = document.getElementById('sheetTabName')?.value.trim() || '';
+  const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+
   closeModal('modalSheetLink');
-  setTimeout(() => {
-    hideLoading();
-    showToast('success','Đã import dữ liệu từ Sheet (cần kết nối GAS)','📊');
-  }, 1200);
+  showLoading();
+
+  fetch(csvUrl)
+    .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} – kiểm tra quyền share Sheet`); return r.text(); })
+    .then(csvText => {
+      hideLoading();
+      const rows = parseCSV(csvText);
+      if (!rows || rows.length < 2) { showToast('error','Sheet trống hoặc không đọc được','⚠️'); return; }
+
+      const headers = rows[0].map(h => h.trim().toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'_'));
+      const ci = cs => { for(const c of cs){const i=headers.findIndex(h=>h.includes(c));if(i>=0)return i;} return -1; };
+
+      const THU_MAP = ['CN','T2','T3','T4','T5','T6','T7'];
+
+      const newData = rows.slice(1).filter(r=>r.some(c=>c.trim())).map(r => {
+        const ngay = (ci(['ngay_thi','ngay','date'])>=0 ? r[ci(['ngay_thi','ngay','date'])] : '').trim();
+        let thu = (ci(['thu','weekday'])>=0 ? r[ci(['thu','weekday'])] : '').trim();
+        if (!thu && ngay) {
+          try {
+            const p = ngay.includes('/') ? ngay.split('/') : ngay.split('-');
+            const d = ngay.includes('/') ? new Date(+p[2],+p[1]-1,+p[0]) : new Date(ngay);
+            if (!isNaN(d)) thu = THU_MAP[d.getDay()];
+          } catch(e) {}
+        }
+        const ca = (ci(['ca_thi','ca','session'])>=0 ? r[ci(['ca_thi','ca','session'])] : 'Ca 2').trim();
+        return {
+          ngay, thu, ca: ca.startsWith('Ca') ? ca : 'Ca '+ca,
+          nganh:  (ci(['nganh','major'])>=0  ? r[ci(['nganh','major'])]  : '').trim(),
+          khoa:   (ci(['khoa','course'])>=0  ? r[ci(['khoa','course'])]  : '').trim(),
+          gv:     (ci(['gv','giang_vien','teacher','ho_ten'])>=0 ? r[ci(['gv','giang_vien','teacher','ho_ten'])] : '').trim(),
+          hk:     (ci(['hoc_ky','ky','semester','hk'])>=0 ? r[ci(['hoc_ky','ky','semester','hk'])] : '').trim(),
+          ghichu: (ci(['ghi_chu','note','ghichu'])>=0 ? r[ci(['ghi_chu','note','ghichu'])] : '').trim(),
+        };
+      }).filter(r => r.ngay || r.nganh);
+
+      if (!newData.length) { showToast('error','Không đọc được dữ liệu. Kiểm tra tên cột trong Sheet.','⚠️'); return; }
+
+      // Push to both exam invig tables (v-exams and DGT_DATA)
+      EXAM_INVIG_DATA = newData;
+      examInvigSorted = [...EXAM_INVIG_DATA];
+      renderExamInvigTable(examInvigSorted);
+      DGT_DATA = newData;
+      dgtSorted = [...DGT_DATA];
+      renderDGT(dgtSorted);
+      showToast('success', `✅ Đã import ${newData.length} ca thi từ Sheet`, '📊');
+    })
+    .catch(err => {
+      hideLoading();
+      showImportErrorModal(sheetId);
+    });
 }
 
 // ══════════════════════════════════════════════════════════
@@ -2145,11 +2221,43 @@ function gkApplyAI() {
 function gkImportSheet() {
   const link = document.getElementById('gkSheetLink').value.trim();
   if (!link) { showToast('error','Vui lòng nhập link Sheet','⚠️'); return; }
+
+  const idMatch = link.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  const sheetId = idMatch ? idMatch[1] : link.trim();
+  const gidMatch = link.match(/[#&]gid=(\d+)/);
+  const gid = gidMatch ? gidMatch[1] : '0';
+  const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+
   showLoading();
-  setTimeout(() => {
-    hideLoading();
-    showToast('success','Đã import từ Sheet (cần GAS kết nối)','📊');
-  }, 1000);
+  fetch(csvUrl)
+    .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); })
+    .then(csvText => {
+      hideLoading();
+      const rows = parseCSV(csvText);
+      if (!rows || rows.length < 2) { showToast('error','Sheet trống hoặc không đọc được','⚠️'); return; }
+
+      const headers = rows[0].map(h => h.trim().toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'_'));
+      const colIdx = cs => { for(const c of cs){const i=headers.findIndex(h=>h.includes(c));if(i>=0)return i;} return -1; };
+
+      GK_ROWS = rows.slice(1).filter(r=>r.some(c=>c.trim())).map(r => ({
+        mon:     (colIdx(['mon','hoc_phan','ten'])   >= 0 ? r[colIdx(['mon','hoc_phan','ten'])].trim()   : ''),
+        lop:     (colIdx(['lop','class'])             >= 0 ? r[colIdx(['lop','class'])].trim()             : ''),
+        ngayThi: (colIdx(['ngay','date'])             >= 0 ? r[colIdx(['ngay','date'])].trim()             : ''),
+        caThi:   (colIdx(['ca','session'])            >= 0 ? r[colIdx(['ca','session'])].trim()            : 'Ca 2'),
+        raDe:    (colIdx(['ra_de','gv_ra'])           >= 0 ? r[colIdx(['ra_de','gv_ra'])].trim()           : ''),
+        gk1:     (colIdx(['gk1','giam_khao_1'])       >= 0 ? r[colIdx(['gk1','giam_khao_1'])].trim()       : ''),
+        gk2:     (colIdx(['gk2','giam_khao_2'])       >= 0 ? r[colIdx(['gk2','giam_khao_2'])].trim()       : ''),
+        ghichu:  (colIdx(['ghi_chu','note','ghichu']) >= 0 ? r[colIdx(['ghi_chu','note','ghichu'])].trim() : ''),
+      }));
+
+      renderGKTable();
+      showToast('success', `✅ Đã import ${GK_ROWS.length} môn từ Sheet`, '📊');
+    })
+    .catch(err => {
+      hideLoading();
+      showToast('error', 'Sheet cần share "Anyone with link can view". Kiểm tra quyền truy cập.', '❌');
+    });
 }
 
 // ── STAT MODAL ────────────────────────────────────────────
@@ -2289,36 +2397,182 @@ function dgtApplyConfig() {
 function dgtImportSheet() {
   const link = document.getElementById('dgtSheetUrl')?.value.trim();
   if (!link) { showToast('error','Vui lòng nhập link Google Sheet','⚠️'); return; }
+
+  // Extract Sheet ID from any Google Sheets URL format
+  const idMatch = link.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  const sheetId = idMatch ? idMatch[1] : link.trim();
+
+  // Extract gid (tab id) if present e.g. #gid=123456
+  const gidMatch = link.match(/[#&]gid=(\d+)/);
+  const gid = gidMatch ? gidMatch[1] : '0';
+
+  // Build CSV export URL — works for "Anyone with link" sheets (view or edit)
+  const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+
   showLoading();
-  let sheetId = link;
-  const m = link.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  if (m) sheetId = m[1];
-  const gasUrl = localStorage.getItem('dnu_gas_url');
-  if (gasUrl) {
-    fetch(`${gasUrl}?action=getSheetData&sheetId=${sheetId}`)
-      .then(r=>r.json())
-      .then(d=>{
-        if (d.rows && d.rows.length) {
-          // Map sheet rows → DGT_DATA format
-          DGT_DATA = d.rows.map(r=>({
-            ngay: r.NgayThi||r[0]||'', thu: r.Thu||r[1]||'',
-            ca:   r.Ca||r[2]||'Ca 2', nganh: r.Nganh||r[3]||'',
-            khoa: r.Khoa||r[4]||'', gv: r.GV||r[5]||'',
-            hk:   r.HocKy||r[6]||'', ghichu: r.GhiChu||r[7]||''
-          }));
-          dgtSorted=[...DGT_DATA]; hideLoading();
-          renderDGT(dgtSorted);
-          showToast('success',`Đã import ${DGT_DATA.length} ca thi từ Sheet`,'📊');
-        } else { hideLoading(); showToast('error','Sheet không có dữ liệu hoặc sai định dạng','⚠️'); }
-      })
-      .catch(()=>{ hideLoading(); showToast('error','Lỗi kết nối GAS – kiểm tra URL trong Settings','❌'); });
-  } else {
-    // Demo mode: simulate import with sample data
-    setTimeout(()=>{
+  document.getElementById('dgtSheetUrl').style.borderColor = '';
+
+  fetch(csvUrl)
+    .then(r => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.text();
+    })
+    .then(csvText => {
       hideLoading();
-      showToast('info','GAS chưa kết nối. Kết nối GAS trong Settings để import thực từ Sheet.','⚠️');
-    },1000);
+      const rows = parseCSV(csvText);
+      if (!rows || rows.length < 2) {
+        showToast('error','Sheet trống hoặc không có dữ liệu','⚠️');
+        return;
+      }
+
+      // Row 0 = headers, rows 1+ = data
+      const headers = rows[0].map(h => h.trim().toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // remove diacritics for matching
+        .replace(/\s+/g,'_'));
+
+      // Flexible header mapping
+      const colIdx = (candidates) => {
+        for (const c of candidates) {
+          const i = headers.findIndex(h => h.includes(c));
+          if (i >= 0) return i;
+        }
+        return -1;
+      };
+
+      const iNgay  = colIdx(['ngay_thi','ngay','date']);
+      const iThu   = colIdx(['thu','weekday','day_of_week']);
+      const iCa    = colIdx(['ca_thi','ca','session','shift']);
+      const iNganh = colIdx(['nganh','nganh_hoc','major','branch']);
+      const iKhoa  = colIdx(['khoa','course','k_']);
+      const iGV    = colIdx(['gv','giang_vien','teacher','ho_ten']);
+      const iHK    = colIdx(['hoc_ky','ky','semester','hk']);
+      const iNote  = colIdx(['ghi_chu','note','ghichu','remarks']);
+
+      const THU_MAP = ['CN','T2','T3','T4','T5','T6','T7'];
+
+      const newData = rows.slice(1)
+        .filter(r => r.some(c => c.trim())) // skip blank rows
+        .map(r => {
+          const ngay = iNgay >= 0 ? r[iNgay]?.trim() : '';
+          let thu = iThu >= 0 ? r[iThu]?.trim() : '';
+
+          // Auto-derive Thứ from date if column missing or empty
+          if (!thu && ngay) {
+            // Support dd/mm/yyyy or yyyy-mm-dd
+            const p = ngay.includes('/') ? ngay.split('/') : ngay.split('-');
+            try {
+              const d = ngay.includes('/')
+                ? new Date(+p[2], +p[1]-1, +p[0])
+                : new Date(ngay);
+              if (!isNaN(d)) thu = THU_MAP[d.getDay()];
+            } catch(e) {}
+          }
+
+          const ca = iCa >= 0 ? r[iCa]?.trim() || 'Ca 2' : 'Ca 2';
+          return {
+            ngay:   ngay,
+            thu:    thu,
+            ca:     ca.startsWith('Ca') ? ca : 'Ca ' + ca,
+            nganh:  iNganh >= 0 ? r[iNganh]?.trim() : '',
+            khoa:   iKhoa  >= 0 ? r[iKhoa]?.trim()  : '',
+            gv:     iGV    >= 0 ? r[iGV]?.trim()    : '',
+            hk:     iHK    >= 0 ? r[iHK]?.trim()    : '',
+            ghichu: iNote  >= 0 ? r[iNote]?.trim()  : '',
+          };
+        })
+        .filter(r => r.ngay || r.nganh); // must have at least date or nganh
+
+      if (!newData.length) {
+        showToast('error','Không đọc được dữ liệu. Kiểm tra tên cột trong Sheet (cần: Ngày thi, Ca thi, Ngành, Khoá, GV)','⚠️');
+        showColumnHint();
+        return;
+      }
+
+      DGT_DATA = newData;
+      dgtSorted = [...DGT_DATA];
+      renderDGT(dgtSorted);
+      showToast('success', `✅ Đã import ${newData.length} ca thi từ Google Sheet`, '📊');
+      document.getElementById('dgtSheetUrl').style.borderColor = '#22c55e';
+    })
+    .catch(err => {
+      hideLoading();
+      // CORS or access error
+      if (err.message.includes('Failed to fetch') || err.message.includes('CORS') || err.message.includes('NetworkError')) {
+        showImportErrorModal(sheetId);
+      } else {
+        showToast('error', `Lỗi: ${err.message}. Sheet cần được share "Anyone with link".`, '❌');
+      }
+    });
+}
+
+// Parse CSV properly (handles quoted fields with commas/newlines)
+function parseCSV(text) {
+  const rows = [];
+  let row = [], field = '', inQuote = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i], next = text[i+1];
+    if (inQuote) {
+      if (ch === '"' && next === '"') { field += '"'; i++; }
+      else if (ch === '"') inQuote = false;
+      else field += ch;
+    } else {
+      if (ch === '"') inQuote = true;
+      else if (ch === ',') { row.push(field); field = ''; }
+      else if (ch === '\n' || (ch === '\r' && next === '\n')) {
+        row.push(field); field = '';
+        if (row.some(c=>c)) rows.push(row);
+        row = []; if (ch === '\r') i++;
+      } else field += ch;
+    }
   }
+  if (field || row.length) { row.push(field); if (row.some(c=>c)) rows.push(row); }
+  return rows;
+}
+
+function showColumnHint() {
+  const msg = `Sheet cần có các cột (tên cột linh hoạt):\n• Ngày thi (dd/mm/yyyy)\n• Ca thi (1, 2, 3 hoặc Ca 1, Ca 2...)\n• Ngành (tên ngành)\n• Khoá (K22, K14...)\n• GV (tên giảng viên)\n• Học kỳ\n• Ghi chú (không bắt buộc)`;
+  alert(msg);
+}
+
+function showImportErrorModal(sheetId) {
+  // Show a helpful modal explaining how to make sheet public
+  const existing = document.getElementById('modalImportHelp');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'modalImportHelp';
+  modal.className = 'modal-overlay open';
+  modal.style.zIndex = '999';
+  modal.innerHTML = `
+    <div class="modal" style="max-width:520px">
+      <div class="modal-hdr"><h3>⚠️ Không thể đọc Google Sheet</h3>
+        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">✕</button></div>
+      <div class="modal-body">
+        <div style="background:#fef9c3;border:1px solid #fde047;border-radius:9px;padding:13px 16px;margin-bottom:14px;font-size:13px;color:#713f12">
+          <strong>Sheet chưa được public.</strong> Để import trực tiếp từ trình duyệt, sheet cần được share ở chế độ <strong>"Anyone with the link can view"</strong>.
+        </div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:12px">Các bước để fix:</p>
+        <ol style="font-size:13px;color:var(--text2);line-height:2;padding-left:18px">
+          <li>Mở Google Sheet → nút <strong>Share</strong></li>
+          <li>Chọn <strong>"Anyone with the link"</strong> → <strong>Viewer</strong> hoặc Editor</li>
+          <li>Copy link → paste lại vào ô Import</li>
+        </ol>
+        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:9px;padding:12px 16px;margin-top:12px;font-size:12px;color:#15803d">
+          <strong>Hoặc</strong>: Kết nối GAS trong Settings → import qua proxy sẽ không bị CORS.
+        </div>
+        <div style="margin-top:14px">
+          <a href="https://docs.google.com/spreadsheets/d/${sheetId}" target="_blank"
+             style="color:var(--primary);font-size:13px;text-decoration:underline">
+            🔗 Mở Sheet để chỉnh quyền truy cập →
+          </a>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Đóng</button>
+        <button class="btn btn-primary" onclick="this.closest('.modal-overlay').remove();dgtImportSheet()">🔄 Thử lại</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
 }
 
 
@@ -2907,12 +3161,85 @@ async function doSmartSearch(q) {
 // UPLOAD
 // ══════════════════════════════════════════════════════════
 async function uploadAndProcess() {
+  // Get file and metadata from modal
+  const fileInput = document.querySelector('#modalUpload input[type="file"]');
+  const titleEl   = document.querySelector('#modalUpload .form-input[placeholder="Tên công văn / thông báo..."]');
+  const typeEl    = document.querySelector('#modalUpload select');
+  const title     = titleEl?.value.trim() || 'Công văn mới';
+  const type      = typeEl?.value || 'Công văn';
+  const file      = fileInput?.files?.[0];
+
   closeModal('modalUpload');
   showLoading();
-  const reply = await callClaude('Phân tích và tóm tắt một công văn hành chính mới được tải lên. Trích xuất: deadline, người phụ trách, hành động cần làm. Định dạng rõ ràng.');
+
+  let fileContent = '';
+  if (file) {
+    // Read file as text if possible
+    try {
+      fileContent = await new Promise((res, rej) => {
+        const reader = new FileReader();
+        reader.onload = e => res(e.target.result);
+        reader.onerror = () => res('');
+        if (file.type.includes('text') || file.name.endsWith('.txt')) {
+          reader.readAsText(file, 'UTF-8');
+        } else {
+          // For PDF/DOCX pass filename only — Claude will analyse based on title
+          res(`[File: ${file.name}, size: ${Math.round(file.size/1024)}KB]`);
+        }
+      });
+    } catch(e) { fileContent = ''; }
+  }
+
+  const prompt = `Bạn là trợ lý hành chính cho Khoa Ngoại Ngữ, Trường ĐH Đồng Nai.
+Phân tích công văn/thông báo sau và trả về JSON với các trường:
+{
+  "tomTat": "Tóm tắt ngắn gọn 1-2 câu",
+  "deadline": "dd/mm/yyyy hoặc null nếu không có",
+  "nguoiPhuTrach": "Tên người/bộ phận cần xử lý",
+  "hanhDong": "Việc cần làm cụ thể",
+  "uuTien": "Cao | Trung bình | Thấp",
+  "tags": ["tag1", "tag2"]
+}
+Chỉ trả JSON, không giải thích thêm.
+
+Tên tài liệu: ${title}
+Loại: ${type}
+Nội dung: ${fileContent || '(Không có nội dung text, phân tích dựa trên tiêu đề)'}`;
+
+  let analysis = { tomTat: title, deadline: null, nguoiPhuTrach: 'Tổ trưởng', hanhDong: 'Xem xét và xử lý', uuTien: 'Trung bình', tags: [] };
+  try {
+    const raw = await callClaude(prompt);
+    const cleaned = raw.replace(/```json|```/g,'').trim();
+    analysis = JSON.parse(cleaned);
+  } catch(e) {
+    // Use defaults if parse fails
+  }
+
   hideLoading();
-  showToast('success', 'Đã phân tích bằng AI', '🤖');
+
+  // Add to NOTICES_DATA
+  const newId = (NOTICES_DATA.length ? Math.max(...NOTICES_DATA.map(n=>n.id)) : 0) + 1;
+  const today = new Date().toLocaleDateString('vi-VN');
+  NOTICES_DATA.unshift({
+    id: newId,
+    title,
+    typeLabel: type,
+    type: type === 'Công văn' ? 'pdf' : 'doc',
+    icon: type === 'Công văn' ? '📄' : type === 'Họp' ? '📅' : '📋',
+    date: today,
+    deadline: analysis.deadline || '',
+    summary: analysis.hanhDong || '',
+    aiSummary: analysis.tomTat || title,
+    status: 'new',
+    uuTien: analysis.uuTien || 'Trung bình',
+    nguoiPhuTrach: analysis.nguoiPhuTrach || '',
+    tags: analysis.tags || [],
+    fileUrl: file ? URL.createObjectURL(file) : '',
+  });
+
+  renderNotices();
   goView('notices', null);
+  showToast('success', `✅ Đã phân tích "${title}" bằng AI`, '🤖');
 }
 
 // ══════════════════════════════════════════════════════════
@@ -2934,7 +3261,25 @@ function testGASConnection() {
   if (!url) { showToast('error','Vui lòng nhập GAS URL','⚠️'); return; }
   localStorage.setItem('dnu_gas_url', url);
   showLoading();
-  setTimeout(() => { hideLoading(); showToast('success','Kết nối GAS thành công!','🔌'); }, 1200);
+  fetch(`${url}?action=ping`)
+    .then(r => r.json())
+    .then(d => {
+      hideLoading();
+      if (d.ok || d.status === 'ok' || d.pong) {
+        showToast('success','✅ Kết nối GAS thành công!','🔌');
+      } else {
+        showToast('warning',`GAS phản hồi nhưng không có trường ok/pong: ${JSON.stringify(d).slice(0,60)}`,'⚠️');
+      }
+    })
+    .catch(err => {
+      hideLoading();
+      // CORS error from GAS is actually normal for doGet — still means it's reachable
+      if (err.message.includes('Failed to fetch') || err.message.includes('CORS')) {
+        showToast('warning','GAS URL đã lưu. Nếu deploy đúng cách (Execute as Me, Anyone), sẽ hoạt động.','⚠️');
+      } else {
+        showToast('error',`Lỗi kết nối: ${err.message}`,'❌');
+      }
+    });
 }
 
 function changePassword() {
@@ -2994,6 +3339,60 @@ function showToast(type, msg, title) {
   el.innerHTML = `<span>${icons[type]||'ℹ️'} ${title ? `<strong>${title}</strong> – ` : ''}${msg}</span>`;
   document.getElementById('toastContainer').appendChild(el);
   setTimeout(() => el.remove(), 4000);
+}
+
+// ── SCHEDULE IMPORT FROM SHEET ───────────────────────────
+function openSchedImportModal() {
+  openModal('modalSchedImport');
+}
+
+function schedImportFromSheet() {
+  const link = document.getElementById('schedSheetUrl')?.value.trim();
+  if (!link) { showToast('error','Vui lòng nhập link Sheet','⚠️'); return; }
+
+  const idMatch = link.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  const sheetId = idMatch ? idMatch[1] : link.trim();
+  const gidMatch = link.match(/[#&]gid=(\d+)/);
+  const gid = gidMatch ? gidMatch[1] : '0';
+  const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+
+  closeModal('modalSchedImport');
+  showLoading();
+
+  fetch(csvUrl)
+    .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); })
+    .then(csvText => {
+      hideLoading();
+      const rows = parseCSV(csvText);
+      if (!rows || rows.length < 2) { showToast('error','Sheet trống','⚠️'); return; }
+
+      const headers = rows[0].map(h => h.trim().toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'_'));
+      const ci = cs => { for(const c of cs){const i=headers.findIndex(h=>h.includes(c));if(i>=0)return i;} return -1; };
+
+      const newSched = rows.slice(1).filter(r=>r.some(c=>c.trim())).map(r => ({
+        gv:     (ci(['gv','giang_vien','teacher'])>=0 ? r[ci(['gv','giang_vien','teacher'])] : '').trim(),
+        mon:    (ci(['mon','mon_hoc','subject'])>=0   ? r[ci(['mon','mon_hoc','subject'])]    : '').trim(),
+        lop:    (ci(['lop','class'])>=0               ? r[ci(['lop','class'])]                : '').trim(),
+        nganh:  (ci(['nganh','major'])>=0             ? r[ci(['nganh','major'])]              : '').trim(),
+        phong:  (ci(['phong','room','phong_hoc'])>=0  ? r[ci(['phong','room','phong_hoc'])]   : '').trim(),
+        lich:   (ci(['lich_hoc','lich','schedule'])>=0? r[ci(['lich_hoc','lich','schedule'])] : '').trim(),
+        ghichu: (ci(['ghi_chu','note','ghichu'])>=0   ? r[ci(['ghi_chu','note','ghichu'])]    : '').trim(),
+      })).filter(r => r.gv || r.mon);
+
+      if (!newSched.length) { showToast('error','Không đọc được dữ liệu. Kiểm tra tên cột (GV, Môn, Lớp, Ngành, Phòng, Lịch học).','⚠️'); return; }
+
+      // Replace SCHEDULE_DATA and re-render
+      SCHEDULE_DATA.length = 0;
+      newSched.forEach(r => SCHEDULE_DATA.push(r));
+      schedSorted = [...SCHEDULE_DATA];
+      renderScheduleTable(schedSorted);
+      showToast('success', `✅ Đã import ${newSched.length} lớp học từ Sheet`, '📊');
+    })
+    .catch(() => {
+      hideLoading();
+      showToast('error','Sheet cần share "Anyone with link can view" để import trực tiếp từ trình duyệt.','❌');
+    });
 }
 
 // ══════════════════════════════════════════════════════════
