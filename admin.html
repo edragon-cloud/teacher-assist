@@ -2398,92 +2398,40 @@ function dgtImportSheet() {
   const link = document.getElementById('dgtSheetUrl')?.value.trim();
   if (!link) { showToast('error','Vui lòng nhập link Google Sheet','⚠️'); return; }
 
-  // Extract Sheet ID from any Google Sheets URL format
   const idMatch = link.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
   const sheetId = idMatch ? idMatch[1] : link.trim();
-
-  // Extract gid (tab id) if present e.g. #gid=123456
   const gidMatch = link.match(/[#&]gid=(\d+)/);
   const gid = gidMatch ? gidMatch[1] : '0';
-
-  // Build CSV export URL — works for "Anyone with link" sheets (view or edit)
   const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
 
   showLoading();
   document.getElementById('dgtSheetUrl').style.borderColor = '';
 
   fetch(csvUrl)
-    .then(r => {
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      return r.text();
-    })
+    .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); })
     .then(csvText => {
       hideLoading();
       const rows = parseCSV(csvText);
-      if (!rows || rows.length < 2) {
-        showToast('error','Sheet trống hoặc không có dữ liệu','⚠️');
-        return;
+      if (!rows || rows.length < 3) { showToast('error','Sheet trống hoặc không đọc được','⚠️'); return; }
+
+      // ── Detect format ──────────────────────────────────────
+      // Flatten all cells to plain text for scanning
+      const flat = rows.map(r => r.map(c => (c||'').trim()));
+
+      // Try to detect MATRIX format (GV rows × date columns)
+      // Signature: a row contains cells that look like dates (dd/mm/yyyy or m/d/yyyy)
+      // and another row has "Ca" or ca numbers, and data rows have "X" markers
+      const isMatrixFormat = detectMatrixFormat(flat);
+
+      let newData;
+      if (isMatrixFormat) {
+        newData = parseMatrixFormat(flat);
+      } else {
+        newData = parseFlatFormat(flat);
       }
 
-      // Row 0 = headers, rows 1+ = data
-      const headers = rows[0].map(h => h.trim().toLowerCase()
-        .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // remove diacritics for matching
-        .replace(/\s+/g,'_'));
-
-      // Flexible header mapping
-      const colIdx = (candidates) => {
-        for (const c of candidates) {
-          const i = headers.findIndex(h => h.includes(c));
-          if (i >= 0) return i;
-        }
-        return -1;
-      };
-
-      const iNgay  = colIdx(['ngay_thi','ngay','date']);
-      const iThu   = colIdx(['thu','weekday','day_of_week']);
-      const iCa    = colIdx(['ca_thi','ca','session','shift']);
-      const iNganh = colIdx(['nganh','nganh_hoc','major','branch']);
-      const iKhoa  = colIdx(['khoa','course','k_']);
-      const iGV    = colIdx(['gv','giang_vien','teacher','ho_ten']);
-      const iHK    = colIdx(['hoc_ky','ky','semester','hk']);
-      const iNote  = colIdx(['ghi_chu','note','ghichu','remarks']);
-
-      const THU_MAP = ['CN','T2','T3','T4','T5','T6','T7'];
-
-      const newData = rows.slice(1)
-        .filter(r => r.some(c => c.trim())) // skip blank rows
-        .map(r => {
-          const ngay = iNgay >= 0 ? r[iNgay]?.trim() : '';
-          let thu = iThu >= 0 ? r[iThu]?.trim() : '';
-
-          // Auto-derive Thứ from date if column missing or empty
-          if (!thu && ngay) {
-            // Support dd/mm/yyyy or yyyy-mm-dd
-            const p = ngay.includes('/') ? ngay.split('/') : ngay.split('-');
-            try {
-              const d = ngay.includes('/')
-                ? new Date(+p[2], +p[1]-1, +p[0])
-                : new Date(ngay);
-              if (!isNaN(d)) thu = THU_MAP[d.getDay()];
-            } catch(e) {}
-          }
-
-          const ca = iCa >= 0 ? r[iCa]?.trim() || 'Ca 2' : 'Ca 2';
-          return {
-            ngay:   ngay,
-            thu:    thu,
-            ca:     ca.startsWith('Ca') ? ca : 'Ca ' + ca,
-            nganh:  iNganh >= 0 ? r[iNganh]?.trim() : '',
-            khoa:   iKhoa  >= 0 ? r[iKhoa]?.trim()  : '',
-            gv:     iGV    >= 0 ? r[iGV]?.trim()    : '',
-            hk:     iHK    >= 0 ? r[iHK]?.trim()    : '',
-            ghichu: iNote  >= 0 ? r[iNote]?.trim()  : '',
-          };
-        })
-        .filter(r => r.ngay || r.nganh); // must have at least date or nganh
-
-      if (!newData.length) {
-        showToast('error','Không đọc được dữ liệu. Kiểm tra tên cột trong Sheet (cần: Ngày thi, Ca thi, Ngành, Khoá, GV)','⚠️');
+      if (!newData || !newData.length) {
+        showToast('error','Không đọc được dữ liệu. Xem hướng dẫn định dạng Sheet.','⚠️');
         showColumnHint();
         return;
       }
@@ -2491,18 +2439,152 @@ function dgtImportSheet() {
       DGT_DATA = newData;
       dgtSorted = [...DGT_DATA];
       renderDGT(dgtSorted);
-      showToast('success', `✅ Đã import ${newData.length} ca thi từ Google Sheet`, '📊');
+      const fmt = isMatrixFormat ? 'ma trận (GV × ngày)' : 'flat';
+      showToast('success', `✅ Đã import ${newData.length} ca thi từ Sheet (format ${fmt})`, '📊');
       document.getElementById('dgtSheetUrl').style.borderColor = '#22c55e';
     })
-    .catch(err => {
-      hideLoading();
-      // CORS or access error
-      if (err.message.includes('Failed to fetch') || err.message.includes('CORS') || err.message.includes('NetworkError')) {
-        showImportErrorModal(sheetId);
-      } else {
-        showToast('error', `Lỗi: ${err.message}. Sheet cần được share "Anyone with link".`, '❌');
+    .catch(() => { hideLoading(); showImportErrorModal(sheetId); });
+}
+
+// ── Detect if sheet uses matrix format (GV rows × date cols) ──────────────
+function detectMatrixFormat(rows) {
+  // Look for a row where multiple cells look like dates
+  const dateRe = /^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}$/;
+  for (const row of rows.slice(0, 15)) {
+    const dateCells = row.filter(c => dateRe.test(c.replace(/\s/g,'')));
+    if (dateCells.length >= 2) return true;
+  }
+  // Also check for "X" pattern: many rows with sparse X markers
+  let xRows = 0;
+  for (const row of rows) {
+    const xs = row.filter(c => c.trim().toUpperCase() === 'X');
+    if (xs.length >= 1 && xs.length <= row.length - 2) xRows++;
+  }
+  return xRows >= 3;
+}
+
+// ── Parse MATRIX format ────────────────────────────────────────────────────
+// Structure (from screenshot):
+//   Row A: title rows (skip)
+//   Row B: "Ngày" + date1, date2, ... (find this row)
+//   Row C: "Ca"  + ca1,   ca2, ...
+//   Row D+E: TỔ BM info rows (skip — no GV name in col B)
+//   Row F+: TT | Họ tên GV | TỔ BM | X/blank ... | Cộng
+//   Stop at: "Tổng đăng ký" or "SL được giao"
+function parseMatrixFormat(rows) {
+  const THU_MAP = ['CN','T2','T3','T4','T5','T6','T7'];
+  const dateRe = /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/;
+
+  // 1. Find the "dates" row
+  let dateRowIdx = -1, dateColStart = -1;
+  const dates = [], cas = [];
+
+  for (let i = 0; i < Math.min(rows.length, 20); i++) {
+    const row = rows[i];
+    const dateMatches = row.map((c,ci) => ({ ci, m: c.replace(/\s/g,'').match(dateRe) }))
+                           .filter(x => x.m);
+    if (dateMatches.length >= 2) {
+      dateRowIdx = i;
+      dateColStart = dateMatches[0].ci;
+      // Parse each date cell
+      dateMatches.forEach(({ci, m}) => {
+        const [,d,mo,y] = m;
+        const yr = y.length === 2 ? '20'+y : y;
+        const dateObj = new Date(+yr, +mo-1, +d);
+        dates.push({
+          ci,
+          display: `${String(d).padStart(2,'0')}/${String(mo).padStart(2,'0')}/${yr}`,
+          thu: THU_MAP[dateObj.getDay()]
+        });
+      });
+      break;
+    }
+  }
+
+  if (!dates.length) return null;
+
+  // 2. Find "Ca" row (usually next row after dates)
+  for (let i = dateRowIdx + 1; i < Math.min(dateRowIdx + 5, rows.length); i++) {
+    const row = rows[i];
+    const isCarow = row.some(c => /^ca$/i.test(c.trim())) ||
+                    row.filter(c => /^\d+$/.test(c.trim())).length >= 2;
+    if (isCarow) {
+      dates.forEach(d => {
+        const caVal = (row[d.ci] || '').trim();
+        d.ca = caVal ? `Ca ${caVal}` : 'Ca 2';
+      });
+      break;
+    }
+  }
+  dates.forEach(d => { if (!d.ca) d.ca = 'Ca 2'; });
+
+  // 3. Find GV data rows — col B (index 1) has teacher name
+  //    Col A has TT (number), col C has Tổ BM
+  //    Stop at "Tổng đăng ký" / "SL được giao" / end
+  const result = [];
+  const stopWords = ['tổng','cộng','sl được','sl duoc','bộ môn','bo mon','ghi chú'];
+  const normalize = s => (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+
+  for (let i = dateRowIdx + 1; i < rows.length; i++) {
+    const row = rows[i];
+    const col0 = normalize(row[0] || '');
+    const col1 = (row[1] || '').trim(); // Họ tên GV
+
+    // Stop conditions
+    if (stopWords.some(w => col0.includes(normalize(w)))) break;
+    if (!col1 || col1.length < 2) continue;
+    // Skip rows that look like header/info (no number in col0, not a name)
+    if (!col1.match(/[a-zA-ZÀ-ỹ]/)) continue;
+
+    // Collect X-marked dates for this GV
+    dates.forEach(d => {
+      const cell = (row[d.ci] || '').trim().toUpperCase();
+      if (cell === 'X' || cell === 'x' || cell === '✓' || cell === '1') {
+        result.push({
+          ngay:   d.display,
+          thu:    d.thu,
+          ca:     d.ca,
+          nganh:  (row[2] || '').trim() || '',   // col C = Tổ BM / Ngành
+          khoa:   '',
+          gv:     col1,
+          hk:     '',
+          ghichu: '',
+        });
       }
     });
+  }
+
+  return result;
+}
+
+// ── Parse FLAT format ──────────────────────────────────────────────────────
+// Standard flat table: header row + data rows with columns for each field
+function parseFlatFormat(rows) {
+  const THU_MAP = ['CN','T2','T3','T4','T5','T6','T7'];
+  const norm = s => (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'_');
+  const headers = rows[0].map(norm);
+  const ci = cs => { for(const c of cs){const i=headers.findIndex(h=>h.includes(c));if(i>=0)return i;} return -1; };
+
+  return rows.slice(1).filter(r=>r.some(c=>c.trim())).map(r => {
+    const ngay = (r[ci(['ngay_thi','ngay','date'])] || '').trim();
+    let thu = (r[ci(['thu','weekday'])] || '').trim();
+    if (!thu && ngay) {
+      try {
+        const p = ngay.split('/');
+        const d = p.length===3 ? new Date(+p[2],+p[1]-1,+p[0]) : new Date(ngay);
+        if (!isNaN(d)) thu = THU_MAP[d.getDay()];
+      } catch(e) {}
+    }
+    const ca = (r[ci(['ca_thi','ca','session'])] || 'Ca 2').trim();
+    return {
+      ngay, thu, ca: ca.startsWith('Ca') ? ca : 'Ca '+ca,
+      nganh:  (r[ci(['nganh','major'])] || '').trim(),
+      khoa:   (r[ci(['khoa','course'])] || '').trim(),
+      gv:     (r[ci(['gv','giang_vien','teacher','ho_ten'])] || '').trim(),
+      hk:     (r[ci(['hoc_ky','ky','semester','hk'])] || '').trim(),
+      ghichu: (r[ci(['ghi_chu','note','ghichu'])] || '').trim(),
+    };
+  }).filter(r => r.ngay || r.nganh);
 }
 
 // Parse CSV properly (handles quoted fields with commas/newlines)
