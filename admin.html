@@ -1360,136 +1360,23 @@ let ADMIN_PASSWORD = localStorage.getItem('dnu_admin_pwd') || 'DNU@tudragon22040
 // ══════════════════════════════════════════════════════════
 // DATA
 // ══════════════════════════════════════════════════════════
+// ── USERS: admin only. Members are added via sheet or registration ──
 const USERS = [
-  { id:1, teacherId:'SPA-001', fullname:'Dương Thanh Tú',        avatar:'T', color:'#0ea5e9', classes:4, hours:120, examShifts:4, specialization:'PP giảng dạy, Kỹ năng Viết' },
-  { id:2, teacherId:'SPA-002', fullname:'Nguyễn Lưu Như Quỳnh',  avatar:'Q', color:'#f97316', classes:4, hours:135, examShifts:4, specialization:'Nói, PP giảng dạy' },
-  { id:3, teacherId:'SPA-003', fullname:'Vũ Thu Hà',              avatar:'H', color:'#8b5cf6', classes:2, hours:90,  examShifts:2, specialization:'Đọc, Viết' },
-  { id:4, teacherId:'SPA-004', fullname:'Bùi Hồng Hà',            avatar:'H', color:'#22c55e', classes:2, hours:75,  examShifts:2, specialization:'PP giảng dạy TA' },
-  { id:5, teacherId:'SPA-005', fullname:'Mai Thị Lan Anh',        avatar:'L', color:'#ef4444', classes:3, hours:105, examShifts:3, specialization:'Viết, PP giảng dạy' },
-  { id:6, teacherId:'SPA-006', fullname:'Nguyễn Thị Hà Phương',  avatar:'P', color:'#f59e0b', classes:1, hours:45,  examShifts:1, specialization:'Nghe, Nói' },
-  { id:7, teacherId:'SPA-007', fullname:'Trương Phi Luân',        avatar:'L', color:'#06b6d4', classes:1, hours:30,  examShifts:1, specialization:'Nói, Kỹ năng tổng hợp' },
-  { id:8, teacherId:'SPA-008', fullname:'Trần Văn Tuấn',          avatar:'T', color:'#3b82f6', classes:1, hours:30,  examShifts:1, specialization:'Kỹ năng ngôn ngữ' },
-  { id:9, teacherId:'SPA-009', fullname:'Trương Thị Hoạt',        avatar:'H', color:'#ec4899', classes:2, hours:60,  examShifts:2, specialization:'Âm vị học, Ngôn ngữ học' },
+  { id:1, teacherId:'SPA-001', fullname:'Dương Thanh Tú', username:'admin', email:'duongthanhtu.dnu@gmail.com', avatar:'T', color:'#0ea5e9', classes:0, hours:0, examShifts:0, specialization:'PP giảng dạy, Kỹ năng Viết' },
 ];
 
-const EXAM_DATA = [
-  { gv:'Dương Thanh Tú',       tid:'SPA-001', days:[1,1,1,0,0,0,1], total:4 },
-  { gv:'Nguyễn Lưu Như Quỳnh', tid:'SPA-002', days:[0,0,1,1,0,1,1], total:4 },
-  { gv:'Vũ Thu Hà',             tid:'SPA-003', days:[0,0,0,0,0,1,1], total:2 },
-  { gv:'Bùi Hồng Hà',           tid:'SPA-004', days:[0,0,0,0,1,0,1], total:2 },
-  { gv:'Mai Thị Lan Anh',       tid:'SPA-005', days:[1,1,0,0,0,0,1], total:3 },
-  { gv:'Nguyễn Thị Hà Phương',  tid:'SPA-006', days:[0,0,0,0,0,0,1], total:1 },
-  { gv:'Trương Phi Luân',       tid:'SPA-007', days:[0,0,0,0,0,0,1], total:1 },
-  { gv:'Trần Văn Tuấn',         tid:'SPA-008', days:[0,0,0,0,0,0,1], total:1 },
-  { gv:'Trương Thị Hoạt',       tid:'SPA-009', days:[0,0,0,1,1,0,0], total:2 },
-];
+const EXAM_DATA = [];
+let EXAM_ROUNDS = [];
+const TEACHING_ASSIGN = [];
+const SCHEDULE_DATA = [];
 
-// hinhthuc: 'viet' | 'vanDap' | 'tracNghiem' | 'thucHanh'
-// gk1, gk2: [{tid, ten}]
-// EXAM_ROUNDS: array of { id, name, from, to, note, items:[] }
-let EXAM_ROUNDS = [
-  {
-    id: 'r1', name: 'Đợt 1', from:'2026-05-22', to:'2026-05-27', note:'SPA K14 A/B – HK IV',
-    items: [
-      { tt:1, mon:'PP giảng dạy TA 1', ngay:'2026-05-07', ca:'Ca 2 (13h00)', hinhthuc:'viet',
-        rade:'SPA-004', radeHo:'Bùi Hồng Hà',
-        gk1:[{tid:'SPA-004', ten:'Bùi Hồng Hà'}],
-        gk2:[{tid:'SPA-005', ten:'Mai Thị Lan Anh'}],
-        bai:80, sdt:'0919817975' },
-      { tt:2, mon:'Nghe 4', ngay:'2026-05-08', ca:'Ca 2 (13h00)', hinhthuc:'tracNghiem',
-        rade:'EXT-001', radeHo:'Ng.T.Hồng Khanh',
-        gk1:[{tid:'EXT-001', ten:'Ng.T.Hồng Khanh'}],
-        gk2:[{tid:'SPA-006', ten:'Ng.T.Hà Phương'}],
-        bai:80, sdt:'0837926532' },
-      { tt:3, mon:'Đọc 4', ngay:'2026-05-11', ca:'Ca 2 (13h00)', hinhthuc:'viet',
-        rade:'EXT-002', radeHo:'Ngô Ngọc Thụy',
-        gk1:[{tid:'EXT-002', ten:'Ngô Ngọc Thụy'}],
-        gk2:[{tid:'EXT-003', ten:'Bùi Công Ng.Phong'}],
-        bai:80, sdt:'0918957870' },
-    ]
-  },
-  {
-    id: 'r2', name: 'Đợt 2', from:'2026-05-13', to:'2026-05-15', note:'SPA K14 A/B – HK IV',
-    items: [
-      { tt:1, mon:'Viết 4', ngay:'2026-05-13', ca:'Ca 2 (13h00)', hinhthuc:'viet',
-        rade:'SPA-005', radeHo:'Mai Thị Lan Anh',
-        gk1:[{tid:'SPA-005', ten:'Mai Thị Lan Anh'}],
-        gk2:[{tid:'SPA-004', ten:'Bùi Hồng Hà'}],
-        bai:80, sdt:'0937479286' },
-      { tt:2, mon:'Nói 4', ngay:'2026-05-14', ca:'Ca 1 (7h30)', hinhthuc:'vanDap',
-        rade:'SPA-002', radeHo:'Ng.L.Như Quỳnh',
-        gk1:[
-          {tid:'SPA-001', ten:'Dương Thanh Tú'},
-          {tid:'SPA-002', ten:'Ng.L.Như Quỳnh'},
-          {tid:'SPA-004', ten:'Bùi Hồng Hà'},
-          {tid:'SPA-006', ten:'Ng.T.Hà Phương'},
-        ],
-        gk2:[
-          {tid:'SPA-003', ten:'Vũ Thu Hà'},
-          {tid:'SPA-005', ten:'Mai Thị Lan Anh'},
-          {tid:'SPA-007', ten:'Trương Phi Luân'},
-          {tid:'SPA-008', ten:'Trần Văn Tuấn'},
-        ],
-        bai:80, sdt:'0942359088' },
-      { tt:3, mon:'Âm vị học', ngay:'2026-05-15', ca:'Ca 2 (13h00)', hinhthuc:'viet',
-        rade:'EXT-003', radeHo:'Bùi Công Ng.Phong',
-        gk1:[{tid:'EXT-003', ten:'Bùi Công Ng.Phong'}],
-        gk2:[{tid:'EXT-002', ten:'Ngô Ngọc Thụy'}],
-        bai:80, sdt:'0913150200' },
-    ]
-  },
-];
-
-const TEACHING_ASSIGN = [
-  { gv:'Dương Thanh Tú', mon:'Viết 3', lop:'SPA K13 B', he:'CQ', ss:40, lt:30, pct:44 },
-  { gv:'Dương Thanh Tú', mon:'Viết 4', lop:'SPA K13 A', he:'CQ', ss:40, lt:30, pct:44 },
-  { gv:'Nguyễn L.N.Quỳnh', mon:'Nói 4', lop:'SPA K14 A/B', he:'CQ', ss:80, lt:45, pct:67 },
-  { gv:'Nguyễn L.N.Quỳnh', mon:'Dịch VE', lop:'SPA K11 D', he:'CQ', ss:40, lt:45, pct:67 },
-  { gv:'Bùi Hồng Hà', mon:'PP dạy TA 1', lop:'SPA K14 A/B', he:'CQ', ss:80, lt:30, pct:28 },
-  { gv:'Mai Thị Lan Anh', mon:'Viết 4', lop:'SPA K14 A/B', he:'CQ', ss:80, lt:45, pct:39 },
-  { gv:'Trương Thị Hoạt', mon:'Âm vị học', lop:'SPA K14 A/B', he:'CQ', ss:80, lt:45, pct:50 },
-  { gv:'Vũ Thu Hà', mon:'Thu tin TM', lop:'NNA K11 A', he:'CQ', ss:42, lt:30, pct:22 },
-];
-
-const SCHEDULE_DATA = [
-  { gv:'Dương Thanh Tú',     mon:'Viết 3',     lop:'SPA K13 B',   nganh:'Sư phạm Anh', phong:'B201',        lich:'T3, Ca 1', ghichu:'' },
-  { gv:'Dương Thanh Tú',     mon:'Viết 4',     lop:'SPA K13 A',   nganh:'Sư phạm Anh', phong:'B202',        lich:'T4, Ca 2', ghichu:'' },
-  { gv:'Nguyễn L.N.Quỳnh',  mon:'Dịch VE',    lop:'SPA K11 D',   nganh:'Sư phạm Anh', phong:'B301',        lich:'T2, Ca 1', ghichu:'' },
-  { gv:'Bùi Hồng Hà',       mon:'PP dạy TA 1',lop:'SPA K14 A/B', nganh:'Sư phạm Anh', phong:'Hội trường',  lich:'T5, Ca 2', ghichu:'' },
-  { gv:'Ng.T.Hồng Khanh',   mon:'Nghe 4',     lop:'SPA K14 A',   nganh:'Sư phạm Anh', phong:'A102',        lich:'T6, Ca 1', ghichu:'' },
-  { gv:'Nguyễn L.N.Quỳnh',  mon:'Nói 4',      lop:'SPA K14 A/B', nganh:'Sư phạm Anh', phong:'Hội trường',  lich:'T7, Ca 1', ghichu:'' },
-  { gv:'Trương Thị Hoạt',   mon:'Âm vị học',  lop:'SPA K14 A/B', nganh:'Sư phạm Anh', phong:'B301',        lich:'T2, Ca 2', ghichu:'' },
-  { gv:'Vũ Thu Hà',          mon:'Thu tin TM', lop:'NNA K11 A',   nganh:'Ngôn ngữ Anh',phong:'C101',        lich:'T3, Ca 2', ghichu:'' },
-];
-
-// Exam invigilation rows (flat table, not matrix)
-let EXAM_INVIG_DATA = [
-  { ngay:'22/05/2026', thu:'T6', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Dương Thanh Tú',    hk:'Học kỳ 1', ghichu:'' },
-  { ngay:'22/05/2026', thu:'T6', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Mai Thị Lan Anh',   hk:'Học kỳ 1', ghichu:'' },
-  { ngay:'25/05/2026', thu:'T2', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Ng.L.Như Quỳnh',    hk:'Học kỳ 1', ghichu:'' },
-  { ngay:'27/05/2026', thu:'T4', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Dương Thanh Tú',    hk:'Học kỳ 1', ghichu:'' },
-  { ngay:'29/05/2026', thu:'T6', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Bùi Hồng Hà',       hk:'Học kỳ 1', ghichu:'' },
-  { ngay:'01/06/2026', thu:'T2', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Vũ Thu Hà',          hk:'Học kỳ 1', ghichu:'' },
-  { ngay:'03/06/2026', thu:'T4', ca:'Ca 2', nganh:'Mầm non',      khoa:'K22', gv:'Ng.T.Hà Phương',    hk:'Học kỳ 2', ghichu:'Mang đề' },
-  { ngay:'05/06/2026', thu:'T6', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Trương Thị Hoạt',   hk:'Học kỳ 1', ghichu:'' },
-];
-let examInvigSorted = [...EXAM_INVIG_DATA];
+let EXAM_INVIG_DATA = [];
+let examInvigSorted = [];
 let examInvigSortKey = '', examInvigAsc = true;
 
-const NOTICES_DATA = [
-  { id:1, icon:'📄', type:'pdf', typeLabel:'Công văn', title:'Quy định coi thi HK IV 2025-2026', date:'18/04/2026', deadline:'22/04/2026', summary:'Tất cả CBCT coi thi tại Cơ sở 1 cần có mặt trước 8h45 (Ca 2). Mang theo CMND/CCCD và thẻ GV. Không sử dụng điện thoại trong phòng thi.', aiSummary:'⏰ Deadline: 22/04 – CBCT có mặt trước 8h45 Ca 2 tại CS1. Người phụ trách: Tất cả GV được phân công gác thi. Hành động: Gửi nhắc nhở cho 9 GV ngay hôm nay.', status:'new' },
-  { id:2, icon:'📝', type:'doc', typeLabel:'Thông báo', title:'Phân công GV ra đề HK IV', date:'15/04/2026', deadline:'30/04/2026', summary:'Danh sách GV được phân công ra đề và chấm thi cho các học phần SPA K14. GV ra đề cần nộp đề thi + đáp án trước ngày thi 5 ngày.', aiSummary:'📋 6 môn cần ra đề. Deadline nộp: 5 ngày trước ngày thi. GV ra đề: Bùi Hồng Hà, Ng.T.Hồng Khanh, Ngô Ngọc Thụy, MTLA, NLNQ, Bùi Công NP.', status:'new' },
-  { id:3, icon:'🖼️', type:'img', typeLabel:'Thông báo', title:'Họp tổ bộ môn tháng 4', date:'10/04/2026', deadline:'25/04/2026', summary:'Cuộc họp tổ SPA tháng 4 diễn ra vào thứ Sáu 25/04/2026, Ca 2 tại phòng B201. Nội dung: rà soát tiến độ học kỳ, chuẩn bị thi kết thúc học phần.', aiSummary:'🗓️ Họp T6 25/04 Ca 2 tại B201. Cần nhắc: Tất cả 9 GV tổ SPA. Gợi ý: Gửi reminder trước 2 ngày (23/04).', status:'read' },
-];
+const NOTICES_DATA = [];
 
-const AI_INSIGHTS_DATA = [
-  { type:'alert', title:'⚠️ Quá tải', text:'GV Nguyễn L.N.Quỳnh đang giảng dạy 135 tiết (vượt 50% định mức). Cân nhắc chuyển 1 lớp.' },
-  { type:'warn', title:'⚡ Sắp deadline', text:'3 GV chưa nộp đề thi. Deadline 30/04 còn 7 ngày. Gửi nhắc nhở ngay.' },
-  { type:'info', title:'📋 Thiếu người dạy', text:'Lớp NNA K12A chưa được phân công GV môn Viết 5 cho HK tiếp theo.' },
-  { type:'ok', title:'✅ Gác thi đủ', text:'Tất cả 7 ngày thi đã có đủ 2 CBCT mỗi ca. Không cần bổ sung.' },
-  { type:'warn', title:'📅 Lịch dày', text:'5/6/2026 có 8 ca coi thi – ngày bận nhất. Cân nhắc phân công dự phòng.' },
-  { type:'info', title:'📊 Tải thấp', text:'GV Trương Phi Luân và Trần Văn Tuấn chỉ có 30 tiết. Có thể nhận thêm lớp.' },
-];
+const AI_INSIGHTS_DATA = [];
 
 const QUICK_CMDS = [
   'Ai đang quá tải giờ dạy?',
@@ -2264,17 +2151,8 @@ function gkImportSheet() {
 // Note: DGT_DATA is declared in the ĐĂNG KÝ GÁC THI section below
 // ĐĂNG KÝ GÁC THI (dangkygac)
 // ══════════════════════════════════════════════════════════
-let DGT_DATA = [
-  { ngay:'22/05/2026', thu:'T6', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Dương Thanh Tú',   hk:'Học kỳ IV', ghichu:'' },
-  { ngay:'22/05/2026', thu:'T6', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Mai Thị Lan Anh',  hk:'Học kỳ IV', ghichu:'' },
-  { ngay:'25/05/2026', thu:'T2', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Ng.L.Như Quỳnh',   hk:'Học kỳ IV', ghichu:'' },
-  { ngay:'27/05/2026', thu:'T4', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Dương Thanh Tú',   hk:'Học kỳ IV', ghichu:'' },
-  { ngay:'29/05/2026', thu:'T6', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Bùi Hồng Hà',      hk:'Học kỳ IV', ghichu:'' },
-  { ngay:'01/06/2026', thu:'T2', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Vũ Thu Hà',         hk:'Học kỳ IV', ghichu:'' },
-  { ngay:'03/06/2026', thu:'T4', ca:'Ca 2', nganh:'Mầm non',      khoa:'K22', gv:'Ng.T.Hà Phương',   hk:'Học kỳ 2', ghichu:'Mang đề' },
-  { ngay:'05/06/2026', thu:'T6', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Trương Thị Hoạt',  hk:'Học kỳ IV', ghichu:'' },
-];
-let dgtSorted = [...DGT_DATA], dgtSortKey='', dgtSortAsc=true;
+let DGT_DATA = [];  // empty — import từ Sheet hoặc thêm thủ công
+let dgtSorted = [], dgtSortKey='', dgtSortAsc=true;
 
 function dgtBuiloi(ca){ const n=parseInt(ca.replace(/\D/g,'')); return n<=2?'Sáng':'Chiều'; }
 function dgtFmtDate(iso){if(!iso)return'';const d=new Date(iso);return`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;}
