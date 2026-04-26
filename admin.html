@@ -2153,16 +2153,7 @@ function gkImportSheet() {
 }
 
 // ── STAT MODAL ────────────────────────────────────────────
-  { ngay:'22/05/2026', thu:'T6', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Dương Thanh Tú',   hk:'Học kỳ IV', ghichu:'' },
-  { ngay:'22/05/2026', thu:'T6', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Mai Thị Lan Anh',  hk:'Học kỳ IV', ghichu:'' },
-  { ngay:'25/05/2026', thu:'T2', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Ng.L.Như Quỳnh',   hk:'Học kỳ IV', ghichu:'' },
-  { ngay:'27/05/2026', thu:'T4', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Dương Thanh Tú',   hk:'Học kỳ IV', ghichu:'' },
-  { ngay:'29/05/2026', thu:'T6', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Bùi Hồng Hà',      hk:'Học kỳ IV', ghichu:'' },
-  { ngay:'01/06/2026', thu:'T2', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Vũ Thu Hà',         hk:'Học kỳ IV', ghichu:'' },
-  { ngay:'03/06/2026', thu:'T4', ca:'Ca 2', nganh:'Mầm non',      khoa:'K22', gv:'Ng.T.Hà Phương',   hk:'Học kỳ 2', ghichu:'Mang đề' },
-  { ngay:'05/06/2026', thu:'T6', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', gv:'Trương Thị Hoạt',  hk:'Học kỳ IV', ghichu:'' },
-];
-// ══════════════════════════════════════════════════════════
+// Note: DGT_DATA is declared in the ĐĂNG KÝ GÁC THI section below
 // ĐĂNG KÝ GÁC THI (dangkygac)
 // ══════════════════════════════════════════════════════════
 let DGT_DATA = [
@@ -2714,30 +2705,6 @@ function renderMemberGrid() {
   }).join('');
 }
 
-function renderNotices() {
-  document.getElementById('noticeList').innerHTML = NOTICES_DATA.map(n => `
-    <div class="notice-item">
-      <div class="ni-icon" style="background:${n.type==='pdf'?'#fee2e2':n.type==='doc'?'#e0f2fe':'#dcfce7'}">${n.icon}</div>
-      <div class="ni-body">
-        <div class="ni-title">${n.title} ${n.status==='new'?'<span class="badge badge-danger" style="font-size:9px;margin-left:4px">MỚI</span>':''}</div>
-        <div class="ni-meta">${n.typeLabel} · ${n.date}</div>
-        <div class="ni-summary">${n.summary}</div>
-        <div class="ni-ai-box">
-          <div class="ni-ai-box-title">🤖 AI Analysis</div>
-          <p>${n.aiSummary}</p>
-        </div>
-        <div class="ni-footer">
-          <span class="deadline-chip">⏰ ${n.deadline}</span>
-          <div class="ni-actions">
-            <button class="btn btn-success btn-sm" onclick="showToast('success','Đã phê duyệt','✓')">✓ Duyệt</button>
-            <button class="btn btn-ai btn-sm" onclick="askAI('Soạn thông báo gửi GV về: ${n.title}')">🤖 Soạn thông báo</button>
-            <button class="btn btn-primary btn-sm" onclick="showToast('info','Đang gửi email...','📧')">📧 Gửi GV</button>
-          </div>
-        </div>
-      </div>
-    </div>`).join('');
-}
-
 function renderReportCharts() {
   const colors = ['#0ea5e9','#f97316','#8b5cf6','#22c55e','#ef4444','#f59e0b','#06b6d4','#3b82f6','#ec4899'];
   const maxH = Math.max(...USERS.map(u => u.hours));
@@ -3206,7 +3173,7 @@ function downloadCSV(csv, filename) {
   URL.revokeObjectURL(url);
 }
 
-
+document.addEventListener('keydown', e => {
   if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
 });
 
