@@ -3651,6 +3651,8 @@ function dgtSaveAsRound() {
     data:   [...DGT_DATA],
   });
   renderDgtRounds();
+  // Persist to GAS
+  dgtPersistRounds();
   // Clear working area
   DGT_DATA = []; dgtSorted = []; renderDGT([]);
   ['dgtNganh','dgtKhoa','dgtNamHoc','dgtFromDate','dgtToDate','dgtSheetUrl'].forEach(id => {
@@ -3720,6 +3722,7 @@ function dgtDeleteRound(id) {
   if (!confirm('Xoá đợt thi này?')) return;
   DGT_ROUNDS = DGT_ROUNDS.filter(r => r.id !== id);
   renderDgtRounds();
+  dgtPersistRounds();
   showToast('success','Đã xoá','🗑️');
 }
 
@@ -3753,6 +3756,43 @@ function dgtExportRound(id) {
 function dgtUpdateSaveBtn() {
   const sb = document.getElementById('dgtSaveRoundBtn');
   if (sb) sb.style.display = (DGT_DATA.length > 0) ? 'inline-flex' : 'none';
+}
+
+// Persist rounds to GAS (and localStorage as fallback)
+function dgtPersistRounds() {
+  // Always save to localStorage as instant backup
+  try { localStorage.setItem('dgt_rounds', JSON.stringify(DGT_ROUNDS)); } catch(e) {}
+  // Also push to GAS if connected
+  const gasUrl = localStorage.getItem('dnu_gas_url');
+  if (!gasUrl) return;
+  fetch(gasUrl, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'saveDgtRounds', rounds: DGT_ROUNDS })
+  }).catch(() => {});
+}
+
+// Load rounds from GAS (or localStorage fallback) on page load
+async function dgtLoadRounds() {
+  const gasUrl = localStorage.getItem('dnu_gas_url');
+  if (gasUrl) {
+    try {
+      const r = await fetch(`${gasUrl}?action=getDgtRounds`);
+      const d = await r.json();
+      if (d.rounds && d.rounds.length) {
+        DGT_ROUNDS = d.rounds;
+        renderDgtRounds();
+        return;
+      }
+    } catch(e) {}
+  }
+  // Fallback: localStorage
+  try {
+    const saved = localStorage.getItem('dgt_rounds');
+    if (saved) {
+      DGT_ROUNDS = JSON.parse(saved);
+      renderDgtRounds();
+    }
+  } catch(e) {}
 }
 
 // schedImportFromSheet replaced by AI version (openSchedImportModal)
@@ -3978,6 +4018,7 @@ document.addEventListener('DOMContentLoaded', () => {
   gkInit();
   dgtSorted = [...DGT_DATA];
   renderDGT(dgtSorted);
+  dgtLoadRounds();
 });
 </script>
 </body>

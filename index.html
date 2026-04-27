@@ -70,7 +70,7 @@ body{font-family:'Inter',sans-serif;min-height:100vh;display:flex;background:#0d
     <div class="logo-box">🏛️</div>
     <div class="logo-txt"><strong>Quản lý Bộ môn</strong><span>Khoa Ngoại Ngữ – DNU</span></div>
   </div>
-  <div class="hero">Quản lý bộ môn<br>thông minh &amp; hiệu quả<br><span class="hl">Khoa Ngoại Ngữ DNU</span></div>
+  <div class="hero">Quản lý Bộ môn<br><span class="hl">Khoa Ngoại Ngữ DNU</span></div>
   <div class="feats">
     <div class="feat"><div class="fi-ic fi-p">📊</div><div class="feat-txt"><strong>Dashboard thống kê</strong><span>Báo cáo giờ dạy, gác thi, deadline trực quan</span></div></div>
     <div class="feat"><div class="fi-ic fi-o">📅</div><div class="feat-txt"><strong>Quản lý lịch dạy & thi</strong><span>Phát hiện xung đột, cảnh báo tự động</span></div></div>
@@ -147,7 +147,7 @@ body{font-family:'Inter',sans-serif;min-height:100vh;display:flex;background:#0d
 
 <!-- REGISTER PANEL (hidden, shown inline) -->
 <script>
-const GAS_URL  = '';
+const GAS_URL  = localStorage.getItem('dnu_gas_url') || '';
 const SHEET_ID = '1SzF3PCEMcxGzvKE7LCdd7ROCrrKh0MvNhuv8_JUNBHM';
 
 // Admin credentials — password stored as plain text (not hashed)
@@ -169,6 +169,12 @@ const LOCAL_GVS = [
 // Load remembered credentials
 const saved = localStorage.getItem('dnu_remember');
 if(saved){ try{ const s=JSON.parse(saved); document.getElementById('uname').value=s.u||''; document.getElementById('upwd').value=s.p||''; document.getElementById('rem').checked=true; }catch(e){} }
+
+// Load locally registered users so they persist across refreshes
+try {
+  const localUsers = JSON.parse(localStorage.getItem('dnu_local_users') || '[]');
+  localUsers.forEach(u => { if (!LOCAL_GVS.find(x=>x.username===u.username)) LOCAL_GVS.push(u); });
+} catch(e) {}
 
 async function doLogin(){
   const u = document.getElementById('uname').value.trim();
@@ -296,8 +302,14 @@ async function doRegister() {
     color: '#6366f1', phone };
   LOCAL_GVS.push(newUser);
 
+  // Save to localStorage so it persists across page refreshes in same browser
+  const pending = JSON.parse(localStorage.getItem('dnu_local_users') || '[]');
+  pending.push({ username:user, password:pwd, fullname:name, email, phone, role:'member',
+    avatar:newUser.avatar, color:newUser.color });
+  localStorage.setItem('dnu_local_users', JSON.stringify(pending));
+
   closeRegModal();
-  alert(`✅ Đăng ký thành công!\nTên đăng nhập: ${user}\n\n⚠️ GAS chưa kết nối nên tài khoản chỉ tồn tại trong phiên này.\nKết nối GAS để lưu vĩnh viễn.`);
+  alert(`✅ Đăng ký thành công!\nTên đăng nhập: ${user}\n\nTài khoản đã được lưu vào bộ nhớ trình duyệt này.\n\n📌 Để đồng bộ vĩnh viễn vào Google Sheet:\n→ Tổ trưởng vào Settings → nhập GAS URL\n→ Hoặc thêm thủ công vào sheet "Users"`);
   document.getElementById('uname').value = user;
   document.getElementById('upwd').value = '';
   btn.disabled = false; btnTxt.textContent = 'Đăng ký →';
