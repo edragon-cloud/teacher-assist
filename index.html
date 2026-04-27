@@ -98,7 +98,48 @@ body{font-family:'Inter',sans-serif;min-height:100vh;display:flex;background:#0d
   <div class="rp-foot">
     <button class="btn-fg" onclick="alert('Liên hệ Tổ trưởng để đặt lại mật khẩu.\nEmail: duongthanhtu.dnu@gmail.com')">Quên mật khẩu?</button>
   </div>
-  <div class="reg-link">Chưa có tài khoản? <a onclick="showReg()">Đăng ký ngay</a></div>
+  <div class="reg-link">Chưa có tài khoản? <a onclick="openRegModal()">Đăng ký ngay</a></div>
+</div>
+
+<!-- REGISTER MODAL -->
+<div id="regModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:#111827;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:32px;width:100%;max-width:420px;margin:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <h2 style="color:#fff;font-size:20px;font-weight:800">Đăng ký tài khoản</h2>
+      <button onclick="closeRegModal()" style="background:none;border:none;color:rgba(255,255,255,.5);font-size:20px;cursor:pointer;line-height:1">✕</button>
+    </div>
+    <div id="regErr" style="display:none;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5;padding:9px 13px;border-radius:9px;font-size:12px;margin-bottom:14px"></div>
+    <div style="display:flex;flex-direction:column;gap:13px">
+      <div>
+        <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px">Họ và tên *</label>
+        <input id="regName" class="fi" placeholder="Nguyễn Văn A">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px">Tên đăng nhập *</label>
+        <input id="regUser" class="fi" placeholder="nguyenvana" autocomplete="off">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px">Email</label>
+        <input id="regEmail" type="email" class="fi" placeholder="email@dnu.edu.vn">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px">Mật khẩu *</label>
+        <input id="regPwd" type="password" class="fi" placeholder="Tối thiểu 6 ký tự">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px">Xác nhận mật khẩu *</label>
+        <input id="regPwd2" type="password" class="fi" placeholder="Nhập lại mật khẩu">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px">Số điện thoại</label>
+        <input id="regPhone" class="fi" placeholder="09xxxxxxxx">
+      </div>
+    </div>
+    <button onclick="doRegister()" id="regBtn" style="margin-top:20px;width:100%;padding:13px;background:linear-gradient(135deg,#0ea5e9,#7c3aed);color:#fff;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;border-radius:10px;border:none;cursor:pointer">
+      <span id="regBtnTxt">Đăng ký →</span>
+    </button>
+    <div style="text-align:center;margin-top:12px;font-size:12px;color:rgba(255,255,255,.35)">Đã có tài khoản? <a onclick="closeRegModal()" style="color:#60a5fa;cursor:pointer">Đăng nhập</a></div>
+  </div>
 </div>
 
 <!-- REGISTER PANEL (hidden, shown inline) -->
@@ -157,6 +198,7 @@ async function doLogin(){
     } else {
       // Check GV list — plain password comparison
       user=LOCAL_GVS.find(x=>(x.username===u||x.email===u)&&x.password===p)||null;
+      // If not in LOCAL_GVS, allow if GAS is connected (GAS already validated above)
     }
   }
 
@@ -167,7 +209,10 @@ async function doLogin(){
   if(rem) localStorage.setItem('dnu_remember',JSON.stringify({u,p}));
   else    localStorage.removeItem('dnu_remember');
 
-  if(user.role==='admin'){
+  // Default role to 'member' if blank
+  const role = String(user.role||'member').toLowerCase().trim() || 'member';
+
+  if(role==='admin'){
     sessionStorage.setItem('dnu_admin_session',JSON.stringify(user));
     window.location.href='admin.html';
   } else {
@@ -176,8 +221,83 @@ async function doLogin(){
   }
 }
 
-function showReg(){
-  alert('Tính năng đăng ký đang được phát triển.\nVui lòng liên hệ Tổ trưởng để được cấp tài khoản.\nEmail: duongthanhtu.dnu@gmail.com');
+function openRegModal() {
+  document.getElementById('regModal').style.display = 'flex';
+  document.getElementById('regErr').style.display = 'none';
+  ['regName','regUser','regEmail','regPwd','regPwd2','regPhone'].forEach(id => document.getElementById(id).value = '');
+}
+function closeRegModal() {
+  document.getElementById('regModal').style.display = 'none';
+}
+
+async function doRegister() {
+  const name  = document.getElementById('regName').value.trim();
+  const user  = document.getElementById('regUser').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pwd   = document.getElementById('regPwd').value;
+  const pwd2  = document.getElementById('regPwd2').value;
+  const phone = document.getElementById('regPhone').value.trim();
+  const errBox = document.getElementById('regErr');
+  const btn = document.getElementById('regBtn');
+  const btnTxt = document.getElementById('regBtnTxt');
+
+  errBox.style.display = 'none';
+  const showErr = msg => { errBox.textContent = '⚠️ ' + msg; errBox.style.display = 'block'; };
+
+  if (!name)  return showErr('Vui lòng nhập họ và tên');
+  if (!user)  return showErr('Vui lòng nhập tên đăng nhập');
+  if (!pwd)   return showErr('Vui lòng nhập mật khẩu');
+  if (pwd.length < 6) return showErr('Mật khẩu tối thiểu 6 ký tự');
+  if (pwd !== pwd2) return showErr('Mật khẩu xác nhận không khớp');
+  if (!/^[a-zA-Z0-9_.]+$/.test(user)) return showErr('Tên đăng nhập chỉ dùng chữ, số, dấu _ hoặc .');
+
+  btn.disabled = true; btnTxt.textContent = '⏳ Đang đăng ký...';
+
+  // Try GAS backend first
+  if (GAS_URL) {
+    try {
+      const r = await fetch(GAS_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action:'register', username:user, password:pwd,
+          fullname:name, email, phone })
+      });
+      const d = await r.json();
+      if (d.success) {
+        closeRegModal();
+        alert(`✅ Đăng ký thành công!\nTên đăng nhập: ${user}\nBạn có thể đăng nhập ngay bây giờ.`);
+        document.getElementById('uname').value = user;
+        document.getElementById('upwd').value = '';
+        btn.disabled = false; btnTxt.textContent = 'Đăng ký →';
+        return;
+      } else {
+        showErr(d.error || 'Đăng ký thất bại');
+        btn.disabled = false; btnTxt.textContent = 'Đăng ký →';
+        return;
+      }
+    } catch(e) {}
+  }
+
+  // Fallback: check local duplicates then save locally
+  await new Promise(r => setTimeout(r, 400));
+  const dup = LOCAL_GVS.find(x => x.username === user || (email && x.email === email));
+  if (dup) {
+    showErr('Tên đăng nhập hoặc email đã tồn tại');
+    btn.disabled = false; btnTxt.textContent = 'Đăng ký →';
+    return;
+  }
+
+  // Add to local list (session only — will be lost on reload without GAS)
+  const newUser = { id: LOCAL_GVS.length + 2, username: user, email, password: pwd,
+    fullname: name, role: 'member',
+    avatar: name.trim().split(' ').pop()[0].toUpperCase(),
+    color: '#6366f1', phone };
+  LOCAL_GVS.push(newUser);
+
+  closeRegModal();
+  alert(`✅ Đăng ký thành công!\nTên đăng nhập: ${user}\n\n⚠️ GAS chưa kết nối nên tài khoản chỉ tồn tại trong phiên này.\nKết nối GAS để lưu vĩnh viễn.`);
+  document.getElementById('uname').value = user;
+  document.getElementById('upwd').value = '';
+  btn.disabled = false; btnTxt.textContent = 'Đăng ký →';
 }
 </script>
 </body>
