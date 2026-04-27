@@ -3641,26 +3641,39 @@ function dgtBuildRoundName() {
 
 function dgtSaveAsRound() {
   if (!DGT_DATA.length) { showToast('error','Chưa có ca thi nào. Import hoặc thêm ca thi trước.','⚠️'); return; }
+
+  // AI auto-builds name from data — user edits after if needed
   const name = dgtBuildRoundName();
-  DGT_ROUNDS.push({
-    id: Date.now(), name, open: false,
+  const round = {
+    id: Date.now(), name, open: true,
     nganh:  document.getElementById('dgtNganh')?.value.trim() || '',
     khoa:   document.getElementById('dgtKhoa')?.value.trim()  || '',
     hk:     document.getElementById('dgtHK')?.value           || '',
     namHoc: document.getElementById('dgtNamHoc')?.value.trim()|| '',
     data:   [...DGT_DATA],
+  };
+  DGT_ROUNDS.push(round);
+
+  // ── SYNC to Lịch gác thi (EXAM_INVIG_DATA) ──────────
+  // Merge: add entries from this round that don't already exist
+  DGT_DATA.forEach(e => {
+    const exists = EXAM_INVIG_DATA.find(x => x.ngay===e.ngay && x.ca===e.ca && x.gv===e.gv);
+    if (!exists) EXAM_INVIG_DATA.push({...e});
   });
+  examInvigSorted = [...EXAM_INVIG_DATA];
+  renderExamInvigTable(examInvigSorted);
+
   renderDgtRounds();
-  // Persist to GAS
   dgtPersistRounds();
-  // Clear working area
+
+  // Clear working area for next round
   DGT_DATA = []; dgtSorted = []; renderDGT([]);
   ['dgtNganh','dgtKhoa','dgtNamHoc','dgtFromDate','dgtToDate','dgtSheetUrl'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   const sb = document.getElementById('dgtSaveRoundBtn');
   if (sb) sb.style.display = 'none';
-  showToast('success', `✅ Đã tạo đợt thi: "${name}"`, '📁');
+  showToast('success', `✅ Đợt thi đã được lưu và đồng bộ sang Lịch gác thi`, '📁');
 }
 
 function renderDgtRounds() {
@@ -3670,7 +3683,10 @@ function renderDgtRounds() {
 
   cont.innerHTML = DGT_ROUNDS.map(round => {
     const gvCount = [...new Set(round.data.map(e=>e.gv).filter(Boolean))].length;
-    const rows = round.data.map(e => {
+
+    // Sortable table inside round card
+    const sortedData = [...round.data].sort((a,b) => a.ngay.localeCompare(b.ngay)||a.gv.localeCompare(b.gv));
+    const rows = sortedData.map(e => {
       const buoi = dgtBuiloi(e.ca);
       const bs = buoi==='Sáng'?'background:#e0f2fe;color:#0284c7':'background:#ede9fe;color:#6d28d9';
       return `<tr style="border-top:1px solid var(--border)">
@@ -3686,20 +3702,29 @@ function renderDgtRounds() {
       </tr>`;
     }).join('');
 
+    const thStyle = `padding:9px 13px;text-align:left;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap`;
+
     return `<div class="round-card">
       <div class="round-card-hdr" onclick="toggleRound(${round.id})">
         <span class="round-card-badge">${round.data.length} ca · ${gvCount} GV</span>
-        <span class="round-card-title">${round.name}</span>
+        <span class="round-card-title" id="rname-${round.id}">${round.name}</span>
+        <button onclick="event.stopPropagation();dgtRenameRound(${round.id})" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--text3);padding:2px 6px" title="Đổi tên">✏️</button>
         <span class="round-card-chevron ${round.open?'open':''}" id="chev-${round.id}">›</span>
       </div>
       <div class="round-card-body ${round.open?'open':''}" id="body-${round.id}">
         <table style="width:100%;border-collapse:collapse">
           <thead><tr style="background:#f8fafc">
-            ${['Ngày thi','Thứ','Ca','Buổi','Ngành','Khoá','GV gác thi','Học kỳ','Ghi chú'].map(h=>
-              `<th style="padding:9px 13px;text-align:left;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">${h}</th>`
-            ).join('')}
+            <th style="${thStyle}" onclick="dgtRoundSort(${round.id},'ngay')">Ngày ↕</th>
+            <th style="${thStyle}">Thứ</th>
+            <th style="${thStyle}" onclick="dgtRoundSort(${round.id},'ca')">Ca ↕</th>
+            <th style="${thStyle}">Buổi</th>
+            <th style="${thStyle}" onclick="dgtRoundSort(${round.id},'nganh')">Ngành ↕</th>
+            <th style="${thStyle}">Khoá</th>
+            <th style="${thStyle}" onclick="dgtRoundSort(${round.id},'gv')">GV gác thi ↕</th>
+            <th style="${thStyle}">Học kỳ</th>
+            <th style="${thStyle}">Ghi chú</th>
           </tr></thead>
-          <tbody>${rows}</tbody>
+          <tbody id="rtbl-${round.id}">${rows}</tbody>
         </table>
         <div class="round-card-actions">
           <button class="btn btn-secondary btn-sm" onclick="dgtEditRound(${round.id})">✏️ Chỉnh sửa</button>
@@ -3716,6 +3741,46 @@ function toggleRound(id) {
   r.open = !r.open;
   document.getElementById(`body-${id}`).classList.toggle('open', r.open);
   document.getElementById(`chev-${id}`).classList.toggle('open', r.open);
+}
+
+// Sort rows within a round card
+const _roundSortState = {};
+function dgtRoundSort(id, key) {
+  const round = DGT_ROUNDS.find(r => r.id === id); if (!round) return;
+  const prev = _roundSortState[id+key];
+  const asc = prev === undefined ? true : !prev;
+  _roundSortState[id+key] = asc;
+  round.data.sort((a,b) => asc
+    ? (a[key]||'').localeCompare(b[key]||'','vi')
+    : (b[key]||'').localeCompare(a[key]||'','vi'));
+
+  const buoiStyle = b => b==='Sáng'?'background:#e0f2fe;color:#0284c7':'background:#ede9fe;color:#6d28d9';
+  const tbody = document.getElementById(`rtbl-${id}`);
+  if (tbody) tbody.innerHTML = round.data.map(e => {
+    const buoi = dgtBuiloi(e.ca);
+    return `<tr style="border-top:1px solid var(--border)">
+      <td style="padding:9px 13px;font-weight:600;font-size:13px;white-space:nowrap">${e.ngay}</td>
+      <td style="padding:9px 13px;font-size:12px;color:var(--text2)">${e.thu}</td>
+      <td style="padding:9px 13px;font-size:13px"><strong>${e.ca}</strong></td>
+      <td style="padding:9px 13px"><span style="${buoiStyle(buoi)};padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">${buoi}</span></td>
+      <td style="padding:9px 13px;font-size:13px">${e.nganh}</td>
+      <td style="padding:9px 13px;font-size:13px">${e.khoa}</td>
+      <td style="padding:9px 13px;font-size:13px">${e.gv}</td>
+      <td style="padding:9px 13px;font-size:12px">${e.hk}</td>
+      <td style="padding:9px 13px;font-size:12px;color:var(--text2)">${e.ghichu||'–'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function dgtRenameRound(id) {
+  const round = DGT_ROUNDS.find(r => r.id === id); if (!round) return;
+  const newName = prompt('Đổi tên đợt thi:', round.name);
+  if (!newName || !newName.trim()) return;
+  round.name = newName.trim();
+  const el = document.getElementById(`rname-${id}`);
+  if (el) el.textContent = round.name;
+  dgtPersistRounds();
+  showToast('success','Đã đổi tên đợt thi','✅');
 }
 
 function dgtDeleteRound(id) {
