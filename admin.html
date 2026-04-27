@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Tổ Trưởng – Quản lý Bộ môn DNU</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
@@ -2397,18 +2400,18 @@ Nếu không tìm thấy dữ liệu hợp lệ, trả về: []`;
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
       body: JSON.stringify({
         model: localStorage.getItem('dnu_claude_model') || 'claude-sonnet-4-20250514',
         max_tokens: 4000,
         messages: [{ role:'user', content: prompt }]
       })
     });
-
-    if (!response.ok) {
-      const err = await response.json().catch(()=>({}));
-      throw new Error(err.error?.message || `API error ${response.status}`);
-    }
 
     const data = await response.json();
     const raw = data.content?.[0]?.text || '';
@@ -3167,7 +3170,12 @@ async function callClaude(userMessage) {
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': CLAUDE_API_KEY, 'anthropic-version': '2023-06-01' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': CLAUDE_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
       body: JSON.stringify({
         model: CLAUDE_MODEL,
         max_tokens: 1024,
@@ -3487,7 +3495,12 @@ async function aiImportFromSheet(csvUrl, promptText, onSuccess) {
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
       body: JSON.stringify({
         model: localStorage.getItem('dnu_claude_model') || 'claude-sonnet-4-20250514',
         max_tokens: 4000,
