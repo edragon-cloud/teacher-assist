@@ -984,25 +984,20 @@ tbody tr:hover { background: var(--surface2); }
   <div class="modal">
     <div class="modal-hdr"><h3>📎 Tải lên tài liệu</h3><button class="modal-close" onclick="closeModal('modalUpload')">✕</button></div>
     <div class="modal-body">
-      <div class="upload-zone" style="margin-bottom:14px" onclick="showToast('info','Chọn file','📂')">
+      <input type="file" id="uploadFileInput" accept=".pdf,.docx,.doc,.txt,.jpg,.jpeg,.png" style="display:none" onchange="previewUploadFile(this)">
+      <div class="upload-zone" style="margin-bottom:14px;cursor:pointer" onclick="document.getElementById('uploadFileInput').click()">
         <div class="up-icon">📂</div>
-        <p style="font-size:14px;font-weight:600">Nhấn để chọn file</p>
-        <small style="color:var(--text3)">PDF, DOCX, JPG – Tối đa 20MB</small>
+        <p style="font-size:14px;font-weight:600" id="uploadFileName">Nhấn để chọn file</p>
+        <small style="color:var(--text3)">PDF, DOCX, TXT, JPG – Tối đa 20MB</small>
       </div>
-      <div class="form-group"><label>Tiêu đề</label><input class="form-input" placeholder="Tên công văn / thông báo..."></div>
+      <div class="form-group"><label>Tiêu đề</label><input class="form-input" id="uploadTitle" placeholder="Tên công văn / thông báo..."></div>
       <div class="form-row">
-        <div class="form-group"><label>Loại</label><select class="form-input"><option>Công văn</option><option>Thông báo</option><option>Quy định</option><option>Kế hoạch</option></select></div>
-        <div class="form-group"><label>Deadline</label><input class="form-input" type="date"></div>
-      </div>
-      <div class="form-group"><label>Ghi chú</label><textarea class="form-input" rows="3" placeholder="Tóm tắt nội dung..."></textarea></div>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:12px;margin-top:4px;font-size:13px">
-        <div style="font-weight:700;margin-bottom:6px">📁 Lưu Google Drive</div>
-        <div style="color:var(--text2);line-height:1.7">Folder: <code style="background:var(--bg);padding:2px 6px;border-radius:4px">13VFlEW68Wplr2Wyx6BB_8sC9NM2FsK6f</code><br>
-        Tên file: <code style="background:var(--bg);padding:2px 6px;border-radius:4px" id="previewFileName">YYYYMMDD_[Tên công văn].[ext]</code></div>
+        <div class="form-group"><label>Loại</label><select class="form-input" id="uploadType"><option>Công văn</option><option>Thông báo</option><option>Quy định</option><option>Kế hoạch</option></select></div>
+        <div class="form-group"><label>Deadline</label><input class="form-input" type="date" id="uploadDeadline"></div>
       </div>
       <div style="background:var(--primary-l);border-radius:9px;padding:12px;margin-top:8px">
         <div style="font-size:12px;font-weight:700;color:var(--primary-d);margin-bottom:4px">🤖 AI sẽ tự động:</div>
-        <div style="font-size:12px;color:#0369a1">• Trích xuất văn bản từ PDF/DOCX<br>• Tóm tắt nội dung chính<br>• Phát hiện deadline & người chịu trách nhiệm<br>• Soạn thông báo gửi cho GV</div>
+        <div style="font-size:12px;color:#0369a1">• Đọc nội dung file (txt/pdf text)<br>• Tóm tắt nội dung chính<br>• Phát hiện deadline & người chịu trách nhiệm<br>• Phân loại ưu tiên</div>
       </div>
     </div>
     <div class="modal-footer">
@@ -2755,34 +2750,36 @@ const LOP_LIST_DEFAULT   = ['SPA K13 A','SPA K13 B','SPA K14 A','SPA K14 B','NNA
 const MON_LIST_DEFAULT   = ['Viết 3','Viết 4','Viết 5','Nói 4','Nghe 4','Đọc 4','PP dạy TA 1','Âm vị học','Dịch VE'];
 
 function renderTeachingUI() {
-  renderNganhPool();
-  renderLopPool();
-  renderMonPool();
-  renderTeacherDropZones();
-  renderTeachingReview();
+  // Guard: old drag-drop elements only exist in old HTML — new view uses accordion cards
+  if (document.getElementById('nganhTagPool')) {
+    renderNganhPool(); renderLopPool(); renderMonPool(); renderTeacherDropZones(); renderTeachingReview();
+  }
+  renderTeachingCards();
 }
 
 function renderNganhPool() {
-  document.getElementById('nganhTagPool').innerHTML = NGANH_LIST_DEFAULT.map(n =>
+  const el = document.getElementById('nganhTagPool'); if (!el) return;
+  el.innerHTML = NGANH_LIST_DEFAULT.map(n =>
     `<span class="tag-pill nganh" draggable="true" ondragstart="onDragStart('nganh','${n}',event)">${n}<span class="tx" onclick="removeTag('nganh','${n}')">✕</span></span>`
   ).join('');
 }
 
 function renderLopPool() {
-  document.getElementById('lopTagPool').innerHTML = LOP_LIST_DEFAULT.map(l =>
+  const el = document.getElementById('lopTagPool'); if (!el) return;
+  el.innerHTML = LOP_LIST_DEFAULT.map(l =>
     `<span class="tag-pill lop" draggable="true" ondragstart="onDragStart('lop','${l}',event)" onclick="dragAndDrop_clickTag('lop','${l}')">${l}<span class="tx" onclick="event.stopPropagation();removeTag('lop','${l}')">✕</span></span>`
   ).join('');
 }
 
 function renderMonPool() {
-  document.getElementById('monTagPool').innerHTML = MON_LIST_DEFAULT.map(m =>
+  const el = document.getElementById('monTagPool'); if (!el) return;
+  el.innerHTML = MON_LIST_DEFAULT.map(m =>
     `<span class="tag-pill mon" draggable="true" ondragstart="onDragStart('mon','${m}',event)" onclick="dragAndDrop_clickTag('mon','${m}')">${m}<span class="tx" onclick="event.stopPropagation();removeTag('mon','${m}')">✕</span></span>`
   ).join('');
 }
 
 function renderTeacherDropZones() {
-  const cont = document.getElementById('teacherDropZones');
-  if (!activeTeachers.length) { cont.innerHTML = `<div style="color:var(--text3);font-size:13px;padding:12px">Chưa có giảng viên nào. Nhấn "+ Thêm giảng viên" để bắt đầu.</div>`; return; }
+  const cont = document.getElementById('teacherDropZones'); if (!cont) return;
   cont.innerHTML = activeTeachers.map(t => {
     const assigned = teachingAssignment.filter(a => a.gv === t);
     const totalTiet = assigned.reduce((s,a)=>s+a.tiet,0);
@@ -2807,6 +2804,7 @@ function renderTeacherDropZones() {
 
 function renderTeachingReview() {
   const sec = document.getElementById('teachingReviewSection');
+  if (!sec) return;
   if (!teachingAssignment.length) { sec.style.display='none'; return; }
   sec.style.display='block';
   document.getElementById('teachingReviewTbl').innerHTML = teachingAssignment.map((a,i) => `
@@ -3222,14 +3220,23 @@ async function doSmartSearch(q) {
 // ══════════════════════════════════════════════════════════
 // UPLOAD
 // ══════════════════════════════════════════════════════════
+function previewUploadFile(input) {
+  const file = input.files?.[0];
+  if (file) {
+    document.getElementById('uploadFileName').textContent = `📄 ${file.name} (${Math.round(file.size/1024)}KB)`;
+    if (!document.getElementById('uploadTitle').value) {
+      document.getElementById('uploadTitle').value = file.name.replace(/\.[^.]+$/,'');
+    }
+  }
+}
+
 async function uploadAndProcess() {
-  // Get file and metadata from modal
-  const fileInput = document.querySelector('#modalUpload input[type="file"]');
-  const titleEl   = document.querySelector('#modalUpload .form-input[placeholder="Tên công văn / thông báo..."]');
-  const typeEl    = document.querySelector('#modalUpload select');
-  const title     = titleEl?.value.trim() || 'Công văn mới';
-  const type      = typeEl?.value || 'Công văn';
-  const file      = fileInput?.files?.[0];
+  const fileInput = document.getElementById('uploadFileInput');
+  const title = (document.getElementById('uploadTitle')?.value || '').trim() || 'Công văn mới';
+  const type  = document.getElementById('uploadType')?.value || 'Công văn';
+  const file  = fileInput?.files?.[0];
+
+  if (!title && !file) { showToast('error','Vui lòng chọn file hoặc nhập tiêu đề','⚠️'); return; }
 
   closeModal('modalUpload');
   showLoading();
@@ -3672,7 +3679,8 @@ function dgtRoundSort(id, key) {
 
   const buoiStyle = b => b==='Sáng'?'background:#e0f2fe;color:#0284c7':'background:#ede9fe;color:#6d28d9';
   const tbody = document.getElementById(`rtbl-${id}`);
-  if (tbody) tbody.innerHTML = round.data.map(e => {
+  if (tbody) tbody.innerHTML = round.data.map((e, si) => {
+    const realIdx = round.data.indexOf(e);
     const buoi = dgtBuiloi(e.ca);
     return `<tr style="border-top:1px solid var(--border)">
       <td style="padding:9px 13px;font-weight:600;font-size:13px;white-space:nowrap">${e.ngay}</td>
@@ -3684,6 +3692,9 @@ function dgtRoundSort(id, key) {
       <td style="padding:9px 13px;font-size:13px">${e.gv}</td>
       <td style="padding:9px 13px;font-size:12px">${e.hk}</td>
       <td style="padding:9px 13px;font-size:12px;color:var(--text2)">${e.ghichu||'–'}</td>
+      <td style="padding:9px 13px;text-align:center">
+        <button class="btn btn-secondary btn-sm" style="font-size:11px;padding:3px 8px" onclick="editDgtRow(${id},${realIdx})">✏️</button>
+      </td>
     </tr>`;
   }).join('');
 }
@@ -3789,9 +3800,8 @@ function refreshExamsView() {
     cont.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);font-size:14px">Chưa có đợt thi nào. Tạo đợt thi trong tab <strong>Đăng ký gác thi</strong> rồi nhấn 🔄 Refresh.</div>';
     return;
   }
-  // Render same round cards as Đăng ký gác thi (read-only view)
-  const thStyle = 'padding:9px 13px;text-align:left;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap';
-  cont.innerHTML = DGT_ROUNDS.map(round => {
+  const thStyle = 'padding:9px 13px;text-align:left;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none';
+  cont.innerHTML = DGT_ROUNDS.map((round, ri) => {
     const gvCount = [...new Set(round.data.map(e=>e.gv).filter(Boolean))].length;
     const sortedData = [...round.data].sort((a,b)=>a.ngay.localeCompare(b.ngay)||a.gv.localeCompare(b.gv));
     const rows = sortedData.map(e => {
@@ -3813,23 +3823,55 @@ function refreshExamsView() {
       <div class="round-card-hdr" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.round-card-chevron').classList.toggle('open')">
         <span class="round-card-badge">${round.data.length} ca · ${gvCount} GV</span>
         <span class="round-card-title">${round.name}</span>
-        <span class="round-card-chevron">›</span>
+        <span class="round-card-chevron open">›</span>
       </div>
-      <div class="round-card-body">
+      <div class="round-card-body open" id="exams-body-${ri}">
         <table style="width:100%;border-collapse:collapse">
           <thead><tr style="background:#f8fafc">
-            <th style="${thStyle}">Ngày thi</th><th style="${thStyle}">Thứ</th>
-            <th style="${thStyle}">Ca</th><th style="${thStyle}">Buổi</th>
-            <th style="${thStyle}">Ngành</th><th style="${thStyle}">Khoá</th>
-            <th style="${thStyle}">GV gác thi</th><th style="${thStyle}">Học kỳ</th>
-            <th style="${thStyle}">Ghi chú</th>
+            <th style="${thStyle}" onclick="examsViewSort(${ri},'ngay')">Ngày ↕</th>
+            <th style="${thStyle}">Thứ</th>
+            <th style="${thStyle}" onclick="examsViewSort(${ri},'ca')">Ca ↕</th>
+            <th style="padding:9px 13px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Buổi</th>
+            <th style="${thStyle}" onclick="examsViewSort(${ri},'nganh')">Ngành ↕</th>
+            <th style="${thStyle}">Khoá</th>
+            <th style="${thStyle}" onclick="examsViewSort(${ri},'gv')">GV gác thi ↕</th>
+            <th style="${thStyle}">Học kỳ</th>
+            <th style="padding:9px 13px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Ghi chú</th>
           </tr></thead>
-          <tbody>${rows}</tbody>
+          <tbody id="exams-tbl-${ri}">${rows}</tbody>
         </table>
       </div>
     </div>`;
   }).join('');
-  showToast('success',`Đã refresh ${DGT_ROUNDS.length} đợt thi`,'🔄');
+  if (DGT_ROUNDS.length) showToast('success',`Đã refresh ${DGT_ROUNDS.length} đợt thi`,'🔄');
+}
+
+const _examsViewSortState = {};
+function examsViewSort(roundIdx, key) {
+  const round = DGT_ROUNDS[roundIdx]; if (!round) return;
+  const stKey = `${roundIdx}-${key}`;
+  const asc = _examsViewSortState[stKey] === undefined ? true : !_examsViewSortState[stKey];
+  _examsViewSortState[stKey] = asc;
+  const sorted = [...round.data].sort((a,b) => asc
+    ? (a[key]||'').localeCompare(b[key]||'','vi')
+    : (b[key]||'').localeCompare(a[key]||'','vi'));
+  const tbody = document.getElementById(`exams-tbl-${roundIdx}`);
+  if (!tbody) return;
+  tbody.innerHTML = sorted.map(e => {
+    const buoi = dgtBuiloi(e.ca);
+    const bs = buoi==='Sáng'?'background:#e0f2fe;color:#0284c7':'background:#ede9fe;color:#6d28d9';
+    return `<tr style="border-top:1px solid var(--border)">
+      <td style="padding:9px 13px;font-weight:600;font-size:13px;white-space:nowrap">${e.ngay}</td>
+      <td style="padding:9px 13px;font-size:12px;color:var(--text2)">${e.thu}</td>
+      <td style="padding:9px 13px"><strong>${e.ca}</strong></td>
+      <td style="padding:9px 13px"><span style="${bs};padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">${buoi}</span></td>
+      <td style="padding:9px 13px;font-size:13px">${e.nganh}</td>
+      <td style="padding:9px 13px;font-size:13px">${e.khoa}</td>
+      <td style="padding:9px 13px;font-size:13px;font-weight:500">${e.gv}</td>
+      <td style="padding:9px 13px;font-size:12px">${e.hk}</td>
+      <td style="padding:9px 13px;font-size:12px;color:var(--text2)">${e.ghichu||'–'}</td>
+    </tr>`;
+  }).join('');
 }
 
 function exportAllExams() {
