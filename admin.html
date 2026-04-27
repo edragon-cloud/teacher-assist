@@ -2485,58 +2485,6 @@ Nếu không tìm thấy dữ liệu hợp lệ, trả về: []`;
   }
 }
 
-
-  const link = document.getElementById('dgtSheetUrl')?.value.trim();
-  if (!link) { showToast('error','Vui lòng nhập link Google Sheet','⚠️'); return; }
-
-  const idMatch = link.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
-  const sheetId = idMatch ? idMatch[1] : link.trim();
-  const gidMatch = link.match(/[#&]gid=(\d+)/);
-  const gid = gidMatch ? gidMatch[1] : '0';
-  const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
-
-  showLoading();
-  document.getElementById('dgtSheetUrl').style.borderColor = '';
-
-  fetch(csvUrl)
-    .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); })
-    .then(csvText => {
-      hideLoading();
-      const rows = parseCSV(csvText);
-      if (!rows || rows.length < 3) { showToast('error','Sheet trống hoặc không đọc được','⚠️'); return; }
-
-      // ── Detect format ──────────────────────────────────────
-      // Flatten all cells to plain text for scanning
-      const flat = rows.map(r => r.map(c => (c||'').trim()));
-
-      // Try to detect MATRIX format (GV rows × date columns)
-      // Signature: a row contains cells that look like dates (dd/mm/yyyy or m/d/yyyy)
-      // and another row has "Ca" or ca numbers, and data rows have "X" markers
-      const isMatrixFormat = detectMatrixFormat(flat);
-
-      let newData;
-      if (isMatrixFormat) {
-        newData = parseMatrixFormat(flat);
-      } else {
-        newData = parseFlatFormat(flat);
-      }
-
-      if (!newData || !newData.length) {
-        showToast('error','Không đọc được dữ liệu. Xem hướng dẫn định dạng Sheet.','⚠️');
-        showColumnHint();
-        return;
-      }
-
-      DGT_DATA = newData;
-      dgtSorted = [...DGT_DATA];
-      renderDGT(dgtSorted);
-      const fmt = isMatrixFormat ? 'ma trận (GV × ngày)' : 'flat';
-      showToast('success', `✅ Đã import ${newData.length} ca thi từ Sheet (format ${fmt})`, '📊');
-      document.getElementById('dgtSheetUrl').style.borderColor = '#22c55e';
-    })
-    .catch(() => { hideLoading(); showImportErrorModal(sheetId); });
-}
-
 // ── Detect if sheet uses matrix format (GV rows × date cols) ──────────────
 function detectMatrixFormat(rows) {
   // Look for a row where multiple cells look like dates
