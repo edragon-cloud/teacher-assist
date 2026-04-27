@@ -613,43 +613,19 @@ tbody tr:hover { background: var(--surface2); }
       </div>
     </div>
 
-    <!-- ── EXAMS ─────────────────────────────────────── -->
+    <!-- ── LỊCH GÁC THI (mirrors Đăng ký gác thi) ──────── -->
     <div class="view" id="v-exams">
       <div class="page-hdr">
-        <div><h2>Lịch gác thi</h2><p>HK IV 2025-2026</p></div>
+        <div><h2>Lịch gác thi</h2><p>Đồng bộ từ tab Đăng ký gác thi</p></div>
         <div class="hdr-actions">
-          <button class="btn btn-secondary btn-sm" onclick="openModal('modalSheetLink')">🔗 Upload từ Sheet</button>
-          <button class="btn btn-primary btn-sm" onclick="openAddExamRowModal()">+ Thêm ca thi</button>
-          <button class="btn btn-success btn-sm" onclick="showToast('success','Đã xuất Excel','📊')">📊 Xuất Excel</button>
+          <button class="btn btn-secondary btn-sm" onclick="refreshExamsView()">🔄 Refresh</button>
+          <button class="btn btn-success btn-sm" onclick="exportAllExams()">📊 Xuất tất cả</button>
         </div>
       </div>
-      <!-- Search + filter bar -->
-      <div style="display:flex;gap:9px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
-        <input type="text" class="form-input" id="examInvigSearch" placeholder="🔍 Tìm GV, ngành, khoá..." style="width:240px;font-size:13px" oninput="filterExamInvig(this.value)">
-        <select class="form-input" id="examInvigCa" style="width:110px;font-size:13px" onchange="filterExamInvig()">
-          <option value="">Ca thi</option><option>Ca 1</option><option>Ca 2</option><option>Ca 3</option><option>Ca 4</option>
-        </select>
-        <select class="form-input" id="examInvigNg" style="width:150px;font-size:13px" onchange="filterExamInvig()">
-          <option value="">Ngành</option>
-        </select>
-      </div>
-      <div class="tbl-wrap">
-        <table style="width:100%;border-collapse:collapse">
-          <thead>
-            <tr>
-              <th onclick="sortExamInvig('ngay')" style="background:#f8fafc;padding:11px 14px;cursor:pointer;user-select:none;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Ngày thi ↕</th>
-              <th onclick="sortExamInvig('thu')" style="background:#f8fafc;padding:11px 14px;cursor:pointer;user-select:none;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Thứ ↕</th>
-              <th onclick="sortExamInvig('ca')" style="background:#f8fafc;padding:11px 14px;cursor:pointer;user-select:none;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Ca ↕</th>
-              <th style="background:#f8fafc;padding:11px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Buổi</th>
-              <th onclick="sortExamInvig('nganh')" style="background:#f8fafc;padding:11px 14px;cursor:pointer;user-select:none;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Ngành ↕</th>
-              <th onclick="sortExamInvig('khoa')" style="background:#f8fafc;padding:11px 14px;cursor:pointer;user-select:none;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Khoá ↕</th>
-              <th onclick="sortExamInvig('gv')" style="background:#f8fafc;padding:11px 14px;cursor:pointer;user-select:none;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Giảng viên ↕</th>
-              <th style="background:#f8fafc;padding:11px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Ghi chú</th>
-              <th style="background:#f8fafc;padding:11px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody id="examInvigTbl"></tbody>
-        </table>
+      <div id="examsViewContent">
+        <div style="text-align:center;padding:40px;color:var(--text3);font-size:14px">
+          Chưa có đợt thi nào. Tạo đợt thi trong tab <strong>Đăng ký gác thi</strong> rồi nhấn 🔄 Refresh.
+        </div>
       </div>
     </div>
 
@@ -672,137 +648,72 @@ tbody tr:hover { background: var(--surface2); }
     <!-- ── TEACHING ───────────────────────────────────── -->
     <div class="view" id="v-teaching">
       <div class="page-hdr">
-        <div><h2>Phân công giảng dạy</h2><p>HK IV 2025-2026 – Kéo thả môn/lớp vào giảng viên</p></div>
+        <div><h2>Phân công giảng dạy</h2><p>Mỗi thẻ = 1 giảng viên</p></div>
         <div class="hdr-actions">
-          <button class="btn btn-secondary btn-sm" onclick="detectConflicts()">⚠️ Xem xung đột</button>
+          <button class="btn btn-ai btn-sm" onclick="teachingAIImport()">🤖 Import qua AI</button>
+          <button class="btn btn-secondary btn-sm" onclick="teachingAddRow()">+ Thêm phân công</button>
           <button class="btn btn-success btn-sm" onclick="approveTeaching()">✓ Phê duyệt & xuất Sheet</button>
-          <button class="btn btn-primary btn-sm" onclick="exportTeachingSheet()">📊 Xuất Google Sheet</button>
-          <button class="btn btn-primary btn-sm" onclick="sendTeachingEmail()">📧 Gửi GV</button>
         </div>
       </div>
 
-      <!-- STEP 1: Tag selectors -->
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
-        <!-- Add Teachers -->
-        <div class="card" style="padding:14px">
-          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">👥 Giảng viên</div>
-          <div id="teacherTagPool" style="display:flex;flex-wrap:wrap;gap:6px;min-height:36px"></div>
-          <button class="btn btn-secondary btn-sm" style="margin-top:8px;width:100%" onclick="openModal_pickTeachers()">+ Thêm giảng viên</button>
-        </div>
-        <!-- Ngành -->
-        <div class="card" style="padding:14px">
-          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">🏫 Ngành</div>
-          <div id="nganhTagPool" style="display:flex;flex-wrap:wrap;gap:6px;min-height:36px"></div>
-          <button class="btn btn-secondary btn-sm" style="margin-top:8px;width:100%" onclick="addNganhTag()">+ Thêm ngành</button>
-        </div>
-        <!-- Lớp -->
-        <div class="card" style="padding:14px">
-          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">📋 Lớp</div>
-          <div id="lopTagPool" style="display:flex;flex-wrap:wrap;gap:6px;min-height:36px" ondragover="event.preventDefault()" ondrop="dropToPool('lop',event)"></div>
-          <button class="btn btn-secondary btn-sm" style="margin-top:8px;width:100%" onclick="addLopTag()">+ Thêm lớp</button>
-        </div>
-        <!-- Môn -->
-        <div class="card" style="padding:14px">
-          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">📖 Môn học</div>
-          <div id="monTagPool" style="display:flex;flex-wrap:wrap;gap:6px;min-height:36px" ondragover="event.preventDefault()" ondrop="dropToPool('mon',event)"></div>
-          <button class="btn btn-secondary btn-sm" style="margin-top:8px;width:100%" onclick="addMonTag()">+ Thêm môn</button>
+      <!-- AI import input -->
+      <div class="card" style="padding:14px;margin-bottom:14px">
+        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+          <div style="flex:1;min-width:260px">
+            <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">🤖 Import phân công giảng dạy qua AI</label>
+            <div style="display:flex;gap:7px">
+              <input class="form-input" id="teachSheetUrl" placeholder="Paste link Google Sheet..." style="font-size:12px;flex:1">
+              <button class="btn btn-primary btn-sm" onclick="teachingAIImport()">🤖 Import</button>
+            </div>
+            <div style="font-size:10px;color:var(--text3);margin-top:3px">AI tự đọc và hiểu cấu trúc — không cần đúng tên cột</div>
+          </div>
+          <div style="font-size:12px;color:var(--text2);padding:8px 12px;background:var(--surface2);border-radius:8px">
+            <strong id="teachingSummary">0 GV · 0 lớp · 0 tiết</strong>
+          </div>
         </div>
       </div>
 
-      <!-- STEP 2: Drop zones per teacher -->
-      <div id="teacherDropZones" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px"></div>
-
-      <!-- STEP 3: Review table -->
-      <div id="teachingReviewSection" style="display:none">
-        <div class="card" style="margin-bottom:12px;padding:16px 18px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-color:#86efac">
-          <div style="font-size:14px;font-weight:700;color:#15803d;margin-bottom:4px">✅ Xem lại trước khi phê duyệt</div>
-          <div style="font-size:13px;color:#166534">Kiểm tra phân công bên dưới, sau đó nhấn <strong>Phê duyệt & Xuất Sheet</strong>.</div>
-        </div>
-        <div class="tbl-wrap">
-          <table style="width:100%;border-collapse:collapse">
-            <thead><tr>
-              <th style="background:#f8fafc;padding:11px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Giảng viên</th>
-              <th style="background:#f8fafc;padding:11px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Lớp</th>
-              <th style="background:#f8fafc;padding:11px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Môn học</th>
-              <th style="background:#f8fafc;padding:11px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Số tiết ước tính</th>
-              <th style="background:#f8fafc;padding:11px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Số tín chỉ</th>
-              <th style="background:#f8fafc;padding:11px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Thao tác</th>
-            </tr></thead>
-            <tbody id="teachingReviewTbl"></tbody>
-          </table>
-        </div>
-      </div>
+      <!-- Per-GV accordion cards -->
+      <div id="teachingCards"></div>
     </div>
 
     <!-- ── PHÂN CÔNG RA ĐỀ + GIÁM KHẢO ─────────────────── -->
     <div class="view" id="v-examassign">
       <div class="page-hdr">
-        <div><h2>Phân công ra đề &amp; Giám khảo</h2>
-          <p>Bảng phân công – <span id="gkLopDisplay">SPA K14 (A, B)</span> – <span id="gkHKDisplay">HK IV 2025-2026</span></p>
-        </div>
+        <div><h2>Phân công ra đề &amp; Giám khảo</h2><p>Mỗi thẻ = 1 khoá học</p></div>
         <div class="hdr-actions">
-          <button class="btn btn-ai btn-sm" onclick="gkAISuggest()">🤖 AI đề xuất</button>
-          <button class="btn btn-secondary btn-sm" onclick="gkAddRow()">+ Thêm môn thi</button>
+          <button class="btn btn-ai btn-sm" onclick="gkAIImportFull()">🤖 Import qua AI</button>
+          <button class="btn btn-secondary btn-sm" onclick="gkAddKhoa()">+ Thêm khoá</button>
           <button class="btn btn-success btn-sm" onclick="gkExportSheet()">📊 Xuất Google Sheet</button>
-          <button class="btn btn-primary btn-sm" onclick="showToast('info','Đang gửi email thông báo...','📧')">📧 Gửi GV</button>
         </div>
       </div>
 
-      <!-- Config bar -->
+      <!-- AI import input -->
       <div class="card" style="padding:14px;margin-bottom:14px">
-        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
-          <div class="form-group" style="margin:0;min-width:160px">
-            <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Lớp / Khoá</label>
-            <input class="form-input" id="gkLop" value="SPA K14 (A, B)" style="font-size:13px" oninput="document.getElementById('gkLopDisplay').textContent=this.value">
-          </div>
-          <div class="form-group" style="margin:0;min-width:180px">
-            <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Học kỳ</label>
-            <input class="form-input" id="gkHK" value="HK IV 2025-2026" style="font-size:13px" oninput="document.getElementById('gkHKDisplay').textContent=this.value">
-          </div>
-          <div class="form-group" style="margin:0;flex:1;min-width:220px">
-            <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">🔗 Import từ Google Sheet (tự điền bảng)</label>
+        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+          <div style="flex:1;min-width:260px">
+            <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">🤖 Import phân công ra đề & GK qua AI</label>
             <div style="display:flex;gap:7px">
-              <input class="form-input" id="gkSheetLink" placeholder="https://docs.google.com/spreadsheets/d/..." style="font-size:12px;flex:1">
-              <button class="btn btn-primary btn-sm" onclick="openGKAIImport()">🤖 Import qua AI</button>
+              <input class="form-input" id="gkSheetLink" placeholder="Paste link Google Sheet..." style="font-size:12px;flex:1">
+              <button class="btn btn-primary btn-sm" onclick="gkAIImportFull()">🤖 Import</button>
             </div>
           </div>
           <button class="btn btn-secondary btn-sm" onclick="gkLoadFromSchedule()">🔄 Lấy từ lịch dạy</button>
         </div>
       </div>
 
-      <!-- AI suggestion banner -->
+      <!-- AI banner -->
       <div id="gkAIBanner" style="display:none;background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:1px solid #bae6fd;border-radius:var(--radius);padding:14px 18px;margin-bottom:14px">
-        <div style="font-size:13px;font-weight:700;color:#0284c7;margin-bottom:6px">🤖 AI Đề xuất phân công</div>
+        <div style="font-size:13px;font-weight:700;color:#0284c7;margin-bottom:6px">🤖 AI Đề xuất</div>
         <div id="gkAIText" style="font-size:13px;color:#0369a1;line-height:1.7"></div>
         <div style="margin-top:10px;display:flex;gap:8px">
-          <button class="btn btn-primary btn-sm" onclick="gkApplyAI()">✓ Áp dụng đề xuất</button>
+          <button class="btn btn-primary btn-sm" onclick="gkApplyAI()">✓ Áp dụng</button>
           <button class="btn btn-secondary btn-sm" onclick="document.getElementById('gkAIBanner').style.display='none'">✕ Đóng</button>
         </div>
       </div>
 
-      <!-- Table -->
-      <div style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)">
-        <table id="gkTable" style="width:100%;border-collapse:collapse;min-width:860px">
-          <thead>
-            <tr style="background:#0f172a">
-              <th style="padding:11px 12px;color:#fff;font-size:12px;text-align:center;width:44px">TT</th>
-              <th style="padding:11px 12px;color:#fff;font-size:12px;text-align:left;min-width:150px">Tên học phần / Lớp</th>
-              <th style="padding:11px 12px;color:#fff;font-size:12px;text-align:left;min-width:160px">Ngày thi</th>
-              <th style="padding:11px 12px;color:#fff;font-size:12px;text-align:left;min-width:170px">GV ra đề</th>
-              <th style="padding:11px 12px;color:#94a3b8;font-size:11px;text-align:center;min-width:170px;border-left:1px solid #334155">GK1</th>
-              <th style="padding:11px 12px;color:#94a3b8;font-size:11px;text-align:center;min-width:170px;border-left:1px solid #334155">GK2</th>
-              <th style="padding:11px 12px;color:#fff;font-size:12px;text-align:left;min-width:120px">Ghi chú / SĐT</th>
-              <th style="padding:11px 12px;color:#fff;font-size:12px;text-align:center;width:70px"></th>
-            </tr>
-          </thead>
-          <tbody id="gkTbody"></tbody>
-        </table>
-      </div>
-
-      <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
-        <button class="btn btn-secondary btn-sm" onclick="gkAddRow()">+ Thêm môn thi</button>
-        <span id="gkCount" style="font-size:12px;color:var(--text3)"></span>
-      </div>
+      <!-- Per-Khoá accordion cards -->
+      <div id="gkKhoaCards"></div>
     </div>
 
     <!-- ── ĐĂNG KÝ GÁC THI ─────────────────────────────── -->
@@ -3664,6 +3575,7 @@ function dgtSaveAsRound() {
   renderExamInvigTable(examInvigSorted);
 
   renderDgtRounds();
+  refreshExamsView();
   dgtPersistRounds();
 
   // Clear working area for next round
@@ -3684,9 +3596,9 @@ function renderDgtRounds() {
   cont.innerHTML = DGT_ROUNDS.map(round => {
     const gvCount = [...new Set(round.data.map(e=>e.gv).filter(Boolean))].length;
 
-    // Sortable table inside round card
     const sortedData = [...round.data].sort((a,b) => a.ngay.localeCompare(b.ngay)||a.gv.localeCompare(b.gv));
-    const rows = sortedData.map(e => {
+    const rows = sortedData.map((e, ri) => {
+      const realIdx = round.data.indexOf(e);
       const buoi = dgtBuiloi(e.ca);
       const bs = buoi==='Sáng'?'background:#e0f2fe;color:#0284c7':'background:#ede9fe;color:#6d28d9';
       return `<tr style="border-top:1px solid var(--border)">
@@ -3699,10 +3611,13 @@ function renderDgtRounds() {
         <td style="padding:9px 13px;font-size:13px">${e.gv}</td>
         <td style="padding:9px 13px;font-size:12px">${e.hk}</td>
         <td style="padding:9px 13px;font-size:12px;color:var(--text2)">${e.ghichu||'–'}</td>
+        <td style="padding:9px 13px;text-align:center">
+          <button class="btn btn-secondary btn-sm" style="font-size:11px;padding:3px 8px" onclick="editDgtRow(${round.id},${realIdx})">✏️</button>
+        </td>
       </tr>`;
     }).join('');
 
-    const thStyle = `padding:9px 13px;text-align:left;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap`;
+    const thStyle = `padding:9px 13px;text-align:left;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer`;
 
     return `<div class="round-card">
       <div class="round-card-hdr" onclick="toggleRound(${round.id})">
@@ -3723,11 +3638,12 @@ function renderDgtRounds() {
             <th style="${thStyle}" onclick="dgtRoundSort(${round.id},'gv')">GV gác thi ↕</th>
             <th style="${thStyle}">Học kỳ</th>
             <th style="${thStyle}">Ghi chú</th>
+            <th style="${thStyle};cursor:default">Thao tác</th>
           </tr></thead>
           <tbody id="rtbl-${round.id}">${rows}</tbody>
         </table>
         <div class="round-card-actions">
-          <button class="btn btn-secondary btn-sm" onclick="dgtEditRound(${round.id})">✏️ Chỉnh sửa</button>
+          <button class="btn btn-secondary btn-sm" onclick="dgtEditRound(${round.id})">✏️ Chỉnh sửa đợt</button>
           <button class="btn btn-success btn-sm" onclick="dgtExportRound(${round.id})">📊 Xuất CSV</button>
           <button class="btn btn-danger btn-sm" onclick="dgtDeleteRound(${round.id})">🗑️ Xoá</button>
         </div>
@@ -3856,6 +3772,7 @@ async function dgtLoadRounds() {
     if (saved) {
       DGT_ROUNDS = JSON.parse(saved);
       renderDgtRounds();
+      refreshExamsView();
     }
   } catch(e) {}
 }
@@ -3863,8 +3780,320 @@ async function dgtLoadRounds() {
 // schedImportFromSheet replaced by AI version (openSchedImportModal)
 
 // ══════════════════════════════════════════════════════════
-// EXPORT TO GOOGLE SHEET (via GAS) – 3 tabs
+// LỊCH GÁC THI — mirror from DGT_ROUNDS
 // ══════════════════════════════════════════════════════════
+function refreshExamsView() {
+  const cont = document.getElementById('examsViewContent');
+  if (!cont) return;
+  if (!DGT_ROUNDS.length) {
+    cont.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);font-size:14px">Chưa có đợt thi nào. Tạo đợt thi trong tab <strong>Đăng ký gác thi</strong> rồi nhấn 🔄 Refresh.</div>';
+    return;
+  }
+  // Render same round cards as Đăng ký gác thi (read-only view)
+  const thStyle = 'padding:9px 13px;text-align:left;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap';
+  cont.innerHTML = DGT_ROUNDS.map(round => {
+    const gvCount = [...new Set(round.data.map(e=>e.gv).filter(Boolean))].length;
+    const sortedData = [...round.data].sort((a,b)=>a.ngay.localeCompare(b.ngay)||a.gv.localeCompare(b.gv));
+    const rows = sortedData.map(e => {
+      const buoi = dgtBuiloi(e.ca);
+      const bs = buoi==='Sáng'?'background:#e0f2fe;color:#0284c7':'background:#ede9fe;color:#6d28d9';
+      return `<tr style="border-top:1px solid var(--border)">
+        <td style="padding:9px 13px;font-weight:600;font-size:13px;white-space:nowrap">${e.ngay}</td>
+        <td style="padding:9px 13px;font-size:12px;color:var(--text2)">${e.thu}</td>
+        <td style="padding:9px 13px"><strong>${e.ca}</strong></td>
+        <td style="padding:9px 13px"><span style="${bs};padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">${buoi}</span></td>
+        <td style="padding:9px 13px;font-size:13px">${e.nganh}</td>
+        <td style="padding:9px 13px;font-size:13px">${e.khoa}</td>
+        <td style="padding:9px 13px;font-size:13px;font-weight:500">${e.gv}</td>
+        <td style="padding:9px 13px;font-size:12px">${e.hk}</td>
+        <td style="padding:9px 13px;font-size:12px;color:var(--text2)">${e.ghichu||'–'}</td>
+      </tr>`;
+    }).join('');
+    return `<div class="round-card" style="margin-bottom:10px">
+      <div class="round-card-hdr" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.round-card-chevron').classList.toggle('open')">
+        <span class="round-card-badge">${round.data.length} ca · ${gvCount} GV</span>
+        <span class="round-card-title">${round.name}</span>
+        <span class="round-card-chevron">›</span>
+      </div>
+      <div class="round-card-body">
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr style="background:#f8fafc">
+            <th style="${thStyle}">Ngày thi</th><th style="${thStyle}">Thứ</th>
+            <th style="${thStyle}">Ca</th><th style="${thStyle}">Buổi</th>
+            <th style="${thStyle}">Ngành</th><th style="${thStyle}">Khoá</th>
+            <th style="${thStyle}">GV gác thi</th><th style="${thStyle}">Học kỳ</th>
+            <th style="${thStyle}">Ghi chú</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+  showToast('success',`Đã refresh ${DGT_ROUNDS.length} đợt thi`,'🔄');
+}
+
+function exportAllExams() {
+  if (!DGT_ROUNDS.length) { showToast('error','Chưa có đợt thi nào','⚠️'); return; }
+  const header = ['Đợt thi','Ngày thi','Thứ','Ca','Buổi','Ngành','Khoá','GV gác thi','Học kỳ','Ghi chú'];
+  const rows = DGT_ROUNDS.flatMap(r => r.data.map(e=>[r.name,e.ngay,e.thu,e.ca,dgtBuiloi(e.ca),e.nganh,e.khoa,e.gv,e.hk,e.ghichu]));
+  const csv = [header,...rows].map(r=>r.map(c=>`"${c||''}"`).join(',')).join('\n');
+  const blob = new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='lich_gac_thi_tat_ca.csv'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('success','Đã xuất tất cả đợt thi','📊');
+}
+
+// ══════════════════════════════════════════════════════════
+// PHÂN CÔNG GIẢNG DẠY — per-GV accordion + AI import + edit
+// ══════════════════════════════════════════════════════════
+// TEACHING_DATA: [{gv, mon, lop, nganh, lich, phong, tiet, ghichu}]
+let TEACHING_DATA = [];
+
+function renderTeachingCards() {
+  const cont = document.getElementById('teachingCards');
+  if (!cont) return;
+  if (!TEACHING_DATA.length) {
+    cont.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3)">Chưa có phân công. Nhấn 🤖 Import qua AI hoặc + Thêm phân công.</div>';
+    updateTeachingSummary(); return;
+  }
+  // Group by GV
+  const byGV = {};
+  TEACHING_DATA.forEach((r,i) => {
+    if (!byGV[r.gv]) byGV[r.gv] = [];
+    byGV[r.gv].push({...r, _idx:i});
+  });
+  const thS = 'padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)';
+  cont.innerHTML = Object.entries(byGV).map(([gv, rows]) => {
+    const totalTiet = rows.reduce((s,r)=>s+(+r.tiet||0),0);
+    const tableRows = rows.map(r=>`
+      <tr style="border-top:1px solid var(--border)" id="teach-row-${r._idx}">
+        <td style="padding:9px 12px;font-size:13px;font-weight:500">${r.mon}</td>
+        <td style="padding:9px 12px;font-size:13px">${r.lop}</td>
+        <td style="padding:9px 12px;font-size:12px">${r.nganh}</td>
+        <td style="padding:9px 12px;font-size:12px">${r.lich||'–'}</td>
+        <td style="padding:9px 12px;font-size:12px">${r.phong||'–'}</td>
+        <td style="padding:9px 12px;text-align:center;font-size:13px;font-weight:600">${r.tiet||'–'}</td>
+        <td style="padding:9px 12px;font-size:11px;color:var(--text2)">${r.ghichu||''}</td>
+        <td style="padding:9px 12px;text-align:center">
+          <button class="btn btn-secondary btn-sm" style="font-size:11px;padding:3px 8px" onclick="editTeachRow(${r._idx})">✏️</button>
+          <button class="btn btn-danger btn-sm" style="font-size:11px;padding:3px 8px" onclick="deleteTeachRow(${r._idx})">🗑️</button>
+        </td>
+      </tr>`).join('');
+    return `<div class="round-card" style="margin-bottom:10px">
+      <div class="round-card-hdr" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.round-card-chevron').classList.toggle('open')">
+        <span class="round-card-badge">${rows.length} môn · ${totalTiet} tiết</span>
+        <span class="round-card-title">👤 ${gv}</span>
+        <span class="round-card-chevron open">›</span>
+      </div>
+      <div class="round-card-body open">
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr style="background:#f8fafc">
+            <th style="${thS}">Môn học</th><th style="${thS}">Lớp</th>
+            <th style="${thS}">Ngành</th><th style="${thS}">Lịch</th>
+            <th style="${thS}">Phòng</th><th style="${thS}">Số tiết</th>
+            <th style="${thS}">Ghi chú</th><th style="${thS}">Thao tác</th>
+          </tr></thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+        <div style="padding:8px 12px;border-top:1px solid var(--border);background:var(--surface2)">
+          <button class="btn btn-secondary btn-sm" onclick="addTeachRowForGV('${gv}')">+ Thêm môn cho ${gv.split(' ').pop()}</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  updateTeachingSummary();
+}
+
+function updateTeachingSummary() {
+  const el = document.getElementById('teachingSummary');
+  if (!el) return;
+  const gvs = new Set(TEACHING_DATA.map(r=>r.gv)).size;
+  const totalTiet = TEACHING_DATA.reduce((s,r)=>s+(+r.tiet||0),0);
+  el.textContent = `${gvs} GV · ${TEACHING_DATA.length} lớp · ${totalTiet} tiết`;
+}
+
+async function teachingAIImport() {
+  const link = document.getElementById('teachSheetUrl')?.value.trim();
+  if (!link) { showToast('error','Vui lòng nhập link Google Sheet','⚠️'); return; }
+  const idM = link.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  if (!idM) { showToast('error','Link không hợp lệ','⚠️'); return; }
+  const sid = idM[1], gidM = link.match(/[#&]gid=(\d+)/);
+  const csvUrl = `https://docs.google.com/spreadsheets/d/${sid}/export?format=csv&gid=${gidM?gidM[1]:'0'}`;
+  const prompt_text = `Phân tích bảng phân công giảng dạy đại học Việt Nam. Trích xuất từng phân công gồm:
+giảng viên (họ tên đầy đủ), môn học, lớp, ngành, lịch học (thứ + ca), phòng, số tiết, ghi chú.
+Trả về ONLY JSON array:
+[{"gv":"Họ tên","mon":"Tên môn","lop":"Lớp","nganh":"Ngành","lich":"T3 Ca1","phong":"B201","tiet":30,"ghichu":""}]`;
+  aiImportFromSheet(csvUrl, prompt_text, (parsed) => {
+    if (!parsed.length) { showToast('error','AI không tìm thấy dữ liệu','⚠️'); return; }
+    TEACHING_DATA = parsed.map(r=>({gv:r.gv||'',mon:r.mon||'',lop:r.lop||'',nganh:r.nganh||'',lich:r.lich||'',phong:r.phong||'',tiet:r.tiet||0,ghichu:r.ghichu||''}));
+    renderTeachingCards();
+    showToast('success',`✅ AI import ${TEACHING_DATA.length} phân công thành công`,'🤖');
+  });
+}
+
+function teachingAddRow() {
+  const gv = prompt('Tên giảng viên:'); if (!gv) return;
+  addTeachRowForGV(gv);
+}
+
+function addTeachRowForGV(gv) {
+  TEACHING_DATA.push({gv, mon:'', lop:'', nganh:'', lich:'', phong:'', tiet:0, ghichu:''});
+  renderTeachingCards();
+  // Auto-open edit for the new row
+  setTimeout(() => editTeachRow(TEACHING_DATA.length-1), 100);
+}
+
+function editTeachRow(idx) {
+  const r = TEACHING_DATA[idx]; if (!r) return;
+  const mon    = prompt('Môn học:', r.mon||'');    if (mon   === null) return;
+  const lop    = prompt('Lớp:', r.lop||'');        if (lop   === null) return;
+  const nganh  = prompt('Ngành:', r.nganh||'');    if (nganh === null) return;
+  const lich   = prompt('Lịch học:', r.lich||'');
+  const phong  = prompt('Phòng:', r.phong||'');
+  const tiet   = prompt('Số tiết:', r.tiet||'');
+  const ghichu = prompt('Ghi chú:', r.ghichu||'');
+  TEACHING_DATA[idx] = {...r, mon, lop, nganh, lich:lich||'', phong:phong||'', tiet:+tiet||0, ghichu:ghichu||''};
+  renderTeachingCards();
+}
+
+function deleteTeachRow(idx) {
+  if (!confirm('Xoá phân công này?')) return;
+  TEACHING_DATA.splice(idx,1);
+  renderTeachingCards();
+}
+
+// ══════════════════════════════════════════════════════════
+// PHÂN CÔNG RA ĐỀ & GK — per-Khoá accordion + AI import + edit
+// ══════════════════════════════════════════════════════════
+// GK_DATA: [{khoa, hk, mon, lop, ngayThi, caThi, raDe, gk1, gk2, ghichu}]
+let GK_DATA = [];
+
+function renderGKKhoaCards() {
+  const cont = document.getElementById('gkKhoaCards');
+  if (!cont) return;
+  if (!GK_DATA.length) {
+    cont.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3)">Chưa có phân công. Nhấn 🤖 Import qua AI hoặc + Thêm khoá.</div>';
+    return;
+  }
+  // Group by khoa
+  const byKhoa = {};
+  GK_DATA.forEach((r,i) => {
+    const key = (r.khoa||'Chưa phân loại') + ' – ' + (r.hk||'');
+    if (!byKhoa[key]) byKhoa[key] = [];
+    byKhoa[key].push({...r, _idx:i});
+  });
+  const thS = 'padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)';
+  cont.innerHTML = Object.entries(byKhoa).map(([khoaKey, rows]) => {
+    const tableRows = rows.map((r,ri)=>`
+      <tr style="border-top:1px solid var(--border)">
+        <td style="padding:9px 12px;text-align:center;color:var(--text2)">${ri+1}</td>
+        <td style="padding:9px 12px;font-size:13px;font-weight:500">${r.mon}<br><span style="font-size:11px;color:var(--text2)">${r.lop}</span></td>
+        <td style="padding:9px 12px;font-size:12px">${r.ngayThi||'–'}<br><span style="font-size:11px;color:var(--text2)">${r.caThi||''}</span></td>
+        <td style="padding:9px 12px;font-size:13px">${r.raDe||'–'}</td>
+        <td style="padding:9px 12px;font-size:13px;border-left:2px solid var(--border)">${r.gk1||'–'}</td>
+        <td style="padding:9px 12px;font-size:13px;border-left:1px solid var(--border)">${r.gk2||'–'}</td>
+        <td style="padding:9px 12px;font-size:12px;color:var(--text2)">${r.ghichu||''}</td>
+        <td style="padding:9px 12px;text-align:center">
+          <button class="btn btn-secondary btn-sm" style="font-size:11px;padding:3px 8px" onclick="editGKRow(${r._idx})">✏️</button>
+          <button class="btn btn-danger btn-sm" style="font-size:11px;padding:3px 8px" onclick="deleteGKRow(${r._idx})">🗑️</button>
+        </td>
+      </tr>`).join('');
+    return `<div class="round-card" style="margin-bottom:10px">
+      <div class="round-card-hdr" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.round-card-chevron').classList.toggle('open')">
+        <span class="round-card-badge">${rows.length} môn</span>
+        <span class="round-card-title">📚 ${khoaKey}</span>
+        <span class="round-card-chevron open">›</span>
+      </div>
+      <div class="round-card-body open">
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr style="background:#f8fafc">
+            <th style="${thS};width:36px">TT</th>
+            <th style="${thS}">Môn học / Lớp</th>
+            <th style="${thS}">Ngày thi / Ca</th>
+            <th style="${thS}">GV ra đề</th>
+            <th style="${thS};border-left:2px solid var(--border)">GK1</th>
+            <th style="${thS}">GK2</th>
+            <th style="${thS}">Ghi chú</th>
+            <th style="${thS}">Thao tác</th>
+          </tr></thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function gkAIImportFull() {
+  const link = document.getElementById('gkSheetLink')?.value.trim();
+  if (!link) { showToast('error','Vui lòng nhập link Google Sheet','⚠️'); return; }
+  const idM = link.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  if (!idM) { showToast('error','Link không hợp lệ','⚠️'); return; }
+  const sid = idM[1], gidM = link.match(/[#&]gid=(\d+)/);
+  const csvUrl = `https://docs.google.com/spreadsheets/d/${sid}/export?format=csv&gid=${gidM?gidM[1]:'0'}`;
+  const prompt_text = `Phân tích bảng phân công ra đề và giám khảo kỳ thi đại học Việt Nam. Trích xuất từng môn thi gồm:
+khoá (K14, K22...), học kỳ, tên học phần, lớp, ngày thi (dd/mm/yyyy), ca thi, GV ra đề, GK1, GK2, ghi chú (SĐT).
+Trả về ONLY JSON array:
+[{"khoa":"K14","hk":"HK IV","mon":"Viết 4","lop":"SPA A","ngayThi":"07/05/2026","caThi":"Ca 2","raDe":"Họ tên GV","gk1":"Họ tên GK1","gk2":"Họ tên GK2","ghichu":"0912345678"}]`;
+  aiImportFromSheet(csvUrl, prompt_text, (parsed) => {
+    if (!parsed.length) { showToast('error','AI không tìm thấy dữ liệu','⚠️'); return; }
+    GK_DATA = parsed.map(r=>({khoa:r.khoa||'',hk:r.hk||'',mon:r.mon||'',lop:r.lop||'',ngayThi:r.ngayThi||'',caThi:r.caThi||'Ca 2',raDe:r.raDe||'',gk1:r.gk1||'',gk2:r.gk2||'',ghichu:r.ghichu||''}));
+    renderGKKhoaCards();
+    showToast('success',`✅ AI import ${GK_DATA.length} môn thi thành công`,'🤖');
+  });
+}
+
+function gkAddKhoa() {
+  const khoa = prompt('Khoá học (VD: K14):'); if (!khoa) return;
+  const hk   = prompt('Học kỳ (VD: HK IV 2025-2026):') || '';
+  GK_DATA.push({khoa, hk, mon:'', lop:'', ngayThi:'', caThi:'Ca 2', raDe:'', gk1:'', gk2:'', ghichu:''});
+  renderGKKhoaCards();
+  setTimeout(()=>editGKRow(GK_DATA.length-1),100);
+}
+
+function editGKRow(idx) {
+  const r = GK_DATA[idx]; if (!r) return;
+  const mon    = prompt('Môn học:', r.mon);       if (mon   ===null) return;
+  const lop    = prompt('Lớp:', r.lop);
+  const ngay   = prompt('Ngày thi (dd/mm/yyyy):', r.ngayThi);
+  const ca     = prompt('Ca thi:', r.caThi||'Ca 2');
+  const rade   = prompt('GV ra đề:', r.raDe);
+  const gk1    = prompt('GK1:', r.gk1);
+  const gk2    = prompt('GK2:', r.gk2);
+  const ghichu = prompt('Ghi chú/SĐT:', r.ghichu);
+  GK_DATA[idx] = {...r, mon, lop:lop||'', ngayThi:ngay||'', caThi:ca||'Ca 2', raDe:rade||'', gk1:gk1||'', gk2:gk2||'', ghichu:ghichu||''};
+  renderGKKhoaCards();
+}
+
+function deleteGKRow(idx) {
+  if (!confirm('Xoá môn thi này?')) return;
+  GK_DATA.splice(idx,1);
+  renderGKKhoaCards();
+}
+
+// ══════════════════════════════════════════════════════════
+// EDIT ROW in DGT round card
+// ══════════════════════════════════════════════════════════
+function editDgtRow(roundId, rowIdx) {
+  const round = DGT_ROUNDS.find(r=>r.id===roundId); if (!round) return;
+  const e = round.data[rowIdx]; if (!e) return;
+  const ngay   = prompt('Ngày thi:', e.ngay);   if (ngay===null) return;
+  const ca     = prompt('Ca thi:', e.ca);        if (ca===null) return;
+  const gv     = prompt('GV gác thi:', e.gv);   if (gv===null) return;
+  const nganh  = prompt('Ngành:', e.nganh);
+  const khoa   = prompt('Khoá:', e.khoa);
+  const hk     = prompt('Học kỳ:', e.hk);
+  const ghichu = prompt('Ghi chú:', e.ghichu||'');
+  const THU = ['CN','T2','T3','T4','T5','T6','T7'];
+  let thu = e.thu;
+  try { const p=ngay.split('/'); if(p.length===3){const d=new Date(+p[2],+p[1]-1,+p[0]);if(!isNaN(d))thu=THU[d.getDay()];} } catch(ex){}
+  round.data[rowIdx] = {...e, ngay, thu, ca, gv, nganh:nganh||e.nganh, khoa:khoa||e.khoa, hk:hk||e.hk, ghichu:ghichu||''};
+  renderDgtRounds();
+  dgtPersistRounds();
+  showToast('success','Đã cập nhật ca thi','✅');
+}
+
+
 
 // Folder IDs
 const FOLDER_TEACHING    = '1rp21-maiY4aEXXxHcgH2g1jJsNbSHs17';
