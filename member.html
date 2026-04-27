@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Giảng Viên – Khoa Ngoại Ngữ DNU</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 <style>
@@ -481,46 +484,12 @@ let CU = JSON.parse(sessionStorage.getItem('dnu_member') || 'null');
 if (!CU) CU = { id:2, fullname:'Nguyễn Lưu Như Quỳnh', username:'quynhnn', role:'member', color:'#f97316', avatar:'Q', email:'quynhnn@dnu.edu.vn', phone:'0912345678' };
 
 // ── DATA ────────────────────────────────────────────
-const TASKS = [
-  { id:1, title:'Nộp đề thi Viết 4 – SPA K14', grp:'Hôm nay',  st:'Đang làm',      pri:'high',   dept:'SPA K14',  urgent:true,  done:false },
-  { id:2, title:'Xác nhận lịch coi thi 22/5',  grp:'Hôm nay',  st:'Đang làm',      pri:'medium', dept:'Tổ SPA',   urgent:true,  done:false },
-  { id:3, title:'Nhập điểm quá trình K13B',     grp:'Hôm nay',  st:'Đang làm',      pri:'high',   dept:'SPA K13B', urgent:true,  done:false },
-  { id:4, title:'Họp tổ BM 25/4',               grp:'Ngày mai', st:'Chưa bắt đầu', pri:'high',   dept:'Tổ SPA',   urgent:false, done:false },
-  { id:5, title:'Cập nhật đề cương Viết 4',     grp:'Ngày mai', st:'Đang làm',      pri:'medium', dept:'SPA',      urgent:false, done:false },
-  { id:6, title:'Chấm bài tập cuối kỳ K13A',    grp:'Tuần này', st:'Chưa bắt đầu', pri:'medium', dept:'SPA K13A', urgent:false, done:false },
-  { id:7, title:'Tổng hợp điểm chuyên cần K14', grp:'Tuần này', st:'Đang làm',      pri:'medium', dept:'SPA K14',  urgent:false, done:false },
-];
-
-// dow = Date.getDay() value (0=CN,1=T2,...,6=T7)
-const TEACHING = [
-  { mon:'Viết 3', lop:'SPA K13 B', lt:30, dow:2, lichFull:'T3, Ca 1', phong:'B201', st:'confirmed' },
-  { mon:'Viết 4', lop:'SPA K13 A', lt:30, dow:3, lichFull:'T4, Ca 2', phong:'B202', st:'confirmed' },
-  { mon:'Viết 4', lop:'SPA K14 A', lt:30, dow:4, lichFull:'T5, Ca 1', phong:'B301', st:'pending'   },
-  { mon:'Viết 5', lop:'NNA K12 B', lt:30, dow:4, lichFull:'T5, Ca 2', phong:'B201', st:'confirmed' },
-];
-
-const EXAM_HK = [{hk:'HK 1',n:2},{hk:'HK 2',n:3},{hk:'HK 3',n:4}];
-
-const SYLLABUS = [
-  { name:'Viết 3',                hk:'HK III', upd:'15/03/2026', st:'done',    driveId:'1abc' },
-  { name:'Viết 4',                hk:'HK IV',  upd:'10/04/2026', st:'done',    driveId:'2abc' },
-  { name:'Viết 5',                hk:'HK IV',  upd:'–',          st:'pending', driveId:'' },
-  { name:'PP Dạy TA 1',           hk:'HK IV',  upd:'01/04/2026', st:'done',    driveId:'4abc' },
-  { name:'Kỹ năng Viết nâng cao', hk:'HK IV',  upd:'–',          st:'missing', driveId:'' },
-];
-
-// Exam invigilation — buoi tự tính từ ca: Ca 1/2 = Sáng, Ca 3/4 = Chiều
-// nganh phụ thuộc vào file Admin upload (GAS backend). Data mẫu dưới đây sẽ được replace bởi data từ Sheet.
-const EXAM_DATA = [
-  { ngay:'19/04/2026', thu:'Thứ 7', ca:'Ca 1', nganh:'Sư phạm Anh', khoa:'K22', donvi:'Khoa mình', hk:'Học kỳ 1', ghichu:'' },
-  { ngay:'19/04/2026', thu:'Thứ 7', ca:'Ca 2', nganh:'Mầm non',     khoa:'K23', donvi:'Khoa khác', hk:'Học kỳ 2', ghichu:'Phòng vấn nói' },
-  { ngay:'20/04/2026', thu:'CN',    ca:'Ca 3', nganh:'Tiểu học',    khoa:'K21', donvi:'Khoa mình', hk:'Học kỳ hè', ghichu:'' },
-  { ngay:'20/04/2026', thu:'CN',    ca:'Ca 4', nganh:'Kỹ thuật',    khoa:'K24', donvi:'Khoa khác', hk:'Học kỳ 2', ghichu:'Mang đề' },
-  { ngay:'22/05/2026', thu:'Thứ 6', ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', donvi:'Khoa mình', hk:'Học kỳ 1', ghichu:'' },
-  { ngay:'25/05/2026', thu:'T2',    ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', donvi:'Khoa mình', hk:'Học kỳ 1', ghichu:'' },
-  { ngay:'27/05/2026', thu:'T4',    ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', donvi:'Khoa mình', hk:'Học kỳ 1', ghichu:'' },
-  { ngay:'05/06/2026', thu:'T6',    ca:'Ca 2', nganh:'Sư phạm Anh', khoa:'K14', donvi:'Khoa mình', hk:'Học kỳ 1', ghichu:'' },
-];
+// ── All data empty — loaded from GAS/admin ──────────────
+const TASKS    = [];
+const TEACHING = [];   // dow = Date.getDay() (0=CN..6=T7)
+const EXAM_HK  = [];
+const SYLLABUS = [];
+const EXAM_DATA = [];
 
 // Ca → Buổi: Ca 1, Ca 2 = Sáng; Ca 3, Ca 4 = Chiều
 function caToBuiloi(ca) {
@@ -528,36 +497,10 @@ function caToBuiloi(ca) {
   return n <= 2 ? 'Sáng' : 'Chiều';
 }
 
-let exSorted = [...EXAM_DATA], exSortKey = '', exAsc = true;
+let exSorted = [], exSortKey = '', exAsc = true;
 
-const NOTICES = [
-  { ID:'CV001', Loai:'Công văn',  SoHieu:'123/QĐ-ĐH', TieuDe:'Quy định coi thi HK IV 2025-2026',
-    TomTatAI:'CBCT có mặt 8h45 Ca 2 tại CS1. Mang CMND + thẻ GV.',
-    UuTien:'Cao', DonViGui:'P.Đào tạo', NguoiPhuTrach:'Tất cả GV',
-    NgayBanHanh:'18/04/2026', NgayNhan:'19/04/2026', Deadline:'22/04/2026',
-    TrangThai:'Chưa xử lý', FileURL:'https://drive.google.com/file/d/sample1/view', Tags:'Thi cử' },
-  { ID:'TB002', Loai:'Thông báo', SoHieu:'45/TB-KNN', TieuDe:'Phân công GV ra đề HK IV',
-    TomTatAI:'6 môn cần ra đề. Nộp 5 ngày trước thi.',
-    UuTien:'Cao', DonViGui:'Tổ trưởng', NguoiPhuTrach:'GV ra đề',
-    NgayBanHanh:'15/04/2026', NgayNhan:'15/04/2026', Deadline:'30/04/2026',
-    TrangThai:'Đang làm', FileURL:'', Tags:'Thi cử, Ra đề' },
-  { ID:'HOP003',Loai:'Họp',       SoHieu:'',           TieuDe:'Họp tổ bộ môn tháng 4/2026',
-    TomTatAI:'Họp T6 25/04 lúc 14h tại B201. Bắt buộc.',
-    UuTien:'Trung bình', DonViGui:'Tổ trưởng', NguoiPhuTrach:'Tất cả GV',
-    NgayBanHanh:'10/04/2026', NgayNhan:'10/04/2026', Deadline:'25/04/2026',
-    TrangThai:'Chưa xử lý', FileURL:'', Tags:'Họp' },
-  { ID:'CV004', Loai:'Công văn',  SoHieu:'78/CV-ĐH',  TieuDe:'Cập nhật đề cương môn học 2026',
-    TomTatAI:'Cập nhật đề cương theo chuẩn mới trước 15/05.',
-    UuTien:'Trung bình', DonViGui:'P.Đào tạo', NguoiPhuTrach:'Tổ trưởng',
-    NgayBanHanh:'05/04/2026', NgayNhan:'07/04/2026', Deadline:'15/05/2026',
-    TrangThai:'Chưa xử lý', FileURL:'https://drive.google.com/file/d/sample4/view', Tags:'Đề cương' },
-  { ID:'DL005', Loai:'Deadline',  SoHieu:'',           TieuDe:'Hạn nộp điểm quá trình HK IV',
-    TomTatAI:'Nộp điểm QT qua hệ thống trước 30/04.',
-    UuTien:'Cao', DonViGui:'P.Đào tạo', NguoiPhuTrach:'Tất cả GV',
-    NgayBanHanh:'01/04/2026', NgayNhan:'01/04/2026', Deadline:'30/04/2026',
-    TrangThai:'Đang làm', FileURL:'', Tags:'Điểm, Deadline' },
-];
-let npSorted = [...NOTICES], npKey = '', npAsc2 = true;
+const NOTICES = [];
+let npSorted = [], npKey = '', npAsc2 = true;
 
 // ── CALENDAR ────────────────────────────────────────
 let calD = new Date(), selD = new Date();

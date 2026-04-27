@@ -390,7 +390,19 @@ tbody tr:hover { background: var(--surface2); }
   .ai-panel { width: calc(100vw - 48px); right: -12px; }
 }
 @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } }
-/* TAGS & DRAG-DROP */
+/* ── EXAM ROUND CARDS ── */
+.round-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.04); }
+.round-card-hdr { display:flex; align-items:center; gap:12px; padding:14px 18px; cursor:pointer; transition:background .15s; user-select:none; }
+.round-card-hdr:hover { background:var(--surface2); }
+.round-card-badge { background:#0f172a; color:#fff; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+.round-card-title { flex:1; font-size:13px; font-weight:600; color:var(--text); }
+.round-card-meta { font-size:12px; color:var(--text2); }
+.round-card-chevron { font-size:16px; color:var(--text3); transition:transform .2s; }
+.round-card-chevron.open { transform:rotate(90deg); }
+.round-card-body { display:none; border-top:1px solid var(--border); padding:0; overflow-x:auto; }
+.round-card-body.open { display:block; }
+.round-card-actions { display:flex; gap:8px; padding:10px 16px; border-top:1px solid var(--border); background:var(--surface2); }
+
 .tag-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:12px;font-weight:600;cursor:grab;user-select:none;transition:opacity .18s}
 .tag-pill:active{cursor:grabbing;opacity:.7}
 .tag-pill.teacher{background:#e0f2fe;color:#0284c7}
@@ -796,101 +808,109 @@ tbody tr:hover { background: var(--surface2); }
     <!-- ── ĐĂNG KÝ GÁC THI ─────────────────────────────── -->
     <div class="view" id="v-dangkygac">
       <div class="page-hdr">
-        <div><h2>Đăng ký gác thi</h2><p>Tạo đợt thi và quản lý ca gác thi</p></div>
+        <div><h2>Đăng ký gác thi</h2><p>Quản lý theo đợt thi</p></div>
         <div class="hdr-actions">
           <button class="btn btn-secondary btn-sm" onclick="openModal('modalAIImport')">🤖 Import qua AI</button>
           <button class="btn btn-primary btn-sm" onclick="dgtAddExam()">+ Thêm ca thi</button>
-          <button class="btn btn-success btn-sm" onclick="dgtExport()">📊 Xuất Excel</button>
+          <button class="btn btn-success btn-sm" onclick="dgtSaveAsRound()">📁 Tạo đợt thi</button>
         </div>
       </div>
 
-      <!-- CONFIG PANEL -->
-      <div class="card" style="padding:16px;margin-bottom:16px">
-        <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">⚙️ Thông tin đợt thi</div>
-        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:12px">
-          <div>
-            <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Đợt thi</label>
-            <input class="form-input" id="dgtDotThi" placeholder="Đợt 1, Đợt 2..." style="font-size:13px">
-          </div>
-          <div>
-            <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Ngành thi</label>
-            <input class="form-input" id="dgtNganh" placeholder="Sư phạm Anh..." style="font-size:13px">
-          </div>
-          <div>
-            <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Khoá thi</label>
-            <input class="form-input" id="dgtKhoa" placeholder="K22, K14..." style="font-size:13px">
-          </div>
-          <div>
-            <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Học kỳ</label>
-            <select class="form-input" id="dgtHK" style="font-size:13px">
-              <option>Học kỳ 1</option><option>Học kỳ 2</option><option>Học kỳ hè</option><option>Học kỳ IV</option>
-            </select>
-          </div>
-          <div>
-            <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Ca thi mặc định</label>
-            <select class="form-input" id="dgtCa" style="font-size:13px">
-              <option>Ca 1</option><option>Ca 2</option><option>Ca 3</option><option>Ca 4</option>
-            </select>
-          </div>
-        </div>
-        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
-          <div style="flex:1;min-width:200px">
-            <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">📅 Từ ngày</label>
-            <input class="form-input" type="date" id="dgtFromDate" style="font-size:13px">
-          </div>
-          <div style="flex:1;min-width:200px">
-            <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">📅 Đến ngày</label>
-            <input class="form-input" type="date" id="dgtToDate" style="font-size:13px">
-          </div>
-          <div style="flex:2;min-width:260px">
-            <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">🤖 Import thông minh qua AI</label>
-            <div style="display:flex;gap:7px">
-              <input class="form-input" id="dgtSheetUrl" placeholder="Paste link Google Sheet..." style="font-size:12px;flex:1">
-              <button class="btn btn-primary btn-sm" onclick="dgtAIImport()">🤖 Import qua AI</button>
+      <!-- SAVED ROUNDS LIST -->
+      <div id="dgtRoundsList" style="margin-bottom:16px"></div>
+
+      <!-- WORKING AREA: config + table for current unsaved batch -->
+      <div id="dgtWorkArea">
+        <!-- CONFIG PANEL -->
+        <div class="card" style="padding:16px;margin-bottom:14px">
+          <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">⚙️ Thông tin đợt thi đang soạn</div>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:12px">
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Ngành thi</label>
+              <input class="form-input" id="dgtNganh" placeholder="GDTH-GDMN, Sư phạm Anh..." style="font-size:13px">
             </div>
-            <div style="font-size:10px;color:var(--text3);margin-top:3px">AI sẽ đọc và tự hiểu cấu trúc file — không cần đúng tên cột</div>
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Hệ + Khoá</label>
+              <input class="form-input" id="dgtKhoa" placeholder="ĐH K14, CĐ K45..." style="font-size:13px">
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Học kỳ</label>
+              <select class="form-input" id="dgtHK" style="font-size:13px">
+                <option>Học kỳ 1</option><option>Học kỳ 2</option><option>Học kỳ 3</option><option>Học kỳ hè</option><option>Học kỳ IV</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Năm học</label>
+              <input class="form-input" id="dgtNamHoc" placeholder="2025-2026" style="font-size:13px" value="2025-2026">
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Ca thi mặc định</label>
+              <select class="form-input" id="dgtCa" style="font-size:13px">
+                <option>Ca 1</option><option>Ca 2</option><option>Ca 3</option><option>Ca 4</option>
+              </select>
+            </div>
           </div>
-          <button class="btn btn-secondary btn-sm" onclick="dgtApplyConfig()">✓ Áp dụng thông tin</button>
+          <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+            <div style="flex:1;min-width:160px">
+              <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">📅 Từ ngày</label>
+              <input class="form-input" type="date" id="dgtFromDate" style="font-size:13px">
+            </div>
+            <div style="flex:1;min-width:160px">
+              <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">📅 Đến ngày</label>
+              <input class="form-input" type="date" id="dgtToDate" style="font-size:13px">
+            </div>
+            <div style="flex:2;min-width:260px">
+              <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">🤖 Import qua AI từ Google Sheet</label>
+              <div style="display:flex;gap:7px">
+                <input class="form-input" id="dgtSheetUrl" placeholder="Paste link Google Sheet..." style="font-size:12px;flex:1">
+                <button class="btn btn-primary btn-sm" onclick="dgtAIImport()">🤖 Import</button>
+              </div>
+              <div style="font-size:10px;color:var(--text3);margin-top:3px">AI tự hiểu cấu trúc — không cần đúng tên cột</div>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <!-- Search + filter -->
-      <div style="display:flex;gap:9px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
-        <input class="form-input" id="dgtSearch" placeholder="🔍 Tìm theo ngày, ngành, khoá, GV..." style="width:260px;font-size:13px" oninput="dgtFilter()">
-        <select class="form-input" id="dgtFCa" style="width:100px;font-size:12px" onchange="dgtFilter()">
-          <option value="">Ca thi</option><option>Ca 1</option><option>Ca 2</option><option>Ca 3</option><option>Ca 4</option>
-        </select>
-        <select class="form-input" id="dgtFNg" style="width:140px;font-size:12px" onchange="dgtFilter()">
-          <option value="">Ngành</option>
-        </select>
-        <select class="form-input" id="dgtFKh" style="width:110px;font-size:12px" onchange="dgtFilter()">
-          <option value="">Khoá</option>
-        </select>
-        <span id="dgtCount" style="font-size:12px;color:var(--text3)"></span>
-      </div>
+        <!-- Search + filter -->
+        <div style="display:flex;gap:9px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+          <input class="form-input" id="dgtSearch" placeholder="🔍 Tìm theo ngày, ngành, khoá, GV..." style="width:260px;font-size:13px" oninput="dgtFilter()">
+          <select class="form-input" id="dgtFCa" style="width:100px;font-size:12px" onchange="dgtFilter()">
+            <option value="">Ca thi</option><option>Ca 1</option><option>Ca 2</option><option>Ca 3</option><option>Ca 4</option>
+          </select>
+          <select class="form-input" id="dgtFNg" style="width:140px;font-size:12px" onchange="dgtFilter()">
+            <option value="">Ngành</option>
+          </select>
+          <select class="form-input" id="dgtFKh" style="width:110px;font-size:12px" onchange="dgtFilter()">
+            <option value="">Khoá</option>
+          </select>
+          <span id="dgtCount" style="font-size:12px;color:var(--text3)"></span>
+        </div>
 
-      <!-- Table -->
-      <div style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)">
-        <table style="width:100%;border-collapse:collapse">
-          <thead>
-            <tr style="background:#0f172a">
-              <th onclick="dgtSort('ngay')" style="padding:11px 13px;color:#fff;font-size:11px;font-weight:700;text-align:left;cursor:pointer;user-select:none">Ngày thi ↕</th>
-              <th onclick="dgtSort('thu')" style="padding:11px 13px;color:#fff;font-size:11px;font-weight:700;text-align:left;cursor:pointer;user-select:none">Thứ ↕</th>
-              <th onclick="dgtSort('ca')" style="padding:11px 13px;color:#fff;font-size:11px;font-weight:700;text-align:left;cursor:pointer;user-select:none">Ca ↕</th>
-              <th style="padding:11px 13px;color:#94a3b8;font-size:11px;font-weight:700;text-align:left">Buổi</th>
-              <th onclick="dgtSort('nganh')" style="padding:11px 13px;color:#fff;font-size:11px;font-weight:700;text-align:left;cursor:pointer;user-select:none">Ngành ↕</th>
-              <th onclick="dgtSort('khoa')" style="padding:11px 13px;color:#fff;font-size:11px;font-weight:700;text-align:left;cursor:pointer;user-select:none">Khoá ↕</th>
-              <th onclick="dgtSort('gv')" style="padding:11px 13px;color:#fff;font-size:11px;font-weight:700;text-align:left;cursor:pointer;user-select:none">GV gác thi ↕</th>
-              <th onclick="dgtSort('hk')" style="padding:11px 13px;color:#fff;font-size:11px;font-weight:700;text-align:left;cursor:pointer;user-select:none">Học kỳ ↕</th>
-              <th style="padding:11px 13px;color:#94a3b8;font-size:11px;font-weight:700;text-align:left">Ghi chú</th>
-              <th style="padding:11px 13px;color:#fff;font-size:11px;text-align:center;width:80px">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody id="dgtTbody"></tbody>
-        </table>
-      </div>
-      <div style="margin-top:10px">
-        <button class="btn btn-secondary btn-sm" onclick="dgtAddExam()">+ Thêm ca thi khác</button>
+        <!-- Table -->
+        <div style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="background:#0f172a">
+                <th onclick="dgtSort('ngay')" style="padding:11px 13px;color:#fff;font-size:11px;font-weight:700;text-align:left;cursor:pointer;user-select:none">Ngày thi ↕</th>
+                <th onclick="dgtSort('thu')" style="padding:11px 13px;color:#fff;font-size:11px;font-weight:700;text-align:left;cursor:pointer;user-select:none">Thứ ↕</th>
+                <th onclick="dgtSort('ca')" style="padding:11px 13px;color:#fff;font-size:11px;font-weight:700;text-align:left;cursor:pointer;user-select:none">Ca ↕</th>
+                <th style="padding:11px 13px;color:#94a3b8;font-size:11px;font-weight:700;text-align:left">Buổi</th>
+                <th onclick="dgtSort('nganh')" style="padding:11px 13px;color:#fff;font-size:11px;font-weight:700;text-align:left;cursor:pointer;user-select:none">Ngành ↕</th>
+                <th onclick="dgtSort('khoa')" style="padding:11px 13px;color:#fff;font-size:11px;font-weight:700;text-align:left;cursor:pointer;user-select:none">Khoá ↕</th>
+                <th onclick="dgtSort('gv')" style="padding:11px 13px;color:#fff;font-size:11px;font-weight:700;text-align:left;cursor:pointer;user-select:none">GV gác thi ↕</th>
+                <th onclick="dgtSort('hk')" style="padding:11px 13px;color:#fff;font-size:11px;font-weight:700;text-align:left;cursor:pointer;user-select:none">Học kỳ ↕</th>
+                <th style="padding:11px 13px;color:#94a3b8;font-size:11px;font-weight:700;text-align:left">Ghi chú</th>
+                <th style="padding:11px 13px;color:#fff;font-size:11px;text-align:center;width:80px">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="dgtTbody"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+          <button class="btn btn-secondary btn-sm" onclick="dgtAddExam()">+ Thêm ca thi</button>
+          <button class="btn btn-success btn-sm" onclick="dgtSaveAsRound()" id="dgtSaveRoundBtn" style="display:none">
+            📁 Tạo đợt thi từ danh sách này
+          </button>
+        </div>
       </div>
     </div>
 
@@ -2284,6 +2304,7 @@ function dgtConfirmAdd() {
   dgtSorted = [...DGT_DATA];
   closeModal('modalDgtAddExam');
   renderDGT(dgtSorted);
+  dgtUpdateSaveBtn();
   showToast('success','Đã thêm ca coi thi','✅');
   ['dgtAddNgay','dgtAddNganh','dgtAddKhoa','dgtAddNote'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
 }
@@ -2473,6 +2494,7 @@ Nếu không tìm thấy dữ liệu hợp lệ, trả về: []`;
     setTimeout(() => {
       closeModal('modalAIImport');
       renderDGT(dgtSorted);
+      dgtUpdateSaveBtn();
       showToast('success', `✅ AI đã import ${newData.length} ca thi từ Sheet`, '🤖');
       // Reset modal
       prog.style.display = 'none';
@@ -3576,6 +3598,162 @@ Trả về ONLY JSON array:
   });
 }
 
+
+// ══════════════════════════════════════════════════════════
+// EXAM ROUNDS (Đợt thi) — group current DGT_DATA into a named card
+// ══════════════════════════════════════════════════════════
+let DGT_ROUNDS = [];
+
+function dgtBuildRoundName() {
+  const nganh  = document.getElementById('dgtNganh')?.value.trim()  || '';
+  const khoa   = document.getElementById('dgtKhoa')?.value.trim()   || '';
+  const hk     = document.getElementById('dgtHK')?.value            || '';
+  const namHoc = document.getElementById('dgtNamHoc')?.value.trim() || '';
+  const fromD  = document.getElementById('dgtFromDate')?.value;
+  const toD    = document.getElementById('dgtToDate')?.value;
+
+  const fmtDate = iso => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  };
+
+  let fromStr = fromD ? fmtDate(fromD) : '';
+  let toStr   = toD   ? fmtDate(toD)   : '';
+
+  // Auto-detect from data if dates not filled
+  if (!fromStr && DGT_DATA.length) {
+    const dates = DGT_DATA.map(e => e.ngay).filter(Boolean).sort();
+    fromStr = dates[0] || '';
+    toStr   = toStr || dates[dates.length - 1] || '';
+  }
+
+  const parts = [];
+  if (nganh)  parts.push(nganh);
+  if (khoa)   parts.push(khoa);
+  if (hk)     parts.push(hk);
+  if (namHoc) parts.push(namHoc);
+  if (fromStr && toStr) parts.push(`${fromStr} → ${toStr}`);
+  else if (fromStr)     parts.push(`từ ${fromStr}`);
+
+  return parts.join(' · ') || 'Đợt thi ' + (DGT_ROUNDS.length + 1);
+}
+
+function dgtSaveAsRound() {
+  if (!DGT_DATA.length) { showToast('error','Chưa có ca thi nào. Import hoặc thêm ca thi trước.','⚠️'); return; }
+  const name = dgtBuildRoundName();
+  DGT_ROUNDS.push({
+    id: Date.now(), name, open: false,
+    nganh:  document.getElementById('dgtNganh')?.value.trim() || '',
+    khoa:   document.getElementById('dgtKhoa')?.value.trim()  || '',
+    hk:     document.getElementById('dgtHK')?.value           || '',
+    namHoc: document.getElementById('dgtNamHoc')?.value.trim()|| '',
+    data:   [...DGT_DATA],
+  });
+  renderDgtRounds();
+  // Clear working area
+  DGT_DATA = []; dgtSorted = []; renderDGT([]);
+  ['dgtNganh','dgtKhoa','dgtNamHoc','dgtFromDate','dgtToDate','dgtSheetUrl'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const sb = document.getElementById('dgtSaveRoundBtn');
+  if (sb) sb.style.display = 'none';
+  showToast('success', `✅ Đã tạo đợt thi: "${name}"`, '📁');
+}
+
+function renderDgtRounds() {
+  const cont = document.getElementById('dgtRoundsList');
+  if (!cont) return;
+  if (!DGT_ROUNDS.length) { cont.innerHTML = ''; return; }
+
+  cont.innerHTML = DGT_ROUNDS.map(round => {
+    const gvCount = [...new Set(round.data.map(e=>e.gv).filter(Boolean))].length;
+    const rows = round.data.map(e => {
+      const buoi = dgtBuiloi(e.ca);
+      const bs = buoi==='Sáng'?'background:#e0f2fe;color:#0284c7':'background:#ede9fe;color:#6d28d9';
+      return `<tr style="border-top:1px solid var(--border)">
+        <td style="padding:9px 13px;font-weight:600;font-size:13px;white-space:nowrap">${e.ngay}</td>
+        <td style="padding:9px 13px;font-size:12px;color:var(--text2)">${e.thu}</td>
+        <td style="padding:9px 13px;font-size:13px"><strong>${e.ca}</strong></td>
+        <td style="padding:9px 13px"><span style="${bs};padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">${buoi}</span></td>
+        <td style="padding:9px 13px;font-size:13px">${e.nganh}</td>
+        <td style="padding:9px 13px;font-size:13px">${e.khoa}</td>
+        <td style="padding:9px 13px;font-size:13px">${e.gv}</td>
+        <td style="padding:9px 13px;font-size:12px">${e.hk}</td>
+        <td style="padding:9px 13px;font-size:12px;color:var(--text2)">${e.ghichu||'–'}</td>
+      </tr>`;
+    }).join('');
+
+    return `<div class="round-card">
+      <div class="round-card-hdr" onclick="toggleRound(${round.id})">
+        <span class="round-card-badge">${round.data.length} ca · ${gvCount} GV</span>
+        <span class="round-card-title">${round.name}</span>
+        <span class="round-card-chevron ${round.open?'open':''}" id="chev-${round.id}">›</span>
+      </div>
+      <div class="round-card-body ${round.open?'open':''}" id="body-${round.id}">
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr style="background:#f8fafc">
+            ${['Ngày thi','Thứ','Ca','Buổi','Ngành','Khoá','GV gác thi','Học kỳ','Ghi chú'].map(h=>
+              `<th style="padding:9px 13px;text-align:left;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">${h}</th>`
+            ).join('')}
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <div class="round-card-actions">
+          <button class="btn btn-secondary btn-sm" onclick="dgtEditRound(${round.id})">✏️ Chỉnh sửa</button>
+          <button class="btn btn-success btn-sm" onclick="dgtExportRound(${round.id})">📊 Xuất CSV</button>
+          <button class="btn btn-danger btn-sm" onclick="dgtDeleteRound(${round.id})">🗑️ Xoá</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleRound(id) {
+  const r = DGT_ROUNDS.find(x => x.id === id); if (!r) return;
+  r.open = !r.open;
+  document.getElementById(`body-${id}`).classList.toggle('open', r.open);
+  document.getElementById(`chev-${id}`).classList.toggle('open', r.open);
+}
+
+function dgtDeleteRound(id) {
+  if (!confirm('Xoá đợt thi này?')) return;
+  DGT_ROUNDS = DGT_ROUNDS.filter(r => r.id !== id);
+  renderDgtRounds();
+  showToast('success','Đã xoá','🗑️');
+}
+
+function dgtEditRound(id) {
+  const r = DGT_ROUNDS.find(x => x.id === id); if (!r) return;
+  DGT_DATA = [...r.data]; dgtSorted = [...DGT_DATA];
+  if (document.getElementById('dgtNganh'))  document.getElementById('dgtNganh').value  = r.nganh  || '';
+  if (document.getElementById('dgtKhoa'))   document.getElementById('dgtKhoa').value   = r.khoa   || '';
+  if (document.getElementById('dgtNamHoc')) document.getElementById('dgtNamHoc').value = r.namHoc || '';
+  DGT_ROUNDS = DGT_ROUNDS.filter(x => x.id !== id);
+  renderDgtRounds(); renderDGT(dgtSorted);
+  const sb = document.getElementById('dgtSaveRoundBtn');
+  if (sb) sb.style.display = 'inline-flex';
+  showToast('info','Đã load đợt thi vào bảng. Chỉnh xong nhấn "Tạo đợt thi".','✏️');
+}
+
+function dgtExportRound(id) {
+  const r = DGT_ROUNDS.find(x => x.id === id); if (!r) return;
+  const fname = r.name.replace(/[·→]/g,'-').replace(/[^\w\sÀ-ỹ\-]/gi,'').trim().replace(/\s+/g,'_');
+  const header = ['Ngày thi','Thứ','Ca','Buổi','Ngành','Khoá','GV gác thi','Học kỳ','Ghi chú'];
+  const rows = r.data.map(e=>[e.ngay,e.thu,e.ca,dgtBuiloi(e.ca),e.nganh,e.khoa,e.gv,e.hk,e.ghichu]);
+  const csv = [header,...rows].map(row=>row.map(c=>`"${c||''}"`).join(',')).join('\n');
+  const blob = new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=(fname||'dot_thi')+'.csv'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('success','Đã xuất CSV','📊');
+}
+
+// Show save-round button helper
+function dgtUpdateSaveBtn() {
+  const sb = document.getElementById('dgtSaveRoundBtn');
+  if (sb) sb.style.display = (DGT_DATA.length > 0) ? 'inline-flex' : 'none';
+}
 
 // schedImportFromSheet replaced by AI version (openSchedImportModal)
 
